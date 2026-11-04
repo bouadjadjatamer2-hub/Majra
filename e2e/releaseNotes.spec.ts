@@ -47,7 +47,7 @@ function writeChangelog(root: string, versions: string[]): void {
 }
 
 function prepareRelease(root: string, files: string[]): string {
-  for (const dir of ['scripts', 'docs', 'dist']) mkdirSync(join(root, dir), { recursive: true })
+  for (const dir of ['scripts', 'release', 'dist']) mkdirSync(join(root, dir), { recursive: true })
   for (const file of ['scripts/release-notes.mjs', 'release/downloads.js']) {
     copyFileSync(resolve(__dirname, '..', file), join(root, file))
   }
@@ -93,7 +93,7 @@ test.describe('release artifact selection @smoke', () => {
         `## What's new\n\n- **Fixed: Fixes.** What changed in ${version}.\n\n## Downloads`
       )
       for (const file of expected) {
-        const url = `https://github.com/anmolkapil/plexo/releases/download/v${version}/${file}`
+        const url = `https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v${version}/${file}`
         expect(notes.stdout.split(url + ')')).toHaveLength(2)
       }
       for (const file of [...otherBuilds, ...noise, ...updateFiles(version), ...channelFiles]) {

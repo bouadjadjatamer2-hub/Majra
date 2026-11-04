@@ -27,6 +27,23 @@
   <a href="README.ar.md">العربية</a>
 </p>
 
+## Get Majra
+
+<p align="center">
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
+    <img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra">
+    <img alt="Majra app page" src="https://img.shields.io/badge/Page-Majra-4CC38A?style=for-the-badge&label=page&color=4CC38A" />
+  </a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3">
+    <img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-B45309?style=for-the-badge&label=release&color=B45309" />
+  </a>
+</p>
+
 <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="Majra downloading a ZIP over Wi-Fi, USB tethering and Ethernet at the same time" width="100%" /></a>
 
 ## Why Majra
@@ -41,18 +58,18 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 
 ## Features
 
-| | |
-| --- | --- |
-| **Every connection, together** | Wi-Fi, Ethernet, USB tethering and mobile data can carry the same file at once. |
-| **2 to 64 connections** | Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64. |
-| **Download + extract** | ZIP, RAR and TAR archives — including `.tar.gz`, `.tar.bz2` and `.tar.xz` — unpack while they arrive. |
-| **Direct links stay direct** | Paste a file URL and go. No in-between page, no forced account. Signed-in downloads keep their cookies. |
-| **Browser hand-off** | The Chromium extension sends a download to Majra with the browser's cookies, then gets out of the way. |
-| **Torrents and magnets** | Open a `.torrent` or a magnet link as one more source, not as a second app. |
-| **Resume and schedule** | Pause, resume after a reboot, and start downloads at a time you choose. |
-| **Closes to the tray** | Keep downloading after the window closes. Start Majra with Windows and it is already there. |
-| **Defender scan** | Finished files can be scanned with Windows Defender before you open them. |
-| **Local by design** | Settings, history and queue live on your PC. Nothing is sent to a server. |
+|                                |                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Every connection, together** | Wi-Fi, Ethernet, USB tethering and mobile data can carry the same file at once.                         |
+| **2 to 64 connections**        | Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64.                       |
+| **Download + extract**         | ZIP, RAR and TAR archives — including `.tar.gz`, `.tar.bz2` and `.tar.xz` — unpack while they arrive.   |
+| **Direct links stay direct**   | Paste a file URL and go. No in-between page, no forced account. Signed-in downloads keep their cookies. |
+| **Browser hand-off**           | The Chromium extension sends a download to Majra with the browser's cookies, then gets out of the way.  |
+| **Torrents and magnets**       | Open a `.torrent` or a magnet link as one more source, not as a second app.                             |
+| **Resume and schedule**        | Pause, resume after a reboot, and start downloads at a time you choose.                                 |
+| **Closes to the tray**         | Keep downloading after the window closes. Start Majra with Windows and it is already there.             |
+| **Defender scan**              | Finished files can be scanned with Windows Defender before you open them.                               |
+| **Local by design**            | Settings, history and queue live on your PC. Nothing is sent to a server.                               |
 
 ## Screenshots
 
@@ -135,14 +152,14 @@ npm install
 npm run dev
 ```
 
-| Command | What it does |
-| --- | --- |
-| `npm run dev` | Start the app in development mode |
-| `npm run typecheck` | Type-check main, renderer, e2e and extension code |
-| `npm run test:e2e` | Run the Playwright end-to-end suite |
-| `npm run build` | Build the app |
-| `npm run build:win` | Build the Windows installer |
-| `npm run build:extension` | Build the browser extension |
+| Command                   | What it does                                      |
+| ------------------------- | ------------------------------------------------- |
+| `npm run dev`             | Start the app in development mode                 |
+| `npm run typecheck`       | Type-check main, renderer, e2e and extension code |
+| `npm run test:e2e`        | Run the Playwright end-to-end suite               |
+| `npm run build`           | Build the app                                     |
+| `npm run build:win`       | Build the Windows installer                       |
+| `npm run build:extension` | Build the browser extension                       |
 
 Packaging notes live in [REBUILD.md](REBUILD.md), and what is planned next is in
 [docs/ROADMAP.md](docs/ROADMAP.md).
