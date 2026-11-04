@@ -1,249 +1,200 @@
 <p align="center">
-  <img src="docs/assets/img/majra-icon.png" width="80" alt="Majra app icon" />
+  <a href="docs/banner.png"><img src="docs/banner.png" alt="Majra — every link lands here" width="100%" /></a>
 </p>
 
-<h1 align="center">Majra</h1>
+<h1 align="center">Majra · مجرى</h1>
 
 <p align="center">
   <strong>Every link lands here.</strong><br />
-  A free, open-source Windows download manager that puts Wi-Fi, Ethernet, USB tethering and mobile data to work on the same file.
+  A free, open-source download manager for Windows that puts Wi-Fi, Ethernet, USB tethering and
+  mobile data to work on the same file.
 </p>
 
 <p align="center">
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/"><img src="docs/assets/img/asraab-mark.svg" width="14" alt="" /> Part of <strong>Asraab</strong></a> — a small, hand-picked catalog of independent Windows apps.
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/bouadjadjatamer2-hub/Majra?style=for-the-badge&label=release&color=B45309" /></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=for-the-badge" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=for-the-badge&color=1F7D5C" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&amp;logo=windows&amp;logoColor=white" alt="Download Majra 1.2.3 for Windows" /></a>
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/"><img src="https://img.shields.io/badge/Asraab-website-1F7D5C?style=for-the-badge" alt="Open the Asraab website" /></a>
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-4CC38A?style=for-the-badge" alt="MIT License" /></a>
+  <a href="#install">Install</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="#how-it-works">How it works</a> ·
+  <a href="#build-from-source">Build from source</a> ·
+  <a href="#faq">FAQ</a> ·
+  <a href="README.ar.md">العربية</a>
 </p>
 
-<p align="center">
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/">Asraab</a> ·
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/apps/majra/">Majra page</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">Download</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-Browser-Extension.zip">Browser extension</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/tag/v1.2.3">Release notes</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/issues">Issues</a>
-</p>
+<a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="Majra downloading a ZIP over Wi-Fi, USB tethering and Ethernet at the same time" width="100%" /></a>
 
-<a href="https://bouadjadjatamer2-hub.github.io/asraab/"><img src="docs/og.png" alt="Majra — one download over every connection" width="100%" /></a>
+## Why Majra
 
-Majra splits files into blocks and binds each stream to a network interface, so a download can use Wi-Fi, Ethernet and USB tethering at the same time. It also resumes interrupted transfers, schedules downloads, extracts archives while they arrive, captures links from the browser, handles torrents, and can scan finished files with Windows Defender.
+Most download managers open several connections to one server over one network. Majra opens
+connections over **every network interface Windows exposes**, binds each stream to an interface, and
+reassembles the blocks in order. A phone on USB tethering, a Wi-Fi link and an Ethernet cable can
+carry the same archive at the same time.
 
-Majra is built for real-world links: signed-in pages, byte-range servers, very large archives, and connections that come and go. It is free, open source, and has no account or bundled adware.
+It is built for real-world links: signed-in pages, byte-range servers, very large archives, and
+connections that come and go. No account, no ads, no telemetry, no bundled toolbars.
 
-> [!NOTE]
-> “Every connection” means every network interface Windows exposes. Majra cannot create bandwidth that is not there: two connections behind the same router often share one uplink, and servers without byte-range support fall back to a single stream.
+## Features
 
-Asraab is a curated, owner-maintained catalog. There is no public submission form, account system or web admin panel. Adding an app is a maintainer-only change to [`docs/assets/apps.js`](docs/assets/apps.js) plus a page under `docs/apps/<slug>/`. The homepage’s “coming soon” card is editorial, not an invitation to submit an app.
-
----
+| | |
+| --- | --- |
+| **Every connection, together** | Wi-Fi, Ethernet, USB tethering and mobile data can carry the same file at once. |
+| **2 to 64 connections** | Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64. |
+| **Download + extract** | ZIP, RAR and TAR archives — including `.tar.gz`, `.tar.bz2` and `.tar.xz` — unpack while they arrive. |
+| **Direct links stay direct** | Paste a file URL and go. No in-between page, no forced account. Signed-in downloads keep their cookies. |
+| **Browser hand-off** | The Chromium extension sends a download to Majra with the browser's cookies, then gets out of the way. |
+| **Torrents and magnets** | Open a `.torrent` or a magnet link as one more source, not as a second app. |
+| **Resume and schedule** | Pause, resume after a reboot, and start downloads at a time you choose. |
+| **Closes to the tray** | Keep downloading after the window closes. Start Majra with Windows and it is already there. |
+| **Defender scan** | Finished files can be scanned with Windows Defender before you open them. |
+| **Local by design** | Settings, history and queue live on your PC. Nothing is sent to a server. |
 
 ## Screenshots
 
-### The website
-
-The [Asraab catalog](https://bouadjadjatamer2-hub.github.io/asraab/) is bilingual and theme-aware. The [Majra page](https://bouadjadjatamer2-hub.github.io/asraab/apps/majra/) keeps the installer, extension ZIP and checksum together, and sends both downloads straight to your browser — no release-page detour.
-
-[![Asraab catalog — dark desktop view](docs/screenshots/website-desktop.png)](https://bouadjadjatamer2-hub.github.io/asraab/)
-
 <table>
   <tr>
-    <td width="50%" valign="top">
-      <a href="https://bouadjadjatamer2-hub.github.io/asraab/apps/majra/"><img src="docs/screenshots/website-arabic.png" alt="Majra page in Arabic with the light theme" /></a>
+    <td width="50%">
+      <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="Majra transfer detail: three networks, one file" /></a>
+      <br /><sub><b>One file, three networks.</b> Each interface gets its own streams, and the throughput chart shows the combined result.</sub>
     </td>
-    <td width="50%" valign="top">
-      <a href="https://bouadjadjatamer2-hub.github.io/asraab/apps/majra/#download"><img src="docs/screenshots/website-download.png" alt="Majra download page with the installer, release details and SHA-256 checksum" /></a>
+    <td width="50%">
+      <a href="docs/banner.png"><img src="docs/banner.png" alt="Majra — every link lands here" /></a>
+      <br /><sub><b>Built for Windows 10 and 11.</b> Free, open source, and honest about what a download manager can and cannot do.</sub>
     </td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Arabic · light theme</sub></td>
-    <td align="center"><sub>Direct download</sub></td>
   </tr>
 </table>
 
-<p align="center">
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/"><img src="docs/screenshots/website-mobile.png" width="300" alt="Asraab catalog on a phone" /></a><br />
-  <sub>Mobile</sub>
-</p>
+## Install
 
-### The app
+### Windows 10 / 11 · 64-bit
 
-[![Majra downloading one file over Wi-Fi, USB tethering and Ethernet](docs/screenshots/app-detail.png)](docs/screenshots/app-detail.png)
+1. Download **[Majra-1.2.3-Setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe)** (127.8 MB).
+2. Run the installer. It is unsigned, so Windows SmartScreen may warn you — choose **More info → Run anyway**, or build from source.
+3. Launch Majra, paste a link, and press **Start**.
 
-<sub>Captured from the real app; the three network interfaces are simulated for the screenshot. One file, three connections, one progress bar.</sub>
+The installer is an assisted setup: you can choose the folder and the drive, and it creates a desktop shortcut.
 
----
+### Browser extension
 
-## What it does
+The Chromium extension (Chrome, Edge, Brave, Opera) captures downloads from the browser and hands
+them to Majra with the right cookies.
 
-### Use every connection
+1. Download **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-Browser-Extension.zip)**.
+2. Unzip it somewhere permanent.
+3. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder.
 
-- **Interface-bound streams.** Each worker is bound to one network interface, so Wi-Fi, Ethernet, USB tethering and mobile data can feed the same download at once.
-- **Dynamic segmentation.** Starts at 8 streams per network and grows to 32 while the server and disk keep up. Turbo mode goes further, with up to 64 streams per network and 4 MB blocks.
-- **A shared work queue.** Faster networks take more blocks automatically instead of waiting for a slower one.
-- **Range-aware fallback.** If a server does not support byte ranges, Majra uses a single connection instead of pretending to split the file.
-
-### Built to finish
-
-- **Resume across restarts** and sleep/wake, with per-block checkpoints and an expired-link replacement flow that does not throw away downloaded bytes.
-- **Version checks.** ETag and Last-Modified validation stop a file republished mid-download from being stitched together from two versions.
-- **Safe publish.** Data is written to a preallocated staging file and only moved to the final name after validation, so a half-finished download never looks complete.
-- **Any size.** A 1 KB file and a multi-terabyte archive take the same path; there is no minimum or maximum download size.
-- **Extract while downloading.** ZIP, RAR and TAR archives — including `.tar.gz`, `.tar.bz2` and `.tar.xz` — unpack as they arrive, avoiding a second full-size copy on disk.
-- **Optional Windows Defender scan** of each finished file.
-- **Automatic updates.** Packaged builds check GitHub Releases at launch and every few hours, then download a newer version in the background and install it on restart.
-
-### Stay in control
-
-- Queues, concurrent-download limits, per-network speed caps and daily/weekly/monthly data budgets.
-- Download schedules by time and day, plus automatic categories for Video, Audio, Programs, Documents, Archives and Images.
-- Arabic and English, with a fully right-to-left Arabic layout, Arabic plurals and dates, and a one-click switch that survives a restart.
-- Clipboard capture, tray support, start with Windows, and optional shutdown when the queue finishes.
-- Browser handoff with cookies included, so signed-in downloads work.
-- Torrents from magnet links or `.torrent` files, with the same queue and history.
-
----
-
-## How it works
-
-1. **Probe the link.** Majra reads the response headers, filename, size, range support and validators.
-2. **Plan the blocks.** The file becomes a queue of byte ranges sized for the connection and disk.
-3. **Bind and pull.** Each request is bound to a chosen interface. Auto keeps a stable count (8 streams per network, 4 on a hard disk) instead of growing until the link collapses; Turbo is the explicit opt-in to more.
-4. **Assemble and publish.** Blocks land in a preallocated staging file, get verified, and are renamed only after the download is whole.
-
-When an archive is being extracted, completed blocks are fed to the extractor as soon as their data is available. The download and extraction share the same progress state, so pause, resume and cancel still behave normally.
-
----
-
-## Download
-
-**Windows 10 / 11 · 64-bit · v1.2.3 · 127.8 MB**
-
-[**Download Majra-1.2.3-Setup.exe**](https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-1.2.3-Setup.exe) · [Release notes](https://github.com/bouadjadjatamer2-hub/asraab/releases/tag/v1.2.3) · [All releases](https://github.com/bouadjadjatamer2-hub/asraab/releases)
-
-|                      |                                     |
-| -------------------- | ----------------------------------- |
-| **Version**          | 1.2.3                               |
-| **Platform**         | Windows 10 / 11, 64-bit             |
-| **Installer**        | `Majra-1.2.3-Setup.exe` · 127.8 MB |
-| **License**          | MIT                                 |
-| **Account required** | No                                  |
-
-### What's new in 1.2.3
-
-- ZIP archives packed with Zstandard (7-Zip's default, and common on repack sites) now unpack while downloading. They used to stop on the first byte with `invalid stored block lengths`.
-- An archive using a compression method Majra cannot stream, or one protected by a password, now says so by name and suggests saving it for 7-Zip or WinRAR.
-- A failed unpack ends the download with its real reason instead of leaving it at 100%.
-
-> [!WARNING]
-> The installer is not code-signed, so Windows SmartScreen may show a warning. Choose **More info → Run anyway**, or build from source. The project does not have a code-signing certificate yet.
-
-<details>
-<summary>Verify the SHA-256 checksum</summary>
+### Verify the download
 
 ```powershell
 Get-FileHash .\Majra-1.2.3-Setup.exe -Algorithm SHA256
 ```
 
-Expected:
+The SHA-256 for `v1.2.3` is:
 
 ```text
 E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E
 ```
 
-</details>
+## How it works
 
----
+```text
+        Wi-Fi ────────┐
+ USB tethering ──────┼──► block scheduler ──► ordered file on disk
+      Ethernet ──────┘
+```
 
-## Browser extension (optional)
+1. Majra asks Windows for the active network interfaces and their addresses.
+2. The file is split into blocks, and each block is requested over the interface with room to spare.
+3. Arrived blocks are written in order; missing blocks are re-requested from another stream.
+4. When the last block lands, the archive can be extracted in place.
 
-[**Download Majra-Browser-Extension.zip**](https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-Browser-Extension.zip) · [Privacy policy](https://bouadjadjatamer2-hub.github.io/asraab/extension/privacy/)
+A server that does not support byte ranges cannot be split, so Majra falls back to a single stream
+for that link. That is a server limit, not a bug.
 
-The Chromium extension hands downloads to Majra with the browser's cookies, so signed-in files work. It supports Chrome, Edge, Brave and Opera.
+## Honest limits
 
-1. Download the ZIP and extract it somewhere you will remember.
-2. Open your browser's extensions page — `chrome://extensions` in Chrome, `edge://extensions` in Edge.
-3. Turn on **Developer mode**, choose **Load unpacked**, and select the extracted folder. `manifest.json` sits at its root.
-4. Keep Majra running, then use the toolbar button or the right-click menu.
-
-> [!NOTE]
-> This is a manual install and is not on the Chrome Web Store yet, so the browser will not update it automatically. Re-download the ZIP when a new release lands. The extension only talks to Majra on `127.0.0.1`; there are no developer servers.
-
----
-
-## Privacy
-
-There is no account, no advertising and no analytics. Majra talks only to the URLs you give it, and the extension talks only to the app on your computer. Download history and settings stay on your PC. The [extension privacy policy](https://bouadjadjatamer2-hub.github.io/asraab/extension/privacy/) has the details.
-
----
+- **Majra cannot create bandwidth that is not there.** Two connections behind the same router often share one uplink; the combined speed will not double.
+- **Turbo raises the connection count, not the server's capacity.** Some servers rate-limit or block aggressive parallel requests.
+- **Not every link can be split.** Servers without byte-range support fall back to one stream.
+- **The installer is unsigned.** There is no code-signing certificate yet, so SmartScreen may ask you to confirm.
+- **It is a download manager, not a VPN or a proxy.** It uses the connections Windows already has.
 
 ## Build from source
 
-**Requirements:** Node.js 22+ and npm 9+. Build the Windows installer on Windows.
+Requirements: **Node.js 22+**, **npm 10+**, and Windows 10/11 for the Windows build.
 
 ```powershell
-git clone https://github.com/bouadjadjatamer2-hub/asraab.git
-cd asraab
-npm ci
+git clone https://github.com/bouadjadjatamer2-hub/Majra.git
+cd Majra
+npm install
 npm run dev
 ```
 
-Create the Windows installer:
+| Command | What it does |
+| --- | --- |
+| `npm run dev` | Start the app in development mode |
+| `npm run typecheck` | Type-check main, renderer, e2e and extension code |
+| `npm run test:e2e` | Run the Playwright end-to-end suite |
+| `npm run build` | Build the app |
+| `npm run build:win` | Build the Windows installer |
+| `npm run build:extension` | Build the browser extension |
 
-```powershell
-npm run build:win
-```
+Packaging notes live in [REBUILD.md](REBUILD.md), and what is planned next is in
+[docs/ROADMAP.md](docs/ROADMAP.md).
 
-The installer is written to `dist/` and is unsigned unless you provide signing credentials. Build the browser extension with:
+## FAQ
 
-```powershell
-npm run build:extension
-```
+<details>
+<summary><b>Does Majra need an account?</b></summary>
+No. There is no sign-up, no subscription and no ads. The app works offline except for the downloads you start.
+</details>
 
-That writes `extension/dist/chrome` and `extension/dist/firefox`. Before opening a pull request, run:
+<details>
+<summary><b>Does it collect telemetry?</b></summary>
+No. Settings, queue and history are stored locally. The app does not send usage data anywhere.
+</details>
 
-```powershell
-npm run lint
-npm run typecheck
-npm run format:check
-```
+<details>
+<summary><b>Will two networks double my speed?</b></summary>
+Only if they are genuinely separate paths to the internet. Wi-Fi and Ethernet behind the same router usually share one uplink, so the gain is small or zero. A phone on mobile data plus a home connection is a real second path.
+</details>
 
-The desktop app is Electron + React + TypeScript. The browser extension is Manifest V3, the site is static HTML/CSS/JS in `docs/`, and Playwright end-to-end tests live in `e2e/`.
+<details>
+<summary><b>Why does SmartScreen warn me?</b></summary>
+The installer is not code-signed. Windows cannot verify the publisher, so it asks you to confirm. You can check the SHA-256 above, or build from source.
+</details>
 
----
+<details>
+<summary><b>Can Majra download from YouTube or other streaming sites?</b></summary>
+No. It downloads files and torrents, not media streams. There is no bundled media sniffer.
+</details>
+
+<details>
+<summary><b>Does it work on macOS or Linux?</b></summary>
+The source contains build targets for both, but only the Windows installer is published and tested. Treat other platforms as build-it-yourself.
+</details>
+
+<details>
+<summary><b>Where are my downloads and settings?</b></summary>
+Downloads go to the folder you choose (Downloads by default). Settings, queue and history live in the app's user-data folder on the same PC.
+</details>
 
 ## Contributing
 
-Issues and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) for setup and test commands, open an issue before a large change, and describe the network setup you tested — which interfaces, URL and file size.
-
----
-
-## Credits
-
-Majra is a fork of [Plexo](https://github.com/anmolkapil/plexo) by Anmol Kapil, used under the MIT License. Plexo's copyright and permission notice are retained in [LICENSE](LICENSE); the changes made for Majra are listed in [NOTICE.md](NOTICE.md).
-
-Bundled tools and their licenses — including UnRAR and `unzipper` — are also listed in [NOTICE.md](NOTICE.md). Not affiliated with, endorsed by, or derived from Internet Download Manager (Tonec Inc.).
+Bug reports and pull requests are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first, and open an
+issue before starting a large change. Security reports should follow [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT](LICENSE) © 2026 Majra contributors.
+Majra is released under the [MIT License](LICENSE). Third-party notices are in [NOTICE.md](NOTICE.md).
 
 ---
 
-<h2 dir="rtl" align="right">بالعربية</h2>
-
-<p dir="rtl" align="right">
-  <strong>مجرى</strong> مدير تحميل مجاني ومفتوح المصدر لنظام ويندوز 10/11. يوزّع الملف الواحد على Wi-Fi والإيثرنت وUSB في الوقت نفسه، مع استئناف التحميل بعد إغلاق التطبيق، والجدولة، واستخراج الأرشيف أثناء التنزيل، والتقاط الروابط من المتصفح.
+<p align="center">
+  <sub>Also from the same workbench: <a href="https://github.com/bouadjadjatamer2-hub/DroidCrate"><b>DroidCrate</b></a> — a careful Android service bench for Windows.</sub>
 </p>
-
-<p dir="rtl" align="right">
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/">موقع أسراب</a> ·
-  <a href="https://bouadjadjatamer2-hub.github.io/asraab/apps/majra/">صفحة مجرى</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">تحميل الإصدار 1.2.3</a> ·
-  <a href="https://github.com/bouadjadjatamer2-hub/asraab/releases/download/v1.2.3/Majra-Browser-Extension.zip">إضافة المتصفح</a>
-</p>
-
-<p dir="rtl" align="right">مجرى هو أول تطبيق في كتالوج أسراب، والمزيد في الطريق. الموقع متوفر بالعربية والإنجليزية.</p>

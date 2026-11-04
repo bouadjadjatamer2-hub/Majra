@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Builds a GitHub Release from the files in dist/, so the Releases page describes each file the
-// same way the download page does (both use docs/downloads.js).
+// same way the release notes do (both use release/downloads.js).
 //
 //   node scripts/release-notes.mjs v1.0.0-rc.8              the release body: the version's
-//                                                          docs/changelog.js entry, then the
+//                                                          release/changelog.js entry, then the
 //                                                          downloads table
 //   node scripts/release-notes.mjs v1.0.0-rc.8 --files      the files to upload, one per line
 //   node scripts/release-notes.mjs v1.0.0-rc.8 --changelog  just the changelog entry; fails when
 //                                                          there isn't one
 //
-// The notes describe only files the download page knows how to describe; the upload list adds
+// The notes describe only files the release notes know how to describe; the upload list adds
 // what the app's updater reads, and nothing else electron-builder leaves in dist/.
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { createRequire } from 'node:module'
@@ -17,11 +17,11 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
-const { PlexoDownloads: downloads } = require('../docs/downloads.js')
-const { PlexoChangelog: changelog } = require('../docs/changelog.js')
+const { PlexoDownloads: downloads } = require('../release/downloads.js')
+const { PlexoChangelog: changelog } = require('../release/changelog.js')
 
-const REPO = 'anmolkapil/plexo'
-const SITE = 'https://getplexo.app/'
+const REPO = 'bouadjadjatamer2-hub/Majra'
+const SITE = 'https://github.com/bouadjadjatamer2-hub/Majra/releases/latest'
 
 const [tag, arg] = process.argv.slice(2)
 if (!tag || !/^v\d/.test(tag)) {
@@ -32,7 +32,7 @@ if (!tag || !/^v\d/.test(tag)) {
 const KIND = { new: 'New', faster: 'Faster', improved: 'Improved', fixed: 'Fixed' }
 const entry = changelog.find((candidate) => candidate.version === tag)
 if (!entry) {
-  console.error(`No ${tag} entry in docs/changelog.js — add one, then tag again.`)
+  console.error(`No ${tag} entry in release/changelog.js — add one, then tag again.`)
   process.exit(1)
 }
 const whatsNew =

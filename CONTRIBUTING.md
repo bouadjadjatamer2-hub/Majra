@@ -7,8 +7,8 @@ Thanks for helping. Majra is a small, Windows-first project; focused changes are
 Requires Node.js 22.13+ and npm 9+.
 
 ```powershell
-git clone https://github.com/bouadjadjatamer2-hub/asraab.git
-cd asraab
+git clone https://github.com/bouadjadjatamer2-hub/Majra.git
+cd Majra
 npm ci
 npm run dev
 ```

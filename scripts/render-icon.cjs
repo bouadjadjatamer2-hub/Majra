@@ -92,7 +92,7 @@ app.whenReady().then(async () => {
 
   const copies = [
     ['resources/icon-dark.png', 512],
-    ['docs/assets/img/majra-icon.png', 512]
+    ['docs/icon.png', 512]
   ]
   for (const [relative, size] of copies) {
     fs.writeFileSync(path.join(root, ...relative.split('/')), png(size))

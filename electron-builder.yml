@@ -39,9 +39,9 @@ win:
     - target: nsis
       arch: [x64]
 nsis:
-  # No ${arch} on purpose: one installer holds both x64 and ARM64, and docs/downloads.js reads an
+  # No ${arch} on purpose: one installer holds both x64 and ARM64, and release/downloads.js reads an
   # installer with no architecture in its name as exactly that. Add one here and update it there.
-  # The capitalisation matches the asset URLs on the website and in README, and the updater's
+  # The capitalisation matches the asset URLs in the README, and the updater's
   # latest.yml points at this exact name.
   artifactName: ${productName}-${version}-Setup.${ext}
   # Assisted installer instead of one-click, so users can choose the install folder (and drive).
@@ -95,7 +95,7 @@ linux:
     - target: tar.gz
       arch: [x64, arm64]
   # Names the .tar.gz, which has no options of its own. Without it the x64 archive would carry no
-  # architecture, and docs/downloads.js would read it as one file for every machine. The deb and
+  # architecture, and release/downloads.js would read it as one file for every machine. The deb and
   # rpm sections below keep their usual names, since they'd otherwise inherit this one.
   artifactName: ${name}-${version}-${arch}.${ext}
   maintainer: electronjs.org
@@ -115,5 +115,5 @@ npmRebuild: false
 publish:
   provider: github
   owner: bouadjadjatamer2-hub
-  repo: asraab
+  repo: Majra
   releaseType: release

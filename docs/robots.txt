@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://bouadjadjatamer2-hub.github.io/asraab/sitemap.xml

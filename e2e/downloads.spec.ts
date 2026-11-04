@@ -2,7 +2,7 @@ import { createRequire } from 'node:module'
 import { expect, test } from '@playwright/test'
 
 // M. Release assets: what each downloaded file is called, which one a visitor is offered, and
-// what the release notes say. The logic lives in docs/downloads.js. The public site itself is
+// what the release notes say. The logic lives in release/downloads.js. The public site itself is
 // static in docs/ and no longer loads this model, so these tests cover the release tooling only.
 
 interface Asset {
@@ -27,7 +27,7 @@ interface Env {
   os: string
   arch: 'arm64' | 'x64' | null
 }
-const D = createRequire(__filename)('../docs/downloads.js').PlexoDownloads as {
+const D = createRequire(__filename)('../release/downloads.js').PlexoDownloads as {
   describe: (name: string) => Omit<Asset, 'file' | 'url' | 'recommended'> | null
   detectEnvironment: (
     nav: { userAgent: string; platform: string; maxTouchPoints?: number },
