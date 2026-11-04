@@ -31,7 +31,7 @@
       })()
     </script>
     <meta name="color-scheme" content="dark light" />
-    <meta name="theme-color" content="#0d100e" id="themeColor" />
+    <meta name="theme-color" content="#0b0d0f" id="themeColor" />
     <meta
       name="description"
       content="DroidCrate is a free, open-source Windows workbench for Android service: local USB detection, official tool links, gated checklists, ten fixed ADB and Fastboot actions, lessons, and a local history. No bypasses."
@@ -50,6 +50,13 @@
     <link rel="manifest" href="../../site.webmanifest" />
     <link
       rel="preload"
+      href="../../assets/fonts/SpaceGrotesk-Variable.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="preload"
       href="../../assets/fonts/Manrope-Variable.woff2"
       as="font"
       type="font/woff2"
@@ -62,8 +69,6 @@
       type="font/woff2"
       crossorigin
     />
-    <link rel="stylesheet" href="../../assets/site.css" />
-    <link rel="stylesheet" href="../../assets/hub.css" />
     <link rel="stylesheet" href="../../assets/droidcrate.css" />
 
     <meta property="og:type" content="website" />
@@ -85,7 +90,7 @@
     />
     <meta
       property="og:image:alt"
-      content="DroidCrate device bench on Windows, with a mint-on-graphite interface and a local USB monitor."
+      content="DroidCrate device bench on Windows, with an amber-on-charcoal interface and a local USB monitor."
     />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="DroidCrate — Know the phone before you touch it." />
@@ -128,6 +133,7 @@
         }
       }
     </script>
+
     <script src="../../assets/config.js" defer></script>
     <script src="../../assets/i18n.js" defer></script>
     <script src="../../assets/droidcrate-i18n.js" defer></script>
@@ -135,22 +141,10 @@
     <script src="../../assets/droidcrate.js" defer></script>
   </head>
 
-  <body id="top" class="app-page">
-    <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
+  <body id="top" class="dc-body">
+    <a class="dc-skip" href="#main" data-i18n="a11y.skip">Skip to content</a>
 
-    <svg class="svg-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      <defs>
-        <linearGradient id="dc-gradient" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="#c8f7e2"></stop>
-          <stop offset="0.55" stop-color="#7bd8ab"></stop>
-          <stop offset="1" stop-color="#2f9e6b"></stop>
-        </linearGradient>
-      </defs>
-      <symbol id="i-logo" viewBox="0 0 24 24">
-        <path d="M3.5 7.2 12 3l8.5 4.2v9.6L12 21l-8.5-4.2V7.2Z"></path>
-        <path d="m3.5 7.2 8.5 4.2 8.5-4.2M12 11.4V21"></path>
-        <path d="M7.6 5.1 16 9.3"></path>
-      </symbol>
+    <svg class="dc-sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
       <symbol id="i-download" viewBox="0 0 24 24">
         <path d="M12 3v11m0 0 4-4m-4 4-4-4M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"></path>
       </symbol>
@@ -204,30 +198,6 @@
       <symbol id="i-chevron-left" viewBox="0 0 24 24">
         <path d="m15 18-6-6 6-6"></path>
       </symbol>
-      <symbol id="i-zap" viewBox="0 0 24 24">
-        <path d="M13 2 4 14h7l-1 8 10-13h-7l0-7Z"></path>
-      </symbol>
-      <symbol id="i-refresh" viewBox="0 0 24 24">
-        <path d="M20 11a8 8 0 1 0-2.3 6.7M20 4v7h-7"></path>
-      </symbol>
-      <symbol id="i-windows" viewBox="0 0 24 24">
-        <path d="M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z"></path>
-      </symbol>
-      <symbol id="i-clock" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="9"></circle>
-        <path d="M12 7v5l3 2"></path>
-      </symbol>
-      <symbol id="i-code" viewBox="0 0 24 24">
-        <path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"></path>
-      </symbol>
-      <symbol id="i-lock" viewBox="0 0 24 24">
-        <rect x="5" y="10" width="14" height="11" rx="2"></rect>
-        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
-      </symbol>
-      <symbol id="i-phone" viewBox="0 0 24 24">
-        <rect x="6.5" y="2.5" width="11" height="19" rx="2.4"></rect>
-        <path d="M10 5.5h4M12 18.3h.01"></path>
-      </symbol>
       <symbol id="i-usb" viewBox="0 0 24 24">
         <path d="M12 21V8M12 8 9 5.5M12 8l3-2.5M12 14l-4-2.5M12 17l4-2.5"></path>
         <circle cx="12" cy="3.5" r="1.4"></circle>
@@ -247,13 +217,16 @@
         <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5A2.5 2.5 0 0 0 4 21.5V4.5Z"></path>
         <path d="M4 19a2.5 2.5 0 0 1 2.5-2.5H20M8 6h8M8 10h6"></path>
       </symbol>
-      <symbol id="i-history" viewBox="0 0 24 24">
-        <path d="M3 12a9 9 0 1 0 2.6-6.3M3 4v5h5"></path>
-        <path d="M12 7v5l3.5 2"></path>
+      <symbol id="i-clock" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="9"></circle>
+        <path d="M12 7v5l3 2"></path>
       </symbol>
-      <symbol id="i-search" viewBox="0 0 24 24">
-        <circle cx="10.5" cy="10.5" r="6.5"></circle>
-        <path d="m15.5 15.5 4.5 4.5"></path>
+      <symbol id="i-code" viewBox="0 0 24 24">
+        <path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14"></path>
+      </symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24">
+        <rect x="5" y="10" width="14" height="11" rx="2"></rect>
+        <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
       </symbol>
       <symbol id="i-ban" viewBox="0 0 24 24">
         <circle cx="12" cy="12" r="9"></circle>
@@ -261,93 +234,82 @@
       </symbol>
       <symbol id="i-database" viewBox="0 0 24 24">
         <ellipse cx="12" cy="5.5" rx="8" ry="3"></ellipse>
-        <path d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"></path>
+        <path
+          d="M4 5.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6M4 11.5v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"
+        ></path>
       </symbol>
       <symbol id="i-cpu" viewBox="0 0 24 24">
         <rect x="7" y="7" width="10" height="10" rx="1.5"></rect>
         <path d="M4 9h3M4 15h3M17 9h3M17 15h3M9 4v3M15 4v3M9 17v3M15 17v3"></path>
       </symbol>
-      <symbol id="i-layers" viewBox="0 0 24 24">
-        <path d="m12 3 9 5-9 5-9-5 9-5Z"></path>
-        <path d="m3 12 9 5 9-5M3 16l9 5 9-5"></path>
-      </symbol>
-      <symbol id="i-file" viewBox="0 0 24 24">
-        <path d="M6 3h8l4 4v14H6zM14 3v5h4"></path>
-      </symbol>
-      <symbol id="i-sliders" viewBox="0 0 24 24">
-        <path d="M4 7h10M18 7h2M4 12h4M12 12h8M4 17h12M20 17h0"></path>
-        <circle cx="16" cy="7" r="2"></circle>
-        <circle cx="10" cy="12" r="2"></circle>
-        <circle cx="18" cy="17" r="2"></circle>
-      </symbol>
     </svg>
 
-    <header class="site-header" id="siteHeader">
-      <div class="wrap nav-wrap">
-        <a
-          class="brand brand-site"
-          href="../../"
-          aria-label="Asraab home"
-          data-i18n-aria-label="site.a11yHome"
-        >
-          <img
-            class="brand-mark"
-            src="../../assets/img/asraab-mark.svg"
-            width="27"
-            height="27"
-            alt=""
-            aria-hidden="true"
-          />
-          <span class="brand-word">ASRAAB</span>
-          <span class="brand-divider" aria-hidden="true">/</span>
-          <span class="brand-app">DroidCrate</span>
+    <div class="dc-topbar">
+      <div class="dc-shell dc-topbar-inner">
+        <span class="dc-topbar-left">
+          <span class="dc-led" aria-hidden="true"></span>
+          ASRAAB / WORKBENCH
+        </span>
+        <span class="dc-topbar-right">
+          <span>WINDOWS 10 / 11</span>
+          <span class="dc-sep" aria-hidden="true">·</span>
+          <span data-config="version" data-prefix="v">v0.1.0</span>
+          <span class="dc-sep" aria-hidden="true">·</span>
+          <span>MIT</span>
+        </span>
+      </div>
+    </div>
+
+    <header class="dc-header" id="siteHeader">
+      <div class="dc-shell dc-header-inner">
+        <a class="dc-brand" href="../../" aria-label="Asraab home" data-i18n-aria-label="site.a11yHome">
+          <span class="dc-brand-crate" aria-hidden="true">
+            <img src="../../assets/img/droidcrate-icon.png" width="30" height="30" alt="" />
+          </span>
+          <span class="dc-brand-text">
+            <span class="dc-brand-name">DROIDCRATE</span>
+            <span class="dc-brand-sub">ASRAAB / 02</span>
+          </span>
         </a>
 
-        <nav class="desktop-nav" aria-label="Primary" data-i18n-aria-label="nav.primary">
-          <a class="nav-link nav-back" href="../../">
+        <nav class="dc-nav" aria-label="Primary" data-i18n-aria-label="nav.primary">
+          <a class="dc-nav-link dc-nav-back" href="../../">
             <svg class="icon flip-rtl" aria-hidden="true"><use href="#i-chevron-left"></use></svg>
             <span data-i18n="nav.allApps">All apps</span>
           </a>
-          <a class="nav-link" href="#features" data-nav="features" data-i18n="nav.features"
-            >Features</a
-          >
-          <a class="nav-link" href="#how" data-nav="how" data-i18n="nav.how">How it works</a>
-          <a class="nav-link" href="#safety" data-nav="safety" data-i18n="dc.nav.safety">Safety</a>
-          <a class="nav-link" href="#library" data-nav="library" data-i18n="dc.nav.library"
-            >Library</a
-          >
-          <a class="nav-link" href="#download" data-nav="download" data-i18n="nav.download"
-            >Download</a
-          >
-          <a class="nav-link" href="#faq" data-nav="faq" data-i18n="nav.faq">FAQ</a>
+          <a class="dc-nav-link" href="#features" data-nav="features" data-i18n="nav.features">Features</a>
+          <a class="dc-nav-link" href="#how" data-nav="how" data-i18n="nav.how">How it works</a>
+          <a class="dc-nav-link" href="#safety" data-nav="safety" data-i18n="dc.nav.safety">Safety</a>
+          <a class="dc-nav-link" href="#library" data-nav="library" data-i18n="dc.nav.library">Library</a>
+          <a class="dc-nav-link" href="#download" data-nav="download" data-i18n="nav.download">Download</a>
+          <a class="dc-nav-link" href="#faq" data-nav="faq" data-i18n="nav.faq">FAQ</a>
         </nav>
 
-        <div class="nav-actions">
+        <div class="dc-actions">
           <button
-            class="icon-btn theme-toggle"
+            class="dc-icon-btn"
             id="themeToggle"
             type="button"
             aria-label="Switch to light theme"
             data-i18n-aria-label="theme.toLight"
             title="Switch theme"
           >
-            <svg class="icon theme-icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
-            <svg class="icon theme-icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
+            <svg class="icon dc-icon-moon" aria-hidden="true"><use href="#i-moon"></use></svg>
+            <svg class="icon dc-icon-sun" aria-hidden="true"><use href="#i-sun"></use></svg>
           </button>
 
           <button
-            class="lang-btn"
+            class="dc-lang"
             id="langToggle"
             type="button"
             aria-label="Switch to Arabic"
             data-i18n-aria-label="lang.switchToArabic"
           >
-            <svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>
-            <span class="lang-label" data-lang-label>العربية</span>
+            <span data-lang-label>العربية</span>
           </button>
 
           <a
-            class="icon-btn"
+            class="dc-icon-btn"
             href="https://github.com/bouadjadjatamer2-hub/DroidCrate"
             target="_blank"
             rel="noopener noreferrer"
@@ -359,7 +321,7 @@
           </a>
 
           <a
-            class="btn btn-primary btn-sm nav-download"
+            class="dc-btn dc-btn-amber dc-btn-sm"
             href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.1.0/DroidCrate-0.1.0-Setup.exe"
             data-config-href="download"
           >
@@ -368,7 +330,7 @@
           </a>
 
           <button
-            class="menu-toggle"
+            class="dc-burger"
             id="menuToggle"
             type="button"
             aria-expanded="false"
@@ -376,37 +338,25 @@
             aria-label="Open menu"
             data-i18n-aria-label="nav.menu"
           >
-            <span class="menu-lines" aria-hidden="true"
-              ><span></span><span></span><span></span
-            ></span>
+            <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
           </button>
         </div>
       </div>
     </header>
 
-    <div class="mobile-menu" id="mobileMenu" hidden>
+    <div class="dc-menu" id="mobileMenu" hidden>
       <nav aria-label="Mobile primary" data-i18n-aria-label="nav.mobilePrimary">
         <a href="../../"><span>00</span><span data-i18n="nav.allApps">All apps</span></a>
-        <a href="#features" data-nav="features"
-          ><span>01</span><span data-i18n="nav.features">Features</span></a
-        >
-        <a href="#how" data-nav="how"
-          ><span>02</span><span data-i18n="nav.how">How it works</span></a
-        >
-        <a href="#safety" data-nav="safety"
-          ><span>03</span><span data-i18n="dc.nav.safety">Safety</span></a
-        >
-        <a href="#library" data-nav="library"
-          ><span>04</span><span data-i18n="dc.nav.library">Library</span></a
-        >
-        <a href="#download" data-nav="download"
-          ><span>05</span><span data-i18n="nav.download">Download</span></a
-        >
+        <a href="#features" data-nav="features"><span>01</span><span data-i18n="nav.features">Features</span></a>
+        <a href="#how" data-nav="how"><span>02</span><span data-i18n="nav.how">How it works</span></a>
+        <a href="#safety" data-nav="safety"><span>03</span><span data-i18n="dc.nav.safety">Safety</span></a>
+        <a href="#library" data-nav="library"><span>04</span><span data-i18n="dc.nav.library">Library</span></a>
+        <a href="#download" data-nav="download"><span>05</span><span data-i18n="nav.download">Download</span></a>
         <a href="#faq" data-nav="faq"><span>06</span><span data-i18n="nav.faq">FAQ</span></a>
       </nav>
-      <div class="mobile-menu-actions">
+      <div class="dc-menu-actions">
         <a
-          class="btn btn-primary"
+          class="dc-btn dc-btn-amber"
           href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.1.0/DroidCrate-0.1.0-Setup.exe"
           data-config-href="download"
         >
@@ -414,7 +364,7 @@
           <span data-i18n="dc.getApp">Get DroidCrate</span>
         </a>
         <a
-          class="btn btn-secondary"
+          class="dc-btn dc-btn-ghost"
           href="https://github.com/bouadjadjatamer2-hub/DroidCrate"
           target="_blank"
           rel="noopener noreferrer"
@@ -424,19 +374,14 @@
           <span data-i18n="footer.github">GitHub</span>
         </a>
       </div>
-      <p class="mobile-menu-tagline" data-i18n="dc.mobileTagline">
-        Know the phone. Keep the line.
-      </p>
-      <div class="mobile-menu-footer">
-        <span class="mono" dir="ltr" style="color: var(--dim); font-size: 9px"
-          >ASRAAB / DROIDCRATE /
-          <span data-config="version" data-prefix="v">v0.1.0</span></span
-        >
+      <p class="dc-menu-tagline" data-i18n="dc.mobileTagline">Know the phone. Keep the line.</p>
+      <div class="dc-menu-foot">
+        <span class="dc-mono">ASRAAB / DROIDCRATE / <span data-config="version" data-prefix="v">v0.1.0</span></span>
         <a
+          class="dc-mono"
           href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/tag/v0.1.0"
           target="_blank"
           rel="noopener noreferrer"
-          style="font-size: 11px; min-height: 0; border: 0"
           data-config-href="releaseTag"
           data-i18n="download.releaseNotes"
           >Release notes</a
@@ -445,334 +390,237 @@
     </div>
 
     <main id="main">
-      <nav
-        class="app-breadcrumb wrap"
-        aria-label="Breadcrumb"
-        data-i18n-aria-label="a11y.breadcrumb"
-      >
+      <nav class="dc-shell dc-crumb" aria-label="Breadcrumb" data-i18n-aria-label="a11y.breadcrumb">
         <a href="../../">ASRAAB</a>
-        <span class="crumb-sep" aria-hidden="true">/</span>
+        <span aria-hidden="true">/</span>
         <a href="../../#apps" data-i18n="nav.catalog">Catalog</a>
-        <span class="crumb-sep" aria-hidden="true">/</span>
-        <span aria-current="page">DroidCrate</span>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">DROIDCRATE</span>
       </nav>
 
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="wrap hero-grid">
-          <div class="hero-copy">
-            <p class="eyebrow">
-              <span class="eyebrow-dot" aria-hidden="true"></span>
+      <!-- 01 · HERO ------------------------------------------------------- -->
+      <section class="dc-hero" aria-labelledby="hero-title">
+        <div class="dc-shell dc-hero-grid">
+          <div class="dc-hero-copy">
+            <p class="dc-kicker">
+              <span class="dc-kicker-mark" aria-hidden="true">[</span>
               <span data-i18n="dc.hero.eyebrow">Windows · Android service bench</span>
+              <span class="dc-kicker-mark" aria-hidden="true">]</span>
             </p>
-            <h1 class="hero-title" id="hero-title">
+
+            <h1 class="dc-hero-title" id="hero-title">
               <span data-i18n="dc.hero.title1">Know the phone.</span>
-              <span class="line-two gradient-text" data-i18n="dc.hero.title2"
-                >Before you touch it.</span
-              >
+              <span class="dc-hero-line2" data-i18n="dc.hero.title2">Before you touch it.</span>
             </h1>
-            <p class="hero-lede" data-i18n="dc.hero.lede">
+
+            <p class="dc-hero-lede" data-i18n="dc.hero.lede">
               DroidCrate reads the USB mode, opens the official tool page, and walks you through
               risky Android work with checklists, lessons, and a local paper trail. Offline-first —
               and no bypasses, ever.
             </p>
-            <div class="hero-actions">
+
+            <div class="dc-hero-actions">
               <a
-                class="btn btn-primary btn-lg"
+                class="dc-btn dc-btn-amber dc-btn-lg"
                 href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.1.0/DroidCrate-0.1.0-Setup.exe"
                 data-config-href="download"
               >
                 <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>
                 <span data-i18n="dc.hero.download">Download for Windows</span>
               </a>
-              <a class="btn btn-secondary btn-lg" href="#how">
+              <a class="dc-btn dc-btn-ghost dc-btn-lg" href="#how">
                 <span data-i18n="dc.hero.secondary">See how it works</span>
-                <svg class="icon arrow-icon" aria-hidden="true">
-                  <use href="#i-arrow-right"></use>
-                </svg>
+                <svg class="icon flip-rtl" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
               </a>
             </div>
-            <div class="hero-meta">
+
+            <p class="dc-hero-meta">
               <span data-i18n="dc.hero.windows">Windows 10 &amp; 11</span>
-              <span class="dot" aria-hidden="true"></span>
+              <span aria-hidden="true">·</span>
               <span data-config="version" data-prefix="v">v0.1.0</span>
-              <span class="dot" aria-hidden="true"></span>
+              <span aria-hidden="true">·</span>
               <span data-config="installerSize">117.6 MB</span>
-            </div>
-            <p class="hero-note">
+            </p>
+
+            <p class="dc-hero-note">
               <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
-              <span data-i18n="dc.hero.note"
-                >Free and open source (MIT) · No account · No telemetry</span
-              >
+              <span data-i18n="dc.hero.note">Free and open source (MIT) · No account · No telemetry</span>
             </p>
           </div>
 
-          <div class="hero-visual">
-            <div class="float-chip chip-a">
-              <span class="chip-dot" aria-hidden="true"></span>
-              <span data-i18n="dc.hero.chip1">USB mode identified locally</span>
-            </div>
-            <div class="float-chip chip-b">
-              <svg class="icon" aria-hidden="true"><use href="#i-ban"></use></svg>
-              <span data-i18n="dc.hero.chip2">Permanent no-bypass policy</span>
-            </div>
-
-            <div class="app-window dc-window" dir="ltr" aria-hidden="true">
-              <div class="app-titlebar">
-                <img
-                  class="app-mark"
-                  src="../../assets/img/droidcrate-icon.png"
-                  width="14"
-                  height="14"
-                  alt=""
-                />
-                <span class="app-name">DROIDCRATE</span>
-                <span class="app-version">v<span data-config="versionPlain">0.1.0</span></span>
-                <span class="app-turbo">LOCAL</span>
-                <span class="app-window-controls">
-                  <span>−</span><span>□</span><span>×</span>
-                </span>
+          <div class="dc-hero-visual">
+            <div class="dc-bench" dir="ltr" aria-hidden="true">
+              <div class="dc-bench-head">
+                <span class="dc-bench-name">DROIDCRATE</span>
+                <span class="dc-bench-ver">v<span data-config="versionPlain">0.1.0</span></span>
+                <span class="dc-bench-flag">LOCAL</span>
               </div>
 
-              <div class="app-toolbar">
-                <span class="app-back">
-                  <svg viewBox="0 0 24 24"><use href="#i-chevron-left"></use></svg>
-                  Device
-                </span>
-                <span class="app-toolbar-spacer"></span>
-                <span class="dc-toolbar-mode"><span class="dc-live-dot"></span>USB</span>
-                <span class="app-mini-btn primary">Scan now</span>
+              <div class="dc-bench-tabs">
+                <span class="is-on">DEVICE</span><span>TOOLS</span><span>LESSONS</span><span>HISTORY</span>
               </div>
 
-              <div class="dc-hero">
+              <div class="dc-bench-device">
                 <div class="dc-phone">
-                  <span class="dc-ring dc-ring-1"></span>
-                  <span class="dc-ring dc-ring-2"></span>
-                  <span class="dc-phone-body"><span class="dc-phone-screen">ADB</span></span>
+                  <span class="dc-phone-screen">ADB</span>
                   <span class="dc-phone-cable"></span>
                 </div>
                 <div class="dc-device">
-                  <span class="app-label">CONNECTED DEVICE</span>
-                  <div class="dc-device-name">
-                    Pixel 7 <span class="dc-device-mode">ADB</span>
-                  </div>
-                  <div class="dc-device-sub">Android 15 · authorized · USB 3.2</div>
+                  <p class="dc-label">CONNECTED DEVICE</p>
+                  <p class="dc-device-name">Pixel 7 <span>ADB</span></p>
+                  <p class="dc-device-sub">Android 15 · authorized · USB 3.2</p>
                   <div class="dc-facts">
-                    <span class="dc-fact"
-                      ><small>BATTERY</small><strong>78%</strong></span
-                    >
-                    <span class="dc-fact"
-                      ><small>STORAGE</small><strong>41.2 GB</strong></span
-                    >
-                    <span class="dc-fact"
-                      ><small>SERIAL</small><strong>•••• 24YT</strong></span
-                    >
+                    <div><span>BATTERY</span><strong>78%</strong></div>
+                    <div><span>STORAGE</span><strong>41.2 GB</strong></div>
+                    <div><span>SERIAL</span><strong>···· 24YT</strong></div>
                   </div>
                 </div>
               </div>
 
-              <div class="dc-split">
-                <div class="dc-ports">
-                  <div class="dc-block-head"><span>USB MODES</span><span>LOCAL</span></div>
-                  <div class="dc-port-row">
-                    <span class="dc-port-dot is-on"></span><span>ADB</span>
-                    <span class="dc-port-state">authorized</span>
-                  </div>
-                  <div class="dc-port-row">
-                    <span class="dc-port-dot is-ready"></span><span>Fastboot</span>
-                    <span class="dc-port-state">ready</span>
-                  </div>
-                  <div class="dc-port-row">
-                    <span class="dc-port-dot"></span><span>Download mode</span>
-                    <span class="dc-port-state">absent</span>
-                  </div>
-                  <div class="dc-port-row">
-                    <span class="dc-port-dot"></span><span>EDL</span>
-                    <span class="dc-port-state">absent</span>
-                  </div>
+              <div class="dc-bench-cols">
+                <div class="dc-block">
+                  <p class="dc-label">USB MODES <span>LOCAL</span></p>
+                  <p class="dc-row"><i class="is-on"></i>ADB<em>authorized</em></p>
+                  <p class="dc-row"><i class="is-ready"></i>Fastboot<em>ready</em></p>
+                  <p class="dc-row"><i></i>Download mode<em>absent</em></p>
+                  <p class="dc-row"><i></i>EDL<em>absent</em></p>
                 </div>
 
-                <div class="dc-checklist">
-                  <div class="dc-block-head">
-                    <span>ACTIVE CHECKLIST</span><span>4 / 6</span>
-                  </div>
-                  <div class="dc-progress"><span style="width: 66%"></span></div>
-                  <div class="dc-check-row is-done">
-                    <span class="dc-check-mark">✓</span><span>Confirm model and region</span>
-                  </div>
-                  <div class="dc-check-row is-done">
-                    <span class="dc-check-mark">✓</span><span>Back up accessible data</span>
-                  </div>
-                  <div class="dc-check-row">
-                    <span class="dc-check-mark">3</span><span>Read the rollback warning</span>
-                  </div>
-                  <div class="dc-check-row is-muted">
-                    <span class="dc-check-mark">4</span><span>Unlock the bootloader</span>
-                  </div>
+                <div class="dc-block">
+                  <p class="dc-label">CHECKLIST <span>4 / 6</span></p>
+                  <div class="dc-bar"><span style="width: 66%"></span></div>
+                  <p class="dc-check is-done"><b>✓</b>Confirm model and region</p>
+                  <p class="dc-check is-done"><b>✓</b>Back up accessible data</p>
+                  <p class="dc-check"><b>3</b>Read the rollback warning</p>
+                  <p class="dc-check is-muted"><b>4</b>Unlock the bootloader</p>
                 </div>
               </div>
 
-              <div class="dc-gate">
-                <div class="dc-block-head">
-                  <span>COMMAND GATE</span><span>FIXED TABLE</span>
-                </div>
-                <div class="dc-cmd-row">
-                  <span class="dc-cmd-icon is-ok">✓</span><code>adb devices -l</code
-                  ><span class="dc-cmd-tag">READ</span>
-                </div>
-                <div class="dc-cmd-row">
-                  <span class="dc-cmd-icon is-ok">✓</span><code>adb shell dumpsys battery</code
-                  ><span class="dc-cmd-tag">READ</span>
-                </div>
-                <div class="dc-cmd-row">
-                  <span class="dc-cmd-icon is-warn">!</span><code>adb reboot bootloader</code
-                  ><span class="dc-cmd-tag is-warn">CONFIRM</span>
-                </div>
-                <div class="dc-cmd-row">
-                  <span class="dc-cmd-icon is-no">×</span><code>adb shell rm -rf /data</code
-                  ><span class="dc-cmd-tag is-no">BLOCKED</span>
-                </div>
+              <div class="dc-bench-gate">
+                <p class="dc-label">COMMAND GATE <span>FIXED TABLE</span></p>
+                <p class="dc-cmd"><b class="is-ok">✓</b><code>adb devices -l</code><em>READ</em></p>
+                <p class="dc-cmd"><b class="is-ok">✓</b><code>adb shell dumpsys battery</code><em>READ</em></p>
+                <p class="dc-cmd"><b class="is-warn">!</b><code>adb reboot bootloader</code><em class="is-warn">CONFIRM</em></p>
+                <p class="dc-cmd"><b class="is-no">✕</b><code>adb shell rm -rf /data</code><em class="is-no">BLOCKED</em></p>
               </div>
 
-              <div class="app-statusbar">
-                <span>History stays on this PC · Offline-first</span>
-                <span class="status-spacer"></span>
+              <div class="dc-bench-foot">
+                <span>History stays on this PC</span>
                 <span>10 fixed actions</span>
-                <span class="dc-status-shield">✓ no cloud</span>
+                <span>no cloud</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div
-          class="wrap hero-stats"
-          aria-label="DroidCrate at a glance"
-          data-i18n-aria-label="dc.hero.statsAria"
-        >
-          <div class="hero-stat">
-            <div class="hero-stat-value" dir="ltr">16</div>
-            <div class="hero-stat-label" data-i18n="dc.hero.stat1">official tools</div>
+        <div class="dc-shell dc-stats" aria-label="DroidCrate at a glance" data-i18n-aria-label="dc.hero.statsAria">
+          <div class="dc-stat">
+            <strong dir="ltr">16</strong>
+            <span data-i18n="dc.hero.stat1">official tools</span>
           </div>
-          <div class="hero-stat">
-            <div class="hero-stat-value" dir="ltr">9</div>
-            <div class="hero-stat-label" data-i18n="dc.hero.stat2">lessons, one quiz</div>
+          <div class="dc-stat">
+            <strong dir="ltr">9</strong>
+            <span data-i18n="dc.hero.stat2">lessons, one quiz</span>
           </div>
-          <div class="hero-stat">
-            <div class="hero-stat-value" dir="ltr">5</div>
-            <div class="hero-stat-label" data-i18n="dc.hero.stat3">gated checklists</div>
+          <div class="dc-stat">
+            <strong dir="ltr">5</strong>
+            <span data-i18n="dc.hero.stat3">gated checklists</span>
           </div>
-          <div class="hero-stat">
-            <div class="hero-stat-value" dir="ltr">0</div>
-            <div class="hero-stat-label" data-i18n="dc.hero.stat4">accounts or telemetry</div>
+          <div class="dc-stat">
+            <strong dir="ltr">0</strong>
+            <span data-i18n="dc.hero.stat4">accounts or telemetry</span>
           </div>
         </div>
       </section>
 
-      <section class="section features" id="features" aria-labelledby="features-title">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <div>
-              <p class="eyebrow">
-                <span class="eyebrow-dot" aria-hidden="true"></span
-                ><span data-i18n="dc.features.eyebrow">Built for the bench</span>
-              </p>
-              <h2 class="section-title" id="features-title" data-i18n="dc.features.title">
+      <!-- 02 · SPEC ------------------------------------------------------- -->
+      <section class="dc-section" id="features" aria-labelledby="features-title">
+        <div class="dc-shell">
+          <div class="dc-sec-head reveal">
+            <span class="dc-sec-num" aria-hidden="true">02</span>
+            <div class="dc-sec-copy">
+              <p class="dc-kicker" data-i18n="dc.features.eyebrow">Built for the bench</p>
+              <h2 class="dc-sec-title" id="features-title" data-i18n="dc.features.title">
                 Look first. Then act.
               </h2>
             </div>
-            <p class="section-lede" data-i18n="dc.features.lede">
+            <p class="dc-sec-lede" data-i18n="dc.features.lede">
               The useful work is unglamorous: identify the phone, name the source, gate the risky
               step, and keep a record. DroidCrate does that part.
             </p>
           </div>
 
-          <div class="feature-grid">
-            <article class="feature-card reveal" style="--reveal-delay: 0ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-usb"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f1Tag">USB</span>
+          <ol class="dc-spec">
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">01</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f1Title">Know what's on the other end</h3>
+                <p data-i18n="dc.features.f1Body">
+                  Windows Plug and Play records are read locally. DroidCrate names the USB mode, the
+                  likely device family, and the safest next step.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f1Title">Know what's on the other end</h3>
-              <p data-i18n="dc.features.f1Body">
-                Windows Plug and Play records are read locally. DroidCrate names the USB mode, the
-                likely device family, and the safest next step.
-              </p>
-            </article>
-
-            <article class="feature-card reveal" style="--reveal-delay: 55ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f2Tag">SOURCES</span>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-usb"></use></svg><span data-i18n="dc.features.f1Tag">USB</span></span>
+            </li>
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">02</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f2Title">Official pages only</h3>
+                <p data-i18n="dc.features.f2Body">
+                  Every entry says who publishes the tool. Vendor software opens on the vendor's own
+                  page — no mirrors, no repacks, and no bundled firmware.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f2Title">Official pages only</h3>
-              <p data-i18n="dc.features.f2Body">
-                Every entry says who publishes the tool. Vendor software opens on the vendor's own
-                page — no mirrors, no repacks, and no bundled firmware.
-              </p>
-            </article>
-
-            <article class="feature-card reveal" style="--reveal-delay: 110ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-checklist"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f3Tag">GATES</span>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg><span data-i18n="dc.features.f2Tag">SOURCES</span></span>
+            </li>
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">03</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f3Title">Checklists before risk</h3>
+                <p data-i18n="dc.features.f3Body">
+                  An ownership confirmation comes first. Then ordered steps, model checks, and a
+                  progress trail you can review later.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f3Title">Checklists before risk</h3>
-              <p data-i18n="dc.features.f3Body">
-                An ownership confirmation comes first. Then ordered steps, model checks, and a
-                progress trail you can review later.
-              </p>
-            </article>
-
-            <article class="feature-card reveal" style="--reveal-delay: 0ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f4Tag">COMMANDS</span>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-checklist"></use></svg><span data-i18n="dc.features.f3Tag">GATES</span></span>
+            </li>
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">04</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f4Title">A small, fixed command set</h3>
+                <p data-i18n="dc.features.f4Body">
+                  Ten ADB and Fastboot actions, resolved inside the main process. No arbitrary shell.
+                  Restarts require an explicit confirmation.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f4Title">A small, fixed command set</h3>
-              <p data-i18n="dc.features.f4Body">
-                Ten ADB and Fastboot actions, resolved inside the main process. No arbitrary shell.
-                Restarts require an explicit confirmation.
-              </p>
-            </article>
-
-            <article class="feature-card reveal" style="--reveal-delay: 55ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f5Tag">LESSONS</span>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-terminal"></use></svg><span data-i18n="dc.features.f4Tag">COMMANDS</span></span>
+            </li>
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">05</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f5Title">Read the boot chain</h3>
+                <p data-i18n="dc.features.f5Body">
+                  Nine lessons explain boot stages, drivers, unlocking law, recovery, root models, and
+                  brick triage before a checklist asks you to act.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f5Title">Read the boot chain</h3>
-              <p data-i18n="dc.features.f5Body">
-                Nine lessons explain boot stages, drivers, unlocking law, recovery, root models, and
-                brick triage before a checklist asks you to act.
-              </p>
-            </article>
-
-            <article class="feature-card reveal" style="--reveal-delay: 110ms">
-              <div class="feature-card-top">
-                <span class="feature-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-database"></use></svg
-                ></span>
-                <span class="feature-tag" data-i18n="dc.features.f6Tag">LOCAL</span>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg><span data-i18n="dc.features.f5Tag">LESSONS</span></span>
+            </li>
+            <li class="dc-spec-row reveal">
+              <span class="dc-spec-num">06</span>
+              <div class="dc-spec-main">
+                <h3 data-i18n="dc.features.f6Title">Nothing leaves the PC</h3>
+                <p data-i18n="dc.features.f6Body">
+                  Progress, history, and settings live in a local SQLite file. Content updates are
+                  manual, hash-verified, and never touch your records.
+                </p>
               </div>
-              <h3 data-i18n="dc.features.f6Title">Nothing leaves the PC</h3>
-              <p data-i18n="dc.features.f6Body">
-                Progress, history, and settings live in a local SQLite file. Content updates are
-                manual, hash-verified, and never touch your records.
-              </p>
-            </article>
-          </div>
+              <span class="dc-spec-tag"><svg class="icon" aria-hidden="true"><use href="#i-database"></use></svg><span data-i18n="dc.features.f6Tag">LOCAL</span></span>
+            </li>
+          </ol>
 
-          <div class="feature-also reveal">
-            <span class="feature-also-label">
+          <div class="dc-also reveal">
+            <span class="dc-also-label">
               <svg class="icon" aria-hidden="true"><use href="#i-shield"></use></svg>
               <span data-i18n="dc.features.also">Also inside</span>
             </span>
@@ -784,72 +632,60 @@
         </div>
       </section>
 
-      <section class="section how" id="how" aria-labelledby="how-title">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <div>
-              <p class="eyebrow">
-                <span class="eyebrow-dot" aria-hidden="true"></span
-                ><span data-i18n="dc.how.eyebrow">Three steps</span>
-              </p>
-              <h2 class="section-title" id="how-title" data-i18n="dc.how.title">
+      <!-- 03 · FLOW ------------------------------------------------------- -->
+      <section class="dc-section" id="how" aria-labelledby="how-title">
+        <div class="dc-shell">
+          <div class="dc-sec-head reveal">
+            <span class="dc-sec-num" aria-hidden="true">03</span>
+            <div class="dc-sec-copy">
+              <p class="dc-kicker" data-i18n="dc.how.eyebrow">Three steps</p>
+              <h2 class="dc-sec-title" id="how-title" data-i18n="dc.how.title">
                 From cable to a record.
               </h2>
             </div>
-            <p class="section-lede" data-i18n="dc.how.lede">
+            <p class="dc-sec-lede" data-i18n="dc.how.lede">
               No accounts, no drivers bundled, no mystery downloads. Install, connect, and follow
               the bench.
             </p>
           </div>
 
-          <div class="how-grid">
-            <article class="how-step reveal" style="--reveal-delay: 0ms">
-              <div class="how-step-top">
-                <span class="step-number" aria-hidden="true">01</span>
-                <span class="step-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg
-                ></span>
+          <ol class="dc-flow">
+            <li class="dc-flow-step reveal">
+              <span class="dc-flow-mark" aria-hidden="true">01</span>
+              <div class="dc-flow-body">
+                <p class="dc-flow-tag" data-i18n="dc.how.step1Label">Install</p>
+                <h3 data-i18n="dc.how.step1Title">Install the bench</h3>
+                <p data-i18n="dc.how.step1Body">
+                  Run the Windows installer. It is unsigned, so SmartScreen may ask you to confirm —
+                  the download section explains why, and how to build from source.
+                </p>
               </div>
-              <div class="step-tag" data-i18n="dc.how.step1Tag">01 / INSTALL</div>
-              <h3 data-i18n="dc.how.step1Title">Install the bench</h3>
-              <p data-i18n="dc.how.step1Body">
-                Run the Windows installer. It is unsigned, so SmartScreen may ask you to confirm —
-                the download section explains why, and how to build from source.
-              </p>
-            </article>
-
-            <article class="how-step reveal" style="--reveal-delay: 70ms">
-              <div class="how-step-top">
-                <span class="step-number" aria-hidden="true">02</span>
-                <span class="step-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-usb"></use></svg
-                ></span>
+            </li>
+            <li class="dc-flow-step reveal">
+              <span class="dc-flow-mark" aria-hidden="true">02</span>
+              <div class="dc-flow-body">
+                <p class="dc-flow-tag" data-i18n="dc.how.step2Label">Connect</p>
+                <h3 data-i18n="dc.how.step2Title">Connect with permission</h3>
+                <p data-i18n="dc.how.step2Body">
+                  Use a data cable, enable USB debugging on a phone you own, and authorize the
+                  computer. DroidCrate scans the USB bus locally — never in the cloud.
+                </p>
               </div>
-              <div class="step-tag" data-i18n="dc.how.step2Tag">02 / CONNECT</div>
-              <h3 data-i18n="dc.how.step2Title">Connect with permission</h3>
-              <p data-i18n="dc.how.step2Body">
-                Use a data cable, enable USB debugging on a phone you own, and authorize the
-                computer. DroidCrate scans the USB bus locally — never in the cloud.
-              </p>
-            </article>
-
-            <article class="how-step reveal" style="--reveal-delay: 140ms">
-              <div class="how-step-top">
-                <span class="step-number" aria-hidden="true">03</span>
-                <span class="step-icon"
-                  ><svg class="icon" aria-hidden="true"><use href="#i-checklist"></use></svg
-                ></span>
+            </li>
+            <li class="dc-flow-step reveal">
+              <span class="dc-flow-mark" aria-hidden="true">03</span>
+              <div class="dc-flow-body">
+                <p class="dc-flow-tag" data-i18n="dc.how.step3Label">Work</p>
+                <h3 data-i18n="dc.how.step3Title">Follow the paper trail</h3>
+                <p data-i18n="dc.how.step3Body">
+                  Identify the mode, read device facts, open a checklist, and keep the history entry.
+                  Stop when the next step is outside the bench.
+                </p>
               </div>
-              <div class="step-tag" data-i18n="dc.how.step3Tag">03 / WORK</div>
-              <h3 data-i18n="dc.how.step3Title">Follow the paper trail</h3>
-              <p data-i18n="dc.how.step3Body">
-                Identify the mode, read device facts, open a checklist, and keep the history entry.
-                Stop when the next step is outside the bench.
-              </p>
-            </article>
-          </div>
+            </li>
+          </ol>
 
-          <p class="how-note reveal">
+          <p class="dc-note reveal">
             <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
             <span data-i18n="dc.how.note"
               >ADB reads are safe to repeat. Anything that restarts or changes state is gated.</span
@@ -858,53 +694,54 @@
         </div>
       </section>
 
-      <section class="section connections" id="safety" aria-labelledby="safety-title">
-        <div class="wrap">
-          <div class="section-head reveal">
-            <div>
-              <p class="eyebrow">
-                <span class="eyebrow-dot" aria-hidden="true"></span
-                ><span data-i18n="dc.safety.eyebrow">Policy, not a toggle</span>
-              </p>
-              <h2 class="section-title" id="safety-title" data-i18n="dc.safety.title">
+      <!-- 04 · SAFETY ----------------------------------------------------- -->
+      <section class="dc-section" id="safety" aria-labelledby="safety-title">
+        <div class="dc-shell">
+          <div class="dc-sec-head reveal">
+            <span class="dc-sec-num" aria-hidden="true">04</span>
+            <div class="dc-sec-copy">
+              <p class="dc-kicker" data-i18n="dc.safety.eyebrow">Policy, not a toggle</p>
+              <h2 class="dc-sec-title" id="safety-title" data-i18n="dc.safety.title">
                 The line we don't cross.
               </h2>
             </div>
-            <p class="section-lede" data-i18n="dc.safety.lede">
+            <p class="dc-sec-lede" data-i18n="dc.safety.lede">
               A screen-lock bypass is not a feature. DroidCrate refuses those tasks in the command
               table, in the interface, and on this page.
             </p>
           </div>
 
-          <div class="connections-panel reveal dc-safety-panel">
-            <div class="connections-copy">
-              <p class="section-lede" data-i18n="dc.safety.panelLede">
+          <div class="dc-safety reveal">
+            <div class="dc-safety-copy">
+              <p class="dc-safety-lede" data-i18n="dc.safety.panelLede">
                 Every action is resolved from a fixed table in the main process. The window cannot
                 invent a command.
               </p>
-              <div class="connections-points">
-                <div class="connections-point">
+
+              <ul class="dc-safety-points">
+                <li>
                   <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
                   <span data-i18n="dc.safety.point1"
                     >Read-only first: device list, properties, battery, storage, Fastboot
                     variables.</span
                   >
-                </div>
-                <div class="connections-point">
+                </li>
+                <li>
                   <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
                   <span data-i18n="dc.safety.point2"
                     >Reboots require an ownership confirmation and an explicit second click.</span
                   >
-                </div>
-                <div class="connections-point">
+                </li>
+                <li>
                   <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg>
                   <span data-i18n="dc.safety.point3"
                     >Flashing, unlocking, erasing, sideloading, and arbitrary shell stay out of the
                     table.</span
                   >
-                </div>
-              </div>
-              <div class="connections-footnote">
+                </li>
+              </ul>
+
+              <div class="dc-safety-warn">
                 <svg class="icon" aria-hidden="true"><use href="#i-ban"></use></svg>
                 <p data-i18n="dc.safety.footnote">
                   Screen locks, FRP, accounts, and ownership protection are refused permanently.
@@ -913,89 +750,67 @@
               </div>
             </div>
 
-            <div class="connections-console dc-gate-console">
-              <div class="console-label">
-                <span data-i18n="dc.safety.consoleLabel">Command gate</span>
-                <span class="console-live" data-i18n="dc.safety.illustrative">Illustrative</span>
+            <div class="dc-console">
+              <div class="dc-console-head">
+                <span class="dc-console-title" data-i18n="dc.safety.consoleLabel">Command gate</span>
+                <span class="dc-console-badge" data-i18n="dc.safety.illustrative">Illustrative</span>
               </div>
 
-              <div class="dc-gate-score">
-                <div class="dc-gate-score-item">
-                  <strong>10</strong>
-                  <span data-i18n="dc.safety.fixedActions">fixed actions</span>
-                </div>
-                <span class="dc-gate-divider" aria-hidden="true"></span>
-                <div class="dc-gate-score-item">
-                  <strong>0</strong>
-                  <span data-i18n="dc.safety.arbitraryShell">arbitrary shell</span>
-                </div>
+              <div class="dc-console-score">
+                <div><strong>10</strong><span data-i18n="dc.safety.fixedActions">fixed actions</span></div>
+                <div><strong>0</strong><span data-i18n="dc.safety.arbitraryShell">arbitrary shell</span></div>
               </div>
 
               <div
-                class="dc-gate-command-grid"
+                class="dc-gate-grid"
                 role="group"
                 aria-label="Example commands"
                 data-i18n-aria-label="dc.safety.gateAria"
               >
-                <button
-                  class="dc-gate-command"
-                  type="button"
-                  data-gate="devices"
-                  aria-pressed="true"
-                >
-                  <code>adb devices -l</code><span class="dc-gate-tag" data-i18n="dc.safety.tagRead">READ</span>
+                <button class="dc-gate" type="button" data-gate="devices" aria-pressed="true">
+                  <code>adb devices -l</code><span class="dc-tag" data-i18n="dc.safety.tagRead">READ</span>
                 </button>
-                <button class="dc-gate-command" type="button" data-gate="getprop" aria-pressed="false">
-                  <code>adb shell getprop</code><span class="dc-gate-tag" data-i18n="dc.safety.tagRead">READ</span>
+                <button class="dc-gate" type="button" data-gate="getprop" aria-pressed="false">
+                  <code>adb shell getprop</code><span class="dc-tag" data-i18n="dc.safety.tagRead">READ</span>
                 </button>
-                <button class="dc-gate-command" type="button" data-gate="battery" aria-pressed="false">
-                  <code>adb shell dumpsys battery</code><span class="dc-gate-tag" data-i18n="dc.safety.tagRead">READ</span>
+                <button class="dc-gate" type="button" data-gate="battery" aria-pressed="false">
+                  <code>adb shell dumpsys battery</code><span class="dc-tag" data-i18n="dc.safety.tagRead">READ</span>
                 </button>
-                <button
-                  class="dc-gate-command"
-                  type="button"
-                  data-gate="reboot"
-                  aria-pressed="false"
-                >
+                <button class="dc-gate" type="button" data-gate="reboot" aria-pressed="false">
                   <code>adb reboot bootloader</code
-                  ><span class="dc-gate-tag is-warn" data-i18n="dc.safety.tagConfirm">CONFIRM</span>
+                  ><span class="dc-tag is-warn" data-i18n="dc.safety.tagConfirm">CONFIRM</span>
                 </button>
-                <button class="dc-gate-command" type="button" data-gate="flash" aria-pressed="false">
+                <button class="dc-gate" type="button" data-gate="flash" aria-pressed="false">
                   <code>fastboot flash boot boot.img</code
-                  ><span class="dc-gate-tag is-no" data-i18n="dc.safety.tagBlocked">BLOCKED</span>
+                  ><span class="dc-tag is-no" data-i18n="dc.safety.tagBlocked">BLOCKED</span>
                 </button>
-                <button class="dc-gate-command" type="button" data-gate="erase" aria-pressed="false">
+                <button class="dc-gate" type="button" data-gate="erase" aria-pressed="false">
                   <code>adb shell rm -rf /data</code
-                  ><span class="dc-gate-tag is-no" data-i18n="dc.safety.tagBlocked">BLOCKED</span>
+                  ><span class="dc-tag is-no" data-i18n="dc.safety.tagBlocked">BLOCKED</span>
                 </button>
               </div>
 
-              <div
-                class="dc-gate-result"
-                data-gate-result
-                data-level="allowed"
-                aria-live="polite"
-              >
-                <div class="dc-gate-result-head">
-                  <span class="dc-gate-status" data-gate-status>ALLOWED</span>
-                  <span class="dc-gate-flag" data-gate-flag>READ</span>
+              <div class="dc-result" data-gate-result data-level="allowed" aria-live="polite">
+                <div class="dc-result-head">
+                  <span class="dc-result-status" data-gate-status>ALLOWED</span>
+                  <span class="dc-result-flag" data-gate-flag>READ</span>
                 </div>
-                <code class="dc-gate-code" data-gate-code>adb devices -l</code>
-                <p class="dc-gate-desc" data-gate-desc>
+                <code class="dc-result-code" data-gate-code>adb devices -l</code>
+                <p class="dc-result-desc" data-gate-desc>
                   Lists attached devices and their transport state. Read-only, no confirmation
                   needed.
                 </p>
-                <p class="dc-gate-note" data-gate-note>
+                <p class="dc-result-note" data-gate-note>
                   Logged to local history with the device serial.
                 </p>
               </div>
 
-              <div class="dc-gate-chips" aria-hidden="true">
+              <div class="dc-console-chips" aria-hidden="true">
                 <span>READ 5</span>
                 <span data-i18n="dc.safety.chipRestart">RESTART 3</span>
                 <span>FASTBOOT 2</span>
               </div>
-              <p class="console-disclaimer" data-i18n="dc.safety.disclaimer">
+              <p class="dc-console-foot" data-i18n="dc.safety.disclaimer">
                 Illustrative only — the shipped app enforces the same table inside the main process.
               </p>
             </div>
@@ -1003,44 +818,35 @@
         </div>
       </section>
 
-      <section class="section library" id="library" aria-labelledby="library-title">
-        <div class="wrap">
-          <div class="dc-library">
-            <div class="dc-library-copy reveal">
-              <p class="eyebrow">
-                <span class="eyebrow-dot" aria-hidden="true"></span
-                ><span data-i18n="dc.library.eyebrow">The reading room</span>
-              </p>
-              <h2 class="section-title" id="library-title" data-i18n="dc.library.title">
+      <!-- 05 · LIBRARY ---------------------------------------------------- -->
+      <section class="dc-section" id="library" aria-labelledby="library-title">
+        <div class="dc-shell">
+          <div class="dc-sec-head reveal">
+            <span class="dc-sec-num" aria-hidden="true">05</span>
+            <div class="dc-sec-copy">
+              <p class="dc-kicker" data-i18n="dc.library.eyebrow">The reading room</p>
+              <h2 class="dc-sec-title" id="library-title" data-i18n="dc.library.title">
                 Sources you can check. Steps you can repeat.
               </h2>
-              <p class="section-lede" data-i18n="dc.library.lede">
-                Tool entries name the publisher. Lessons explain the boot chain. Checklists turn a
-                risky procedure into an ordered, reviewable one.
-              </p>
+            </div>
+            <p class="dc-sec-lede" data-i18n="dc.library.lede">
+              Tool entries name the publisher. Lessons explain the boot chain. Checklists turn a
+              risky procedure into an ordered, reviewable one.
+            </p>
+          </div>
 
-              <div class="dc-library-facts">
-                <div class="dc-library-fact">
-                  <strong dir="ltr">16</strong>
-                  <span data-i18n="dc.library.fact1">tool entries</span>
-                </div>
-                <div class="dc-library-fact">
-                  <strong dir="ltr">9</strong>
-                  <span data-i18n="dc.library.fact2">lessons</span>
-                </div>
-                <div class="dc-library-fact">
-                  <strong dir="ltr">5</strong>
-                  <span data-i18n="dc.library.fact3">checklists</span>
-                </div>
-                <div class="dc-library-fact">
-                  <strong dir="ltr">60%</strong>
-                  <span data-i18n="dc.library.fact4">quiz pass mark</span>
-                </div>
+          <div class="dc-library">
+            <div class="dc-library-copy reveal">
+              <div class="dc-fact-grid">
+                <div><strong dir="ltr">16</strong><span data-i18n="dc.library.fact1">tool entries</span></div>
+                <div><strong dir="ltr">9</strong><span data-i18n="dc.library.fact2">lessons</span></div>
+                <div><strong dir="ltr">5</strong><span data-i18n="dc.library.fact3">checklists</span></div>
+                <div><strong dir="ltr">60%</strong><span data-i18n="dc.library.fact4">quiz pass mark</span></div>
               </div>
 
               <div class="dc-library-actions">
                 <a
-                  class="btn btn-secondary"
+                  class="dc-btn dc-btn-ghost"
                   href="https://github.com/bouadjadjatamer2-hub/DroidCrate/tree/main/docs"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1061,7 +867,7 @@
               </div>
             </div>
 
-            <div class="dc-lesson reveal" dir="ltr">
+            <article class="dc-lesson reveal" dir="ltr">
               <div class="dc-lesson-top">
                 <span>LESSON 01 / FOUNDATIONS</span>
                 <span class="dc-lesson-time"
@@ -1080,26 +886,17 @@
                 </p>
                 <div class="dc-before">
                   <h4>BEFORE YOU CONTINUE</h4>
-                  <div class="dc-before-row">
-                    <span class="dc-before-mark">✓</span
-                    ><span>Back up the data you can still reach</span>
-                  </div>
-                  <div class="dc-before-row">
-                    <span class="dc-before-mark">✓</span
-                    ><span>Confirm the exact model and region</span>
-                  </div>
-                  <div class="dc-before-row">
-                    <span class="dc-before-mark">3</span
-                    ><span>Read the rollback and warranty warning</span>
-                  </div>
+                  <p><b>✓</b>Back up the data you can still reach</p>
+                  <p><b>✓</b>Confirm the exact model and region</p>
+                  <p><b>3</b>Read the rollback and warranty warning</p>
                 </div>
               </div>
               <div class="dc-lesson-foot">
-                <span class="dc-quiz-badge">QUIZ</span>
+                <span class="dc-quiz">QUIZ</span>
                 <span>Knowledge check · 60% to pass</span>
                 <span class="dc-lesson-cta">Start <span aria-hidden="true">→</span></span>
               </div>
-            </div>
+            </article>
           </div>
 
           <div class="dc-gallery reveal">
@@ -1152,47 +949,46 @@
         </div>
       </section>
 
-      <section class="section download" id="download" aria-labelledby="download-title">
-        <div class="wrap">
-          <div class="download-card reveal">
-            <div class="download-copy">
-              <p class="eyebrow">
-                <span class="eyebrow-dot" aria-hidden="true"></span
-                ><span data-i18n="download.eyebrow">Windows 10 &amp; 11 · 64-bit</span>
-              </p>
-              <div class="app-icon-wrap">
-                <img
-                  class="app-icon"
-                  src="../../assets/img/droidcrate-icon.png"
-                  width="70"
-                  height="70"
-                  alt="DroidCrate app icon"
-                  data-i18n-alt="dc.download.appIconAlt"
-                />
-              </div>
-              <h2 class="download-title" id="download-title" data-i18n="dc.download.title">
+      <!-- 06 · DOWNLOAD --------------------------------------------------- -->
+      <section class="dc-section" id="download" aria-labelledby="download-title">
+        <div class="dc-shell">
+          <div class="dc-sec-head reveal">
+            <span class="dc-sec-num" aria-hidden="true">06</span>
+            <div class="dc-sec-copy">
+              <p class="dc-kicker" data-i18n="download.eyebrow">Windows 10 &amp; 11 · 64-bit</p>
+              <h2 class="dc-sec-title" id="download-title" data-i18n="dc.download.title">
                 Ready to look first.
               </h2>
-              <p class="download-lede" data-i18n="dc.download.lede">
-                One installer. No account. The latest build, its checksum, and the limits are
-                below.
-              </p>
-              <div class="download-actions">
+            </div>
+            <p class="dc-sec-lede" data-i18n="dc.download.lede">
+              One installer. No account. The latest build, its checksum, and the limits are below.
+            </p>
+          </div>
+
+          <div class="dc-download reveal">
+            <div class="dc-download-main">
+              <img
+                class="dc-app-icon"
+                src="../../assets/img/droidcrate-icon.png"
+                width="64"
+                height="64"
+                alt="DroidCrate app icon"
+                data-i18n-alt="dc.download.appIconAlt"
+              />
+              <div class="dc-download-actions">
                 <a
-                  class="btn btn-primary btn-lg"
+                  class="dc-btn dc-btn-amber dc-btn-lg"
                   href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.1.0/DroidCrate-0.1.0-Setup.exe"
                   data-config-href="download"
                 >
                   <svg class="icon" aria-hidden="true"><use href="#i-download"></use></svg>
-                  <span class="download-button-label">
+                  <span class="dc-dl-label">
                     <span data-i18n="download.button">Download installer</span>
-                    <span class="download-button-version" data-config="version" data-prefix="v"
-                      >v0.1.0</span
-                    >
+                    <span class="dc-dl-version" data-config="version" data-prefix="v">v0.1.0</span>
                   </span>
                 </a>
                 <a
-                  class="btn btn-secondary btn-lg"
+                  class="dc-btn dc-btn-ghost dc-btn-lg"
                   href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/tag/v0.1.0"
                   target="_blank"
                   rel="noopener noreferrer"
@@ -1202,47 +998,68 @@
                   <span data-i18n="download.releaseNotes">Release notes</span>
                 </a>
               </div>
+
+              <ul class="dc-whats-new">
+                <li>
+                  <span class="dc-whats-label" data-i18n="download.whatsNew">What's new in {version}</span>
+                </li>
+                <li>
+                  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
+                  ><span data-i18n="dc.download.new1"
+                    >First public build: 16 official tools, 9 lessons, and 5 gated checklists</span
+                  >
+                </li>
+                <li>
+                  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
+                  ><span data-i18n="dc.download.new2"
+                    >Ten fixed ADB and Fastboot actions, with confirmation for every restart</span
+                  >
+                </li>
+                <li>
+                  <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
+                  ><span data-i18n="dc.download.new3"
+                    >SHA-256-verified content updates that never touch local progress or history</span
+                  >
+                </li>
+              </ul>
             </div>
 
-            <div class="release-card">
-              <div class="release-card-head">
-                <span class="release-card-title">
-                  <svg class="icon" aria-hidden="true"><use href="#i-code"></use></svg>
-                  <span data-i18n="download.releaseChannel">Release channel</span>
-                </span>
-                <span class="release-status" data-i18n="download.latest">Latest</span>
+            <div class="dc-release">
+              <div class="dc-release-head">
+                <span data-i18n="download.releaseChannel">Release channel</span>
+                <span class="dc-release-badge" data-i18n="download.latest">Latest</span>
               </div>
-              <div class="release-rows">
-                <div class="release-row">
-                  <span class="label" data-i18n="download.releaseLabel">Version</span>
-                  <span class="value" data-config="version" data-prefix="v">v0.1.0</span>
+              <dl class="dc-release-rows">
+                <div>
+                  <dt data-i18n="download.releaseLabel">Version</dt>
+                  <dd data-config="version" data-prefix="v">v0.1.0</dd>
                 </div>
-                <div class="release-row">
-                  <span class="label" data-i18n="download.installerLabel">Installer</span>
-                  <span class="value" data-config="installerName">DroidCrate-0.1.0-Setup.exe</span>
+                <div>
+                  <dt data-i18n="download.installerLabel">Installer</dt>
+                  <dd data-config="installerName">DroidCrate-0.1.0-Setup.exe</dd>
                 </div>
-                <div class="release-row">
-                  <span class="label" data-i18n="download.sizeLabel">Size</span>
-                  <span class="value" data-config="installerSize">117.6 MB</span>
+                <div>
+                  <dt data-i18n="download.sizeLabel">Size</dt>
+                  <dd data-config="installerSize">117.6 MB</dd>
                 </div>
-                <div class="release-row">
-                  <span class="label" data-i18n="download.platformLabel">Platform</span>
-                  <span class="value" data-i18n="download.platformValue">Windows 10 / 11</span>
+                <div>
+                  <dt data-i18n="download.platformLabel">Platform</dt>
+                  <dd data-i18n="download.platformValue">Windows 10 / 11</dd>
                 </div>
-                <div class="release-row">
-                  <span class="label" data-i18n="download.archLabel">Architecture</span>
-                  <span class="value" data-i18n="download.archValue">64-bit</span>
+                <div>
+                  <dt data-i18n="download.archLabel">Architecture</dt>
+                  <dd data-i18n="download.archValue">64-bit</dd>
                 </div>
-                <div class="release-row">
-                  <span class="label" data-i18n="download.licenseLabel">License</span>
-                  <span class="value" data-i18n="download.licenseValue">MIT</span>
+                <div>
+                  <dt data-i18n="download.licenseLabel">License</dt>
+                  <dd data-i18n="download.licenseValue">MIT</dd>
                 </div>
-              </div>
-              <div class="release-checksum">
-                <div class="checksum-head">
-                  <span class="label" data-i18n="download.checksumLabel">SHA-256</span>
+              </dl>
+              <div class="dc-checksum">
+                <div class="dc-checksum-head">
+                  <span data-i18n="download.checksumLabel">SHA-256</span>
                   <button
-                    class="copy-btn"
+                    class="dc-copy"
                     id="copyChecksum"
                     type="button"
                     aria-label="Copy SHA-256 checksum"
@@ -1252,51 +1069,26 @@
                     <span data-copy-label data-i18n="common.copy">Copy</span>
                   </button>
                 </div>
-                <code class="checksum" data-config="sha256"
+                <code data-config="sha256"
                   >8C785FBAFFD9F9472082BD87F84C634DB077616FD4CBB4F0529008DE8529789C</code
                 >
               </div>
             </div>
           </div>
 
-          <div class="download-whats-new reveal">
-            <p class="whats-new-label" data-i18n="download.whatsNew">What's new in {version}</p>
-            <ul class="whats-new-list">
-              <li>
-                <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
-                ><span data-i18n="dc.download.new1"
-                  >First public build: 16 official tools, 9 lessons, and 5 gated checklists</span
-                >
-              </li>
-              <li>
-                <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
-                ><span data-i18n="dc.download.new2"
-                  >Ten fixed ADB and Fastboot actions, with confirmation for every restart</span
-                >
-              </li>
-              <li>
-                <svg class="icon" aria-hidden="true"><use href="#i-check"></use></svg
-                ><span data-i18n="dc.download.new3"
-                  >SHA-256-verified content updates that never touch local progress or history</span
-                >
-              </li>
-            </ul>
-          </div>
-
-          <div class="download-warning reveal">
+          <div class="dc-warning reveal">
             <svg class="icon" aria-hidden="true"><use href="#i-warning"></use></svg>
             <div>
-              <strong data-i18n="download.unsignedTitle">About the SmartScreen warning</strong
-              ><br />
-              <span data-i18n="download.unsignedBody">
+              <strong data-i18n="download.unsignedTitle">About the SmartScreen warning</strong>
+              <p data-i18n="download.unsignedBody">
                 The installer is not code-signed, so Windows may show a SmartScreen warning. Choose
                 More info → Run anyway, or build from source. The project does not have a
                 code-signing certificate yet.
-              </span>
+              </p>
             </div>
           </div>
 
-          <div class="download-links reveal">
+          <div class="dc-links reveal">
             <a
               href="https://github.com/bouadjadjatamer2-hub/DroidCrate/blob/main/LICENSE"
               target="_blank"
@@ -1323,7 +1115,7 @@
               <svg class="icon" aria-hidden="true"><use href="#i-book"></use></svg>
               <span data-i18n="dc.download.docs">Documentation</span>
             </a>
-            <span style="color: var(--dim)" data-i18n="dc.download.note">
+            <span class="dc-links-note" data-i18n="dc.download.note">
               Platform Tools come from dl.google.com and are re-hashed before extraction. No
               firmware is bundled.
             </span>
@@ -1331,21 +1123,20 @@
         </div>
       </section>
 
-      <section class="section faq" id="faq" aria-labelledby="faq-title">
-        <div class="wrap faq-grid">
-          <div class="faq-intro">
-            <p class="eyebrow">
-              <span class="eyebrow-dot" aria-hidden="true"></span
-              ><span data-i18n="faq.eyebrow">Questions, answered</span>
-            </p>
-            <h2 class="section-title" id="faq-title" data-i18n="dc.faq.title">
+      <!-- 07 · FAQ -------------------------------------------------------- -->
+      <section class="dc-section" id="faq" aria-labelledby="faq-title">
+        <div class="dc-shell dc-faq-grid">
+          <div class="dc-faq-intro">
+            <span class="dc-sec-num" aria-hidden="true">07</span>
+            <p class="dc-kicker" data-i18n="faq.eyebrow">Questions, answered</p>
+            <h2 class="dc-sec-title" id="faq-title" data-i18n="dc.faq.title">
               The honest version, limits included.
             </h2>
-            <p class="section-lede" data-i18n="dc.faq.lede">
+            <p class="dc-sec-lede" data-i18n="dc.faq.lede">
               If the answer is not here, open an issue on GitHub. Safety questions get priority.
             </p>
             <a
-              class="faq-cta"
+              class="dc-text-link"
               href="https://github.com/bouadjadjatamer2-hub/DroidCrate/issues"
               target="_blank"
               rel="noopener noreferrer"
@@ -1356,112 +1147,110 @@
             </a>
           </div>
 
-          <div class="faq-list">
-            <details class="faq-item" open>
+          <div class="dc-faq-list">
+            <details class="dc-faq-item" open>
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q1"
+                <span class="dc-faq-q" data-i18n="dc.faq.q1"
                   >Does DroidCrate bypass screen locks or FRP?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a1">
+              <div class="dc-faq-a" data-i18n="dc.faq.a1">
                 No. It never has and never will. There is no hidden bypass, no unlock service, and no
                 account-recovery path. The app refuses those tasks in code and on this page.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q2">Is it really free?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q2">Is it really free?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a2">
+              <div class="dc-faq-a" data-i18n="dc.faq.a2">
                 Yes. DroidCrate is MIT-licensed, with no account, subscription, or ads. The full
                 source is on GitHub, and the installer is built from it.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q3"
+                <span class="dc-faq-q" data-i18n="dc.faq.q3"
                   >Does it bundle Odin, QFIL, or SP Flash Tool?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a3">
+              <div class="dc-faq-a" data-i18n="dc.faq.a3">
                 No. Those tools have no official public download we can redistribute. DroidCrate
                 links their official support pages and marks them support-only. No mirrors, repacks,
                 or bundled firmware.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q4">Can it flash firmware?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q4">Can it flash firmware?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a4">
+              <div class="dc-faq-a" data-i18n="dc.faq.a4">
                 No. It can reboot to bootloader or recovery and read Fastboot variables. Flashing,
                 unlocking, erasing, and sideloading stay outside the allow-list.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q5">Which phones work?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q5">Which phones work?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a5">
+              <div class="dc-faq-a" data-i18n="dc.faq.a5">
                 Any Android phone that exposes standard USB modes. The device database covers common
                 vendors and is editable; vendor tools and firmware vary by model and region.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q6"
-                  >What can the ADB console do?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q6">What can the ADB console do?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a6">
+              <div class="dc-faq-a" data-i18n="dc.faq.a6">
                 Ten fixed actions: list devices, read properties, battery and storage, restart to
                 system, bootloader, or recovery, and two Fastboot reads. It cannot send arbitrary
                 shell commands.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q7"
-                  >Does it need an internet connection?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q7">Does it need an internet connection?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a7">
+              <div class="dc-faq-a" data-i18n="dc.faq.a7">
                 Not for daily use. Lessons, checklists, history, and the tool index are local.
                 Vendor pages open in your browser; content updates are manual downloads with SHA-256
                 verification.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q8">Where does my data live?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q8">Where does my data live?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a8">
+              <div class="dc-faq-a" data-i18n="dc.faq.a8">
                 In %APPDATA%\droidcrate on this PC: a SQLite database plus content files. There is no
                 telemetry and no cloud account. History can be exported as CSV.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q9">Why does Windows warn me?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                <span class="dc-faq-q" data-i18n="dc.faq.q9">Why does Windows warn me?</span
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a9">
+              <div class="dc-faq-a" data-i18n="dc.faq.a9">
                 The installer is unsigned, so SmartScreen cannot verify the publisher. Choose More
                 info → Run anyway, or build from source. Signing needs a paid certificate the
                 project does not have.
               </div>
             </details>
-            <details class="faq-item">
+            <details class="dc-faq-item">
               <summary>
-                <span class="faq-question" data-i18n="dc.faq.q10"
+                <span class="dc-faq-q" data-i18n="dc.faq.q10"
                   >Is it a replacement for a repair shop?</span
-                ><span class="faq-plus" aria-hidden="true"></span>
+                ><span class="dc-faq-mark" aria-hidden="true"></span>
               </summary>
-              <div class="faq-answer" data-i18n="dc.faq.a10">
+              <div class="dc-faq-a" data-i18n="dc.faq.a10">
                 No. It is a careful bench for phones you own or are authorized to service. A hard
                 brick, a data-recovery job, or a warranty repair still belongs with a professional.
               </div>
@@ -1470,69 +1259,60 @@
         </div>
       </section>
 
-      <section class="section app-crosslink" aria-labelledby="more-title">
-        <div class="wrap crosslink-card reveal">
-          <div class="crosslink-copy">
-            <p class="eyebrow">
-              <span class="eyebrow-dot" aria-hidden="true"></span>
-              <span data-i18n="dc.crossEyebrow">Part of Asraab</span>
-            </p>
-            <h2 class="crosslink-title" id="more-title" data-i18n="dc.crossTitle">
-              Two apps. One standard.
-            </h2>
-            <p class="crosslink-lede" data-i18n="dc.crossLede">
-              Majra handles downloads. DroidCrate handles Android service. Both are free, open
-              source, and honest about what they will not do.
-            </p>
-          </div>
-          <div class="dc-cross-actions">
-            <a class="btn btn-secondary btn-lg" href="../majra/">
-              <span data-i18n="dc.crossMajra">Meet Majra</span>
-              <svg class="icon arrow-icon" aria-hidden="true">
-                <use href="#i-arrow-right"></use>
-              </svg>
-            </a>
-            <a class="btn btn-quiet" href="../../#apps" data-i18n="nav.allApps">All apps</a>
+      <!-- 08 · CROSSLINK -------------------------------------------------- -->
+      <section class="dc-section dc-section-tight" aria-labelledby="more-title">
+        <div class="dc-shell">
+          <div class="dc-cross reveal">
+            <div>
+              <p class="dc-kicker" data-i18n="dc.crossEyebrow">Part of Asraab</p>
+              <h2 class="dc-cross-title" id="more-title" data-i18n="dc.crossTitle">
+                Two apps. One standard.
+              </h2>
+              <p class="dc-cross-lede" data-i18n="dc.crossLede">
+                Majra handles downloads. DroidCrate handles Android service. Both are free, open
+                source, and honest about what they will not do.
+              </p>
+            </div>
+            <div class="dc-cross-actions">
+              <a class="dc-btn dc-btn-ghost" href="../majra/">
+                <span data-i18n="dc.crossMajra">Meet Majra</span>
+                <svg class="icon flip-rtl" aria-hidden="true"><use href="#i-arrow-right"></use></svg>
+              </a>
+              <a class="dc-text-link" href="../../#apps" data-i18n="nav.allApps">All apps</a>
+            </div>
           </div>
         </div>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <div class="wrap">
-        <div class="footer-grid">
-          <div class="footer-brand">
-            <a
-              class="brand brand-site"
-              href="../../"
-              aria-label="Asraab home"
-              data-i18n-aria-label="site.a11yHome"
-            >
-              <img
-                class="brand-mark"
-                src="../../assets/img/asraab-mark.svg"
-                width="24"
-                height="24"
-                alt=""
-                aria-hidden="true"
-              />
-              <span class="brand-word">ASRAAB</span>
+    <footer class="dc-footer">
+      <div class="dc-shell">
+        <div class="dc-footer-grid">
+          <div class="dc-footer-brand">
+            <a class="dc-brand" href="../../" aria-label="Asraab home" data-i18n-aria-label="site.a11yHome">
+              <span class="dc-brand-crate" aria-hidden="true">
+                <img src="../../assets/img/asraab-mark.svg" width="30" height="30" alt="" />
+              </span>
+              <span class="dc-brand-text">
+                <span class="dc-brand-name">ASRAAB</span>
+                <span class="dc-brand-sub">CATALOG / WORKBENCH</span>
+              </span>
             </a>
-            <p class="footer-tagline" data-i18n="site.footerTagline">
+            <p class="dc-footer-tagline" data-i18n="site.footerTagline">
               A small catalog of independent apps worth keeping.
             </p>
-            <p class="footer-status">
-              <span>DroidCrate</span>
-              <span class="sep" aria-hidden="true">·</span>
+            <p class="dc-footer-status">
+              <span>DROIDCRATE</span>
+              <span aria-hidden="true">·</span>
               <span>v<span data-config="versionPlain">0.1.0</span></span>
-              <span class="sep" aria-hidden="true">·</span>
+              <span aria-hidden="true">·</span>
               <span data-i18n="app.windowsShort">Windows 10/11</span>
-              <span class="sep" aria-hidden="true">·</span>
+              <span aria-hidden="true">·</span>
               <span>MIT</span>
             </p>
           </div>
 
-          <div class="footer-col">
+          <div class="dc-footer-col">
             <h2 data-i18n="dc.footer.app">DroidCrate</h2>
             <a href="#features" data-i18n="footer.features">Features</a>
             <a href="#safety" data-i18n="dc.footer.safety">Safety</a>
@@ -1550,7 +1330,7 @@
             </a>
           </div>
 
-          <div class="footer-col">
+          <div class="dc-footer-col">
             <h2 data-i18n="footer.project">Project</h2>
             <a
               href="https://github.com/bouadjadjatamer2-hub/DroidCrate"
@@ -1589,40 +1369,30 @@
             </a>
           </div>
 
-          <div class="footer-col">
+          <div class="dc-footer-col">
             <h2 data-i18n="footer.asraab">Asraab</h2>
             <a href="../../" data-i18n="nav.allApps">All apps</a>
             <a href="../../#standards" data-i18n="footer.standards">How we choose</a>
             <a href="../../extension/privacy/" data-i18n="footer.privacy">Privacy</a>
-            <button class="footer-lang" type="button" data-lang-toggle>
+            <button class="dc-footer-lang" type="button" data-lang-toggle>
               <svg class="icon" aria-hidden="true"><use href="#i-globe"></use></svg>
               <span data-lang-label>العربية</span>
             </button>
           </div>
         </div>
 
-        <div class="footer-bottom">
-          <div class="footer-bottom-left">
-            <span data-i18n="site.footerRights">© {year} Asraab contributors.</span>
-            <span class="sep" aria-hidden="true">·</span>
-            <span data-i18n="dc.footer.disclaimer"
-              >DroidCrate is not affiliated with Google, Samsung, Qualcomm, or any device vendor.
-              Android is a trademark of Google LLC.</span
-            >
-          </div>
-          <div class="footer-bottom-right">
-            <span data-i18n="footer.made">Made for Windows</span>
-            <span class="sep" aria-hidden="true">·</span>
-            <span>MIT</span>
-            <a class="footer-back-top" href="#top">
-              <span data-i18n="footer.backTop">Back to top</span>
-              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>
-            </a>
-          </div>
+        <div class="dc-footer-bottom">
+          <span data-i18n="site.footerRights">© {year} Asraab contributors.</span>
+          <span data-i18n="dc.footer.disclaimer"
+            >DroidCrate is not affiliated with Google, Samsung, Qualcomm, or any device vendor.
+            Android is a trademark of Google LLC.</span
+          >
+          <a class="dc-back-top" href="#top">
+            <span data-i18n="footer.backTop">Back to top</span>
+            <svg class="icon" aria-hidden="true"><use href="#i-arrow-up"></use></svg>
+          </a>
         </div>
       </div>
     </footer>
-
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
   </body>
 </html>
