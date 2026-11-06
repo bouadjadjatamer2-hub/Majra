@@ -15,6 +15,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="حالة CI" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="صفحة مجرى" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
