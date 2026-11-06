@@ -265,7 +265,11 @@ export function downloadChunk(options: ChunkDownloadOptions): Promise<void> {
 
     const attempt = (targetUrl: URL, redirectsLeft: number): void => {
       void connection
-        .request(targetUrl, { ...requestHeaders(targetUrl, browser, siteReferer ?? undefined), ...range }, signal)
+        .request(
+          targetUrl,
+          { ...requestHeaders(targetUrl, browser, siteReferer ?? undefined), ...range },
+          signal
+        )
         .then(({ req, res, sentAt }) => {
           if (settled) {
             req.destroy()

@@ -15,14 +15,7 @@ export function LogoMark({
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true" focusable="false">
       {gradient && (
         <defs>
-          <linearGradient
-            id={id}
-            x1="7"
-            y1="3"
-            x2="19"
-            y2="21"
-            gradientUnits="userSpaceOnUse"
-          >
+          <linearGradient id={id} x1="7" y1="3" x2="19" y2="21" gradientUnits="userSpaceOnUse">
             <stop offset="0" stopColor="#fff1d6" />
             <stop offset="0.34" stopColor="#f7bd7c" />
             <stop offset="0.7" stopColor="#e2933f" />

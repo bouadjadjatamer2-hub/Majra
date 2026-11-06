@@ -12,15 +12,23 @@ const win = await app.firstWindow()
 await win.waitForTimeout(2500)
 await win.screenshot({ path: 'C:\\Users\\Lenovo\\Downloads\\Majra-fix\\_ui-installed-main.png' })
 
-await win.getByRole('button', { name: /New download/ }).first().click()
+await win
+  .getByRole('button', { name: /New download/ })
+  .first()
+  .click()
 await win.waitForTimeout(900)
 await win.screenshot({ path: 'C:\\Users\\Lenovo\\Downloads\\Majra-fix\\_ui-installed-new.png' })
 await win.keyboard.press('Escape')
 await win.waitForTimeout(400)
 
-await win.getByRole('button', { name: /network/i }).first().click()
+await win
+  .getByRole('button', { name: /network/i })
+  .first()
+  .click()
 await win.waitForTimeout(700)
-await win.screenshot({ path: 'C:\\Users\\Lenovo\\Downloads\\Majra-fix\\_ui-installed-networks.png' })
+await win.screenshot({
+  path: 'C:\\Users\\Lenovo\\Downloads\\Majra-fix\\_ui-installed-networks.png'
+})
 
 await app.close()
 console.log('shots written')

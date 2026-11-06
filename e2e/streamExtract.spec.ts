@@ -264,9 +264,7 @@ function crc32(data: Buffer): number {
 
 /** A ZIP written by hand, so an entry can carry any compression method: Zstandard (93), which
  * 7-Zip writes by default and repack sites ship, or one that has no streaming reader (LZMA). */
-function makeArchive(
-  entries: readonly { name: string; data: Buffer; method: number }[]
-): Buffer {
+function makeArchive(entries: readonly { name: string; data: Buffer; method: number }[]): Buffer {
   const parts: Buffer[] = []
   const directory: Buffer[] = []
   let offset = 0
@@ -310,7 +308,11 @@ function makeArchive(
   return Buffer.concat([...parts, central, end])
 }
 
-test('a ZIP compressed with Zstandard unpacks while downloading', async ({ plexo, dirs, serve }) => {
+test('a ZIP compressed with Zstandard unpacks while downloading', async ({
+  plexo,
+  dirs,
+  serve
+}) => {
   const text = Buffer.from('hello from Majra\n')
   const binary = randomBytes(300_000)
   const archive = makeArchive([
@@ -427,4 +429,3 @@ test('a compression it cannot stream is named, not reported as a broken stream',
   expect(state.error).toContain('unpacked while downloading')
   expect(state.error).not.toContain('stored block')
 })
-

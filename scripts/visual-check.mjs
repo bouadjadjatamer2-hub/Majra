@@ -158,7 +158,10 @@ await page.waitForTimeout(3500)
 await shot(page, 'list-light-1200.png')
 
 await size(app, 760, 640)
-await page.getByRole('button', { name: /Flight Manual\.pdf/ }).first().click()
+await page
+  .getByRole('button', { name: /Flight Manual\.pdf/ })
+  .first()
+  .click()
 await shot(page, 'detail-light-760.png')
 
 await size(app, 720, 620)

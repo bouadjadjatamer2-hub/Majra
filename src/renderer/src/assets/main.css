@@ -184,82 +184,82 @@ html.reduce-motion *::after {
 
 html[data-theme='dark'] {
   color-scheme: dark;
-    --hero-bg: linear-gradient(180deg, #171d17 0%, #0e120f 100%);
-    --hero-border: #2a322a;
-    /* Deep graphite with a green undertone, like a channel at night; signals are warm. */
-    --bg: #0d100e;
-    --bg-secondary: #131814;
-    --bg-tertiary: #1a201b;
-    --input-bg: #171d18;
-    --track-bg: #252c26;
+  --hero-bg: linear-gradient(180deg, #171d17 0%, #0e120f 100%);
+  --hero-border: #2a322a;
+  /* Deep graphite with a green undertone, like a channel at night; signals are warm. */
+  --bg: #0d100e;
+  --bg-secondary: #131814;
+  --bg-tertiary: #1a201b;
+  --input-bg: #171d18;
+  --track-bg: #252c26;
 
-    --text: #f1f0e7;
-    --text-secondary: #a7ab9f;
-    --text-tertiary: #8e9387;
+  --text: #f1f0e7;
+  --text-secondary: #a7ab9f;
+  --text-tertiary: #8e9387;
 
-    --border: #262d26;
-    --border-subtle: #1b211c;
-    --border-strong: #3a423a;
-    --footer-border: #262d26;
+  --border: #262d26;
+  --border-subtle: #1b211c;
+  --border-strong: #3a423a;
+  --footer-border: #262d26;
 
-    --icon-muted: #3b433b;
-    --icon-muted-strong: #4a534a;
-    --scrollbar-thumb: #343c34;
+  --icon-muted: #3b433b;
+  --icon-muted-strong: #4a534a;
+  --scrollbar-thumb: #343c34;
 
-    --checkbox-shadow: rgba(0, 0, 0, 0.4);
-    --checkbox-inset-shadow: rgba(0, 0, 0, 0.3);
+  --checkbox-shadow: rgba(0, 0, 0, 0.4);
+  --checkbox-inset-shadow: rgba(0, 0, 0, 0.3);
 
-    --color-wifi: #54b39c;
-    --color-wifi-bg: #20312d;
-    --color-wifi-border: #36534c;
-    --color-wifi-text: #8bd2c0;
-    --color-wifi-onsolid: #0b1f1a;
+  --color-wifi: #54b39c;
+  --color-wifi-bg: #20312d;
+  --color-wifi-border: #36534c;
+  --color-wifi-text: #8bd2c0;
+  --color-wifi-onsolid: #0b1f1a;
 
-    --color-usb: #e0a25b;
-    --color-usb-bg: #332818;
-    --color-usb-border: #574126;
-    --color-usb-text: #efbd80;
-    --color-usb-onsolid: #241607;
+  --color-usb: #e0a25b;
+  --color-usb-bg: #332818;
+  --color-usb-border: #574126;
+  --color-usb-text: #efbd80;
+  --color-usb-onsolid: #241607;
 
-    --color-ethernet: #8494b1;
-    --color-ethernet-bg: #232a36;
-    --color-ethernet-border: #3a4558;
-    --color-ethernet-text: #aebbd3;
-    --color-ethernet-onsolid: #111722;
+  --color-ethernet: #8494b1;
+  --color-ethernet-bg: #232a36;
+  --color-ethernet-border: #3a4558;
+  --color-ethernet-text: #aebbd3;
+  --color-ethernet-onsolid: #111722;
 
-    --color-neutral: #8d9187;
-    --color-neutral-bg: #262b26;
-    --color-neutral-border: #3a413a;
-    --color-neutral-text: #adb2a7;
-    --color-neutral-onsolid: #141813;
+  --color-neutral: #8d9187;
+  --color-neutral-bg: #262b26;
+  --color-neutral-border: #3a413a;
+  --color-neutral-text: #adb2a7;
+  --color-neutral-onsolid: #141813;
 
-    --swatch-teal: #54b39c;
-    --swatch-teal-onsolid: #0b1f1a;
-    --swatch-amber: #e0a25b;
-    --swatch-amber-onsolid: #241607;
-    --swatch-steel: #8494b1;
-    --swatch-steel-onsolid: #111722;
-    --swatch-rose: #d08585;
-    --swatch-rose-onsolid: #210f0f;
-    --swatch-violet: #a191d8;
-    --swatch-violet-onsolid: #17131f;
-    --swatch-lime: #aecb75;
-    --swatch-lime-onsolid: #161f0d;
-    --swatch-cyan: #74bccb;
-    --swatch-cyan-onsolid: #0d1a1e;
-    --swatch-coral: #e29a72;
-    --swatch-coral-onsolid: #241209;
+  --swatch-teal: #54b39c;
+  --swatch-teal-onsolid: #0b1f1a;
+  --swatch-amber: #e0a25b;
+  --swatch-amber-onsolid: #241607;
+  --swatch-steel: #8494b1;
+  --swatch-steel-onsolid: #111722;
+  --swatch-rose: #d08585;
+  --swatch-rose-onsolid: #210f0f;
+  --swatch-violet: #a191d8;
+  --swatch-violet-onsolid: #17131f;
+  --swatch-lime: #aecb75;
+  --swatch-lime-onsolid: #161f0d;
+  --swatch-cyan: #74bccb;
+  --swatch-cyan-onsolid: #0d1a1e;
+  --swatch-coral: #e29a72;
+  --swatch-coral-onsolid: #241209;
 
-    --color-accent: #e8a35f;
-    --color-accent-onsolid: #1c1308;
-    --primary-bg: linear-gradient(135deg, #f2b46d 0%, #e8a35f 50%, #d08338 100%);
-    --color-success: #57c99a;
+  --color-accent: #e8a35f;
+  --color-accent-onsolid: #1c1308;
+  --primary-bg: linear-gradient(135deg, #f2b46d 0%, #e8a35f 50%, #d08338 100%);
+  --color-success: #57c99a;
 
-    --color-danger: #ff9b90;
-    --color-danger-bg: #2a1512;
-    --color-danger-border: #4a2620;
+  --color-danger: #ff9b90;
+  --color-danger-bg: #2a1512;
+  --color-danger-border: #4a2620;
 
-    --node-accent: #e8a35f;
+  --node-accent: #e8a35f;
 }
 
 /* Layered, not plain global CSS, so Tailwind utility classes still win over these resets.

@@ -18,7 +18,8 @@
       }
       canvas {
         position: absolute;
-        filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.45)) drop-shadow(0 0 5px rgba(0, 0, 0, 0.35));
+        filter: drop-shadow(0 22px 34px rgba(0, 0, 0, 0.45))
+          drop-shadow(0 0 5px rgba(0, 0, 0, 0.35));
         inset: 0;
         width: 1024px;
         height: 1024px;
@@ -37,7 +38,14 @@
     <div id="stage">
       <svg width="1024" height="1024" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="tile" x1="120" y1="40" x2="900" y2="1000" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id="tile"
+            x1="120"
+            y1="40"
+            x2="900"
+            y2="1000"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop offset="0" stop-color="#37493c" />
             <stop offset="0.34" stop-color="#1f2b23" />
             <stop offset="0.72" stop-color="#101710" />
@@ -52,12 +60,26 @@
             <stop offset="0" stop-color="#54b39c" stop-opacity="0.2" />
             <stop offset="1" stop-color="#54b39c" stop-opacity="0" />
           </radialGradient>
-          <linearGradient id="tileRim" x1="512" y1="40" x2="512" y2="984" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id="tileRim"
+            x1="512"
+            y1="40"
+            x2="512"
+            y2="984"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop offset="0" stop-color="#ffffff" stop-opacity="0.32" />
             <stop offset="0.34" stop-color="#ffffff" stop-opacity="0.07" />
             <stop offset="1" stop-color="#ffffff" stop-opacity="0" />
           </linearGradient>
-          <linearGradient id="tileEdge" x1="512" y1="984" x2="512" y2="40" gradientUnits="userSpaceOnUse">
+          <linearGradient
+            id="tileEdge"
+            x1="512"
+            y1="984"
+            x2="512"
+            y2="40"
+            gradientUnits="userSpaceOnUse"
+          >
             <stop offset="0" stop-color="#000000" stop-opacity="0.55" />
             <stop offset="0.5" stop-color="#000000" stop-opacity="0.12" />
             <stop offset="1" stop-color="#000000" stop-opacity="0" />
@@ -74,11 +96,37 @@
         <rect x="40" y="40" width="944" height="944" rx="214" fill="url(#tile)" />
         <rect x="40" y="40" width="944" height="944" rx="214" fill="url(#tileWarm)" />
         <rect x="40" y="40" width="944" height="944" rx="214" fill="url(#tileCool)" />
-        <rect x="43" y="43" width="938" height="938" rx="211" fill="none" stroke="url(#tileRim)" stroke-width="6" />
-        <rect x="43" y="43" width="938" height="938" rx="211" fill="none" stroke="url(#tileEdge)" stroke-width="6" />
+        <rect
+          x="43"
+          y="43"
+          width="938"
+          height="938"
+          rx="211"
+          fill="none"
+          stroke="url(#tileRim)"
+          stroke-width="6"
+        />
+        <rect
+          x="43"
+          y="43"
+          width="938"
+          height="938"
+          rx="211"
+          fill="none"
+          stroke="url(#tileEdge)"
+          stroke-width="6"
+        />
 
         <ellipse cx="512" cy="648" rx="360" ry="330" fill="url(#glow)" />
-        <ellipse cx="540" cy="930" rx="230" ry="30" fill="#000000" opacity="0.55" filter="url(#soft)" />
+        <ellipse
+          cx="540"
+          cy="930"
+          rx="230"
+          ry="30"
+          fill="#000000"
+          opacity="0.55"
+          filter="url(#soft)"
+        />
       </svg>
       <canvas id="scene" width="1024" height="1024"></canvas>
     </div>
@@ -160,7 +208,7 @@
         [0.575, 0.46],
         [0.455, 0.62],
         [0.325, 0.755],
-        [0.20, 0.862],
+        [0.2, 0.862],
         [0.095, 0.945],
         [0.025, 0.988],
         [0.0, 1.0]

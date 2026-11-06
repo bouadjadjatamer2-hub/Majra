@@ -438,7 +438,10 @@ function EmptyState(): React.JSX.Element {
     <div className="flex flex-col items-center px-5 pt-14 pb-10 text-center">
       <div className="relative mb-7">
         <div className="relative grid size-[68px] place-items-center rounded-[18px] border border-white/10 bg-[linear-gradient(155deg,#1d241d,#0d110e)] shadow-[0_18px_40px_-26px_rgba(180,83,9,0.9)] ring-1 ring-accent/15">
-          <span aria-hidden className="absolute inset-x-3 top-2 h-[2px] rounded-full bg-accent/60" />
+          <span
+            aria-hidden
+            className="absolute inset-x-3 top-2 h-[2px] rounded-full bg-accent/60"
+          />
           <LogoMark className="size-9" gradient />
         </div>
       </div>

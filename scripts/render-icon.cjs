@@ -87,8 +87,14 @@ app.whenReady().then(async () => {
     (size === 1024 ? full : full.resize({ width: size, height: size, quality: 'best' })).toPNG()
 
   fs.writeFileSync(path.join(root, 'build', 'icon.png'), png(1024))
-  fs.writeFileSync(path.join(root, 'build', 'icon.ico'), ico([16, 24, 32, 48, 64, 128, 256, 512, 1024].map((size) => ({ size, data: png(size) }))))
-  fs.writeFileSync(path.join(root, 'build', 'icon.icns'), icns([16, 32, 64, 128, 256, 512, 1024].map((size) => ({ size, data: png(size) }))))
+  fs.writeFileSync(
+    path.join(root, 'build', 'icon.ico'),
+    ico([16, 24, 32, 48, 64, 128, 256, 512, 1024].map((size) => ({ size, data: png(size) })))
+  )
+  fs.writeFileSync(
+    path.join(root, 'build', 'icon.icns'),
+    icns([16, 32, 64, 128, 256, 512, 1024].map((size) => ({ size, data: png(size) })))
+  )
 
   const copies = [
     ['resources/icon-dark.png', 512],
@@ -113,7 +119,10 @@ app.whenReady().then(async () => {
     )
   }
 
-  console.log('wrote icon.png/.ico/.icns, resources/icon-dark.png, docs and extension icons', full.getSize())
+  console.log(
+    'wrote icon.png/.ico/.icns, resources/icon-dark.png, docs and extension icons',
+    full.getSize()
+  )
   app.quit()
 })
 
