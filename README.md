@@ -11,12 +11,12 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="Majra app page" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=for-the-badge&logo=github&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=for-the-badge&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download%20for%20Windows%20v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="Majra app page" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
