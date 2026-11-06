@@ -11,37 +11,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="آخر إصدار" src="https://img.shields.io/github/v/release/bouadjadjatamer2-hub/Majra?style=for-the-badge&label=release&color=B45309" /></a>
-  <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=for-the-badge" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="عدد التنزيلات" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=for-the-badge&color=1F7D5C" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="صفحة مجرى" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=for-the-badge&logo=git&logoColor=white" /></a>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="عدد التنزيلات" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
+  <img alt="ويندوز 10 و11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
 </p>
 
 <p align="center">
   <a href="#التثبيت">التثبيت</a> ·
   <a href="#المميزات">المميزات</a> ·
-  <a href="#لقطات-الشاشة">لقطات الشاشة</a> ·
   <a href="#كيف-يعمل">كيف يعمل</a> ·
+  <a href="#حدود-صريحة">الحدود</a> ·
   <a href="#البناء-من-المصدر">البناء من المصدر</a> ·
   <a href="#أسئلة-شائعة">أسئلة شائعة</a> ·
   <a href="README.md">English</a>
-</p>
-
-## خذ مجرى
-
-<p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
-    <img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra">
-    <img alt="صفحة مجرى" src="https://img.shields.io/badge/Page-Majra-4CC38A?style=for-the-badge&label=page&color=4CC38A" />
-  </a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3">
-    <img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-B45309?style=for-the-badge&label=release&color=B45309" />
-  </a>
 </p>
 
 <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="مجرى ينزّل ملف ZIP عبر الواي فاي وتوصيل USB والإيثرنت في الوقت نفسه" width="100%" /></a>
@@ -57,7 +45,7 @@
 
 ## المميزات
 
-|                                  |                                                                                          |
+| الميزة                           | ما تفعله                                                                                 |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | **كل الاتصالات معاً**            | الواي فاي والإيثرنت وتوصيل USB وبيانات الهاتف يمكنهم حمل نفس الملف في الوقت نفسه.        |
 | **من 2 إلى 64 اتصالاً**          | اختر 2 أو 4 أو 8 أو 16 أو 32 اتصالاً متوازياً لكل شبكة. وضع Turbo يصل إلى 64.            |
@@ -69,21 +57,6 @@
 | **يُغلق إلى شريط النظام**        | يواصل التنزيل بعد إغلاق النافذة. شغّله مع ويندوز يجده جاهزاً.                            |
 | **فحص Defender**                 | يمكن فحص الملفات المنتهية بـ Windows Defender قبل فتحها.                                 |
 | **محلي بالتصميم**                | الإعدادات والسجل وقائمة الانتظار على جهازك. لا شيء يُرسل إلى أي خادم.                    |
-
-## لقطات الشاشة
-
-<table>
-  <tr>
-    <td width="50%">
-      <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="تفاصيل نقل في مجرى: ثلاث شبكات، ملف واحد" /></a>
-      <br /><sub><b>ملف واحد، ثلاث شبكات.</b> كل واجهة لها مساراتها، ومخطط السرعة يُظهر الناتج المجمّع.</sub>
-    </td>
-    <td width="50%">
-      <a href="docs/banner.png"><img src="docs/banner.png" alt="مجرى — كل رابط يهبط هنا" /></a>
-      <br /><sub><b>مصمّم لويندوز 10 و11.</b> مجاني، مفتوح المصدر، وصريح فيما يستطيع وما لا يستطيع.</sub>
-    </td>
-  </tr>
-</table>
 
 ## التثبيت
 

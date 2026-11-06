@@ -11,37 +11,25 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/latest"><img alt="Latest release" src="https://img.shields.io/github/v/release/bouadjadjatamer2-hub/Majra?style=for-the-badge&label=release&color=B45309" /></a>
-  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=for-the-badge" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=for-the-badge&color=1F7D5C" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="Majra app page" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=for-the-badge&logo=github&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=for-the-badge&logo=git&logoColor=white" /></a>
+</p>
+
+<p align="center">
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
+  <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
 </p>
 
 <p align="center">
   <a href="#install">Install</a> ·
   <a href="#features">Features</a> ·
-  <a href="#screenshots">Screenshots</a> ·
   <a href="#how-it-works">How it works</a> ·
+  <a href="#honest-limits">Limits</a> ·
   <a href="#build-from-source">Build from source</a> ·
   <a href="#faq">FAQ</a> ·
   <a href="README.ar.md">العربية</a>
-</p>
-
-## Get Majra
-
-<p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
-    <img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download_for_Windows-v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra">
-    <img alt="Majra app page" src="https://img.shields.io/badge/Page-Majra-4CC38A?style=for-the-badge&label=page&color=4CC38A" />
-  </a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3">
-    <img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-B45309?style=for-the-badge&label=release&color=B45309" />
-  </a>
 </p>
 
 <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="Majra downloading a ZIP over Wi-Fi, USB tethering and Ethernet at the same time" width="100%" /></a>
@@ -58,7 +46,7 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 
 ## Features
 
-|                                |                                                                                                         |
+| Feature                        | What it does                                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | **Every connection, together** | Wi-Fi, Ethernet, USB tethering and mobile data can carry the same file at once.                         |
 | **2 to 64 connections**        | Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64.                       |
@@ -70,21 +58,6 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 | **Closes to the tray**         | Keep downloading after the window closes. Start Majra with Windows and it is already there.             |
 | **Defender scan**              | Finished files can be scanned with Windows Defender before you open them.                               |
 | **Local by design**            | Settings, history and queue live on your PC. Nothing is sent to a server.                               |
-
-## Screenshots
-
-<table>
-  <tr>
-    <td width="50%">
-      <a href="docs/screenshots/app-detail.png"><img src="docs/screenshots/app-detail.png" alt="Majra transfer detail: three networks, one file" /></a>
-      <br /><sub><b>One file, three networks.</b> Each interface gets its own streams, and the throughput chart shows the combined result.</sub>
-    </td>
-    <td width="50%">
-      <a href="docs/banner.png"><img src="docs/banner.png" alt="Majra — every link lands here" /></a>
-      <br /><sub><b>Built for Windows 10 and 11.</b> Free, open source, and honest about what a download manager can and cannot do.</sub>
-    </td>
-  </tr>
-</table>
 
 ## Install
 
