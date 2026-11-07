@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-page="404">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Page not found — Asraab</title>
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#07080c" />
+    <link rel="icon" href="/Majra/assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/Majra/assets/css/site.css" />
+    <script>
+      try {
+        if (localStorage.getItem("asraab:lang") === "ar") {
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+        }
+      } catch (e) {}
+        document.documentElement.classList.add("has-js");
+    </script>
+  </head>
+  <body>
+    <header class="site-header is-stuck">
+      <div class="header-inner">
+        <a class="brand" href="/Majra/index.html" aria-label="Asraab — home">
+          <img src="/Majra/assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+        </a>
+        <div class="header-actions" style="margin-inline-start: auto">
+          <button class="lang-btn" id="langToggle" type="button" aria-label="Switch to Arabic">ع</button>
+          <a class="btn btn-primary btn-sm header-cta" href="/Majra/index.html" data-i18n="404.home">Home</a>
+        </div>
+      </div>
+    </header>
+
+    <main class="error-page" id="main">
+      <div class="wrap">
+        <div class="error-code" aria-hidden="true">404</div>
+        <h1 data-i18n="404.title">This page flew away.</h1>
+        <p data-i18n="404.body">The link is broken or the page moved. The two apps are still right here.</p>
+        <div class="btn-row" style="justify-content: center">
+          <a class="btn btn-primary" href="/Majra/index.html" data-i18n="404.home">Back to Asraab</a>
+          <a class="btn btn-ghost" href="/Majra/index.html#apps" data-i18n="404.apps">Browse the apps</a>
+        </div>
+      </div>
+    </main>
+
+    <script src="/Majra/assets/js/i18n.js"></script>
+    <script src="/Majra/assets/js/site.js"></script>
+  </body>
+</html>

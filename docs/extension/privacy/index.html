@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-page="privacy">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Extension privacy — Majra · Asraab</title>
+    <meta
+      name="description"
+      content="What the Download with Majra browser extension can access, where its data goes, and what it never does."
+    />
+    <meta name="theme-color" content="#07080c" />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Asraab" />
+    <meta property="og:title" content="Extension privacy — Majra" />
+    <meta property="og:description" content="What the Majra browser extension can access and where its data goes." />
+    <meta property="og:url" content="https://bouadjadjatamer2-hub.github.io/Majra/extension/privacy/" />
+    <meta property="og:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og.png" />
+    <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="../../site.webmanifest" />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <script>
+      try {
+        if (localStorage.getItem("asraab:lang") === "ar") {
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+        }
+      } catch (e) {}
+        document.documentElement.classList.add("has-js");
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
+
+    <header class="site-header is-stuck" id="top">
+      <div class="header-inner">
+        <a class="brand" href="../../index.html" aria-label="Asraab — home" data-i18n-aria="brand.aria">
+          <img src="../../assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+        </a>
+        <nav class="nav" id="nav" aria-label="Primary" data-i18n-aria="nav.aria">
+          <a href="../../index.html#apps" data-i18n="nav.apps">Apps</a>
+          <a href="../../index.html#standards" data-i18n="nav.standards">Standards</a>
+          <a href="../../index.html#about" data-i18n="nav.about">About</a>
+        </nav>
+        <div class="header-actions">
+          <button class="lang-btn" id="langToggle" type="button" aria-label="Switch to Arabic">ع</button>
+          <a class="btn btn-primary btn-sm header-cta" href="../../apps/majra/" data-i18n="privacy.back">Back to Majra</a>
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main" class="legal">
+      <div class="wrap">
+        <span class="kicker" data-i18n="privacy.kicker">Legal · Browser extension</span>
+        <h1 data-i18n="privacy.title">Extension privacy</h1>
+        <p class="legal-meta" data-i18n="privacy.updated">Last updated: 7 November 2026 · Applies to Download with Majra 1.0.0</p>
+        <p data-i18n="privacy.intro">
+          Download with Majra is a small Chromium extension whose only job is to hand a download to the Majra
+          desktop app. This page explains what it can read, why it needs each permission, and where the data goes.
+          It is written to be read, not to be skipped.
+        </p>
+
+        <div class="legal-box">
+          <strong data-i18n="privacy.shortTitle">The short version</strong>
+          <p data-i18n="privacy.short">
+            No analytics, no ads, no account, no data sold. The extension talks to the Majra app on your own PC.
+            Asraab operates no server that receives your browsing or download data.
+          </p>
+        </div>
+
+        <h2 data-i18n="privacy.h1">What the extension can access</h2>
+        <p data-i18n="privacy.p1">
+          The extension declares only the permissions it uses to capture a download and pass it to Majra. Chromium
+          shows these permissions when you load or install it.
+        </p>
+        <ul>
+          <li data-i18n-html="privacy.li1"><strong>downloads</strong> — to notice a download you started, read its URL and filename, and route it to Majra instead of the browser.</li>
+          <li data-i18n-html="privacy.li2"><strong>cookies</strong> — to include the cookies of the page you are already signed in to, so the desktop app can fetch the same file you could fetch in the browser.</li>
+          <li data-i18n-html="privacy.li3"><strong>tabs</strong> — to know which page a download came from and to keep the hand-off tied to that tab.</li>
+          <li data-i18n-html="privacy.li4"><strong>contextMenus</strong> — to add the “Download with Majra” item to the link menu.</li>
+          <li data-i18n-html="privacy.li5"><strong>storage</strong> — to remember your extension settings, such as whether capture is on.</li>
+          <li data-i18n-html="privacy.li6"><strong>alarms</strong> — to retry a hand-off when the Majra app was not running yet.</li>
+          <li data-i18n-html="privacy.li7"><strong>&lt;all_urls&gt;</strong> — because a download can come from any site. The extension does not read page content to profile you.</li>
+        </ul>
+
+        <h2 data-i18n="privacy.h2">Where the data goes</h2>
+        <p data-i18n="privacy.p2">
+          The URL, filename and cookies of the download you chose are sent to the Majra app running on the same
+          computer, over a local connection. Settings stay in the browser's extension storage. Nothing is sent to
+          Asraab, to an analytics service, or to any third-party server.
+        </p>
+        <p data-i18n="privacy.p3">
+          Majra then downloads the file directly from the original server, exactly as your browser would. That
+          server sees the request, its cookies and your IP address, under its own privacy policy.
+        </p>
+
+        <h2 data-i18n="privacy.h3">What the extension never does</h2>
+        <ul>
+          <li data-i18n="privacy.li8">It does not collect analytics, crash reports, or usage statistics.</li>
+          <li data-i18n="privacy.li9">It does not inject ads, change search results, or modify pages.</li>
+          <li data-i18n="privacy.li10">It does not sell, rent or share data with advertisers or data brokers.</li>
+          <li data-i18n="privacy.li11">It does not create an account, a profile, or a device fingerprint.</li>
+          <li data-i18n="privacy.li12">It does not download anything on its own. It only hands off a download you started.</li>
+        </ul>
+
+        <h2 data-i18n="privacy.h4">Your control</h2>
+        <p data-i18n="privacy.p4">
+          You can turn capture off in the extension popup, remove the extension from
+          <span class="inline-code">chrome://extensions</span>, and clear its storage at any time. Uninstalling the
+          extension removes its local settings. Majra's own queue and history live on your PC and can be cleared
+          from the app.
+        </p>
+
+        <h2 data-i18n="privacy.h5">Changes and contact</h2>
+        <p data-i18n-html="privacy.p5">
+          If this policy changes, the date above changes with it, and the diff is visible in the public repository.
+          Questions or a privacy concern can be opened as an issue on
+          <a href="https://github.com/bouadjadjatamer2-hub/Majra/issues" target="_blank" rel="noopener">the Majra repository</a>.
+        </p>
+
+        <div class="legal-box">
+          <strong data-i18n="privacy.footerTitle">Plain summary</strong>
+          <p data-i18n="privacy.footerBody">
+            The extension exists to move one download from the browser to your own desktop app. That is the whole
+            product. If it ever needs to do more, this page will say so first.
+          </p>
+        </div>
+
+        <div class="btn-row" style="margin-top: 2rem">
+          <a class="btn btn-primary" href="../../apps/majra/" data-i18n="privacy.back">Back to Majra</a>
+          <a class="btn btn-ghost" href="../../index.html" data-i18n="privacy.home">Asraab home</a>
+        </div>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="footer-base" style="margin-top: 0">
+          <span>© <span id="year">2026</span> Asraab</span>
+          <span data-i18n="footer.note">Not affiliated with Google or Microsoft. Android is a trademark of Google LLC.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../../assets/js/i18n.js"></script>
+    <script src="../../assets/js/site.js"></script>
+  </body>
+</html>

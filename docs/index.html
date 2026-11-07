@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-page="home">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Asraab — apps that fly together</title>
+    <meta
+      name="description"
+      content="Asraab builds two focused Windows tools: Majra, a multi-network download manager, and DroidCrate, a careful Android workbench. Free, open source, no telemetry."
+    />
+    <meta name="theme-color" content="#07080c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Asraab" />
+    <meta property="og:title" content="Asraab — apps that fly together" />
+    <meta
+      property="og:description"
+      content="Majra moves one download across every connection. DroidCrate puts a full Android workbench in one window. Free, open source, local-first."
+    />
+    <meta property="og:url" content="https://bouadjadjatamer2-hub.github.io/Majra/" />
+    <meta property="og:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="site.webmanifest" />
+    <link rel="preload" href="assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="assets/fonts/Manrope-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="assets/css/site.css" />
+    <script>
+      try {
+        if (localStorage.getItem("asraab:lang") === "ar") {
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+        }
+      } catch (e) {}
+        document.documentElement.classList.add("has-js");
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
+
+    <header class="site-header" id="top">
+      <div class="header-inner">
+        <a class="brand" href="index.html" aria-label="Asraab — home" data-i18n-aria="brand.aria">
+          <img src="assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+        </a>
+        <nav class="nav" id="nav" aria-label="Primary" data-i18n-aria="nav.aria">
+          <a href="#apps" data-i18n="nav.apps">Apps</a>
+          <a href="#standards" data-i18n="nav.standards">Standards</a>
+          <a href="#how" data-i18n="nav.how">How it works</a>
+          <a href="#about" data-i18n="nav.about">About</a>
+        </nav>
+        <div class="header-actions">
+          <button class="lang-btn" id="langToggle" type="button" aria-label="Switch to Arabic">ع</button>
+          <a class="btn btn-primary btn-sm header-cta" href="#apps" data-i18n="nav.browse">Browse apps</a>
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ================= HERO ================= -->
+      <section class="hero">
+        <div class="wrap hero-inner">
+          <div class="hero-copy">
+            <span class="eyebrow reveal"><span class="dot"></span><span data-i18n="home.eyebrow">Independent software studio</span></span>
+            <h1 class="display reveal" style="--d: 60ms">
+              <span class="line" data-i18n="home.title1">Apps that</span>
+              <span class="line grad-text" data-i18n="home.title2">fly together.</span>
+            </h1>
+            <p class="lede reveal" style="--d: 120ms" data-i18n="home.lede">
+              Two focused Windows tools, built in the open. Majra pulls one file across every connection you
+              have. DroidCrate turns a phone into a readable, careful workbench. No accounts, no telemetry, no noise.
+            </p>
+            <div class="hero-actions reveal" style="--d: 180ms">
+              <a class="btn btn-primary" href="#apps">
+                <span data-i18n="home.ctaApps">Explore the apps</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.6 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.3 11.3 0 0 0 12 .7Z" /></svg>
+                <span data-i18n="home.ctaGithub">Majra on GitHub</span>
+              </a>
+            </div>
+            <div class="hero-meta reveal" style="--d: 240ms">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" /></svg><span data-i18n="home.meta1">Free &amp; open source</span></span>
+              <span class="sep"></span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round" /></svg><span data-i18n="home.meta2">No telemetry</span></span>
+              <span class="sep"></span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" stroke-linecap="round" /></svg><span data-i18n="home.meta3">Windows 10 / 11</span></span>
+            </div>
+          </div>
+
+          <div class="scene-frame reveal-scale" style="--d: 140ms">
+            <div class="scene" data-scene="home" data-fallback="assets/img/asraab-mark.svg" role="img" aria-label="A three-dimensional flock of amber and jade particles orbiting two glowing app cores" data-i18n-aria="home.sceneAria"></div>
+            <span class="scene-tag"><i></i><span data-i18n="home.sceneTag">Live WebGL · particle flock</span></span>
+            <span class="scene-badge" data-i18n="home.sceneBadge">Two apps</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= APPS ================= -->
+      <section class="section" id="apps">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="apps.kicker">The catalog</span>
+            <h2 class="h2" data-i18n="apps.title">Two tools. One standard.</h2>
+            <p class="section-lede" data-i18n="apps.lede">
+              Different jobs, same rules: fast, legible, honest about limits, and finished. Open the page for the
+              full story, screenshots and checksums.
+            </p>
+          </div>
+
+          <div class="app-grid">
+            <article class="app-card reveal" data-tilt>
+              <span class="app-card__index">01 / M</span>
+              <div class="app-card__top">
+                <img class="app-icon" src="assets/img/majra-icon.png" alt="Majra app icon" width="74" height="74" />
+                <div class="app-card__id">
+                  <h3>Majra</h3>
+                  <p data-i18n="app.majra.category">Download manager · Windows</p>
+                </div>
+              </div>
+              <p class="app-tagline" data-i18n="app.majra.tagline">Every link lands here.</p>
+              <p class="app-desc" data-i18n="app.majra.desc">
+                Splits one file across Wi-Fi, Ethernet and USB tethering at the same time, then reassembles it in
+                order. Resume, queues, torrents, and extract-while-downloading.
+              </p>
+              <div class="chips">
+                <span class="chip"><i></i><span data-i18n="app.majra.chip1">Wi-Fi + USB + Ethernet</span></span>
+                <span class="chip"><i></i><span data-i18n="app.majra.chip2">2 to 64 connections</span></span>
+                <span class="chip"><i></i><span data-i18n="app.majra.chip3">Resume &amp; schedule</span></span>
+              </div>
+              <div class="app-card__actions">
+                <a class="btn btn-primary btn-sm" href="apps/majra/" data-i18n="app.majra.page">Open Majra page</a>
+                <a class="link-arrow" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
+                  <span data-i18n="app.majra.download">Download v1.2.3</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </a>
+              </div>
+              <span class="app-card__glow" aria-hidden="true"></span>
+            </article>
+
+            <article class="app-card jade reveal" style="--d: 90ms" data-tilt>
+              <span class="app-card__index">02 / D</span>
+              <div class="app-card__top">
+                <img class="app-icon" src="assets/img/droidcrate-icon.png" alt="DroidCrate app icon" width="74" height="74" />
+                <div class="app-card__id">
+                  <h3>DroidCrate</h3>
+                  <p data-i18n="app.droidcrate.category">Android workbench · Windows</p>
+                </div>
+              </div>
+              <p class="app-tagline" data-i18n="app.droidcrate.tagline">Know the phone before you touch it.</p>
+              <p class="app-desc" data-i18n="app.droidcrate.desc">
+                One window for apps, files, screen, flashing, adb and fastboot. Real device specs, verified Platform
+                Tools, and checklists that slow you down before the risky parts.
+              </p>
+              <div class="chips">
+                <span class="chip"><i></i><span data-i18n="app.droidcrate.chip1">Six tools, one window</span></span>
+                <span class="chip"><i></i><span data-i18n="app.droidcrate.chip2">46 checklist steps</span></span>
+                <span class="chip"><i></i><span data-i18n="app.droidcrate.chip3">ADB &amp; fastboot</span></span>
+              </div>
+              <div class="app-card__actions">
+                <a class="btn btn-jade btn-sm" href="apps/droidcrate/" data-i18n="app.droidcrate.page">Open DroidCrate page</a>
+                <a class="link-arrow" href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.2.1/DroidCrate-0.2.1-Setup.exe">
+                  <span data-i18n="app.droidcrate.download">Download v0.2.1</span>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                </a>
+              </div>
+              <span class="app-card__glow" aria-hidden="true"></span>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= STANDARDS ================= -->
+      <section class="section" id="standards">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="standards.kicker">What stays true</span>
+            <h2 class="h2" data-i18n="standards.title">Quiet software. Loud craft.</h2>
+            <p class="section-lede" data-i18n="standards.lede">
+              No dashboards to feed, no accounts to create, no telemetry to justify. Just a small set of rules we
+              keep on every release.
+            </p>
+          </div>
+
+          <div class="feature-grid">
+            <article class="feature reveal">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="m8 9-4 3 4 3M16 9l4 3-4 3M14 5l-4 14" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+              <h3 data-i18n="standards.s1t">Open source, MIT</h3>
+              <p data-i18n="standards.s1b">Every line is on GitHub. Read it, build it, or send a fix. No private build with extra features.</p>
+            </article>
+            <article class="feature reveal" style="--d: 70ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2" /><rect x="3" y="13" width="18" height="7" rx="2" /><path d="M7 7.5h.01M7 16.5h.01" stroke-linecap="round" /></svg></span>
+              <h3 data-i18n="standards.s2t">Local-first</h3>
+              <p data-i18n="standards.s2b">Queues, history and settings stay on your PC. No account, no cloud sync, no analytics.</p>
+            </article>
+            <article class="feature reveal" style="--d: 140ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round" /><path d="m8.5 12 2.4 2.4 4.6-4.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+              <h3 data-i18n="standards.s3t">Verifiable downloads</h3>
+              <p data-i18n="standards.s3b">Every release publishes the installer size and SHA-256, so you can check exactly what you run.</p>
+            </article>
+            <article class="feature reveal" style="--d: 210ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1" stroke-linecap="round" /><circle cx="12" cy="12" r="3.2" /></svg></span>
+              <h3 data-i18n="standards.s4t">Small, deliberate tools</h3>
+              <p data-i18n="standards.s4b">No bundled toolbars, no upsells, no second app to install. Each tool does one job, completely.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HOW ================= -->
+      <section class="section tight" id="how">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="how.kicker">From link to app</span>
+            <h2 class="h2" data-i18n="how.title">Three steps. No detours.</h2>
+          </div>
+          <div class="steps">
+            <article class="step reveal">
+              <h3 data-i18n="how.s1t">Pick a tool</h3>
+              <p data-i18n="how.s1b">Majra for downloads, DroidCrate for Android. Both install like any Windows app — no account, no launcher.</p>
+            </article>
+            <article class="step reveal" style="--d: 80ms">
+              <h3 data-i18n="how.s2t">Read the page</h3>
+              <p data-i18n="how.s2b">Features, honest limits, screenshots and the exact SHA-256 are on the app page before you download.</p>
+            </article>
+            <article class="step reveal" style="--d: 160ms">
+              <h3 data-i18n="how.s3t">Verify and run</h3>
+              <p data-i18n="how.s3b">Hash the installer, run it, and keep everything local. Updates are yours to start, never pushed in the background.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= ABOUT ================= -->
+      <section class="section" id="about">
+        <div class="wrap split">
+          <div class="reveal">
+            <span class="kicker" data-i18n="about.kicker">About Asraab</span>
+            <h2 class="h2" data-i18n="about.title">Built by people who use the tools.</h2>
+            <p class="section-lede" data-i18n="about.body">
+              Asraab is a small, independent studio. We build the software we wanted: fast, legible, honest about
+              limits, and finished. Both apps are free, open source, and made for Windows 10 and 11.
+            </p>
+            <div class="btn-row" style="margin-top: 1.6rem">
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra" target="_blank" rel="noopener" data-i18n="about.repo">Majra repository</a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/DroidCrate" target="_blank" rel="noopener" data-i18n="about.repo2">DroidCrate repository</a>
+            </div>
+          </div>
+          <div class="panel reveal" style="--d: 100ms">
+            <div class="facts" style="border: 0">
+              <div class="fact">
+                <dt data-i18n="about.stat1t">Apps</dt>
+                <dd>2<small data-i18n="about.stat1s">both shipping</small></dd>
+              </div>
+              <div class="fact">
+                <dt data-i18n="about.stat2t">Trackers</dt>
+                <dd>0<small data-i18n="about.stat2s">no telemetry</small></dd>
+              </div>
+            </div>
+            <div class="facts" style="border-bottom: 0">
+              <div class="fact">
+                <dt data-i18n="about.stat3t">Local data</dt>
+                <dd>100%<small data-i18n="about.stat3s">on your PC</small></dd>
+              </div>
+              <div class="fact">
+                <dt data-i18n="about.stat4t">License</dt>
+                <dd>MIT<small data-i18n="about.stat4s">open source</small></dd>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CTA ================= -->
+      <section class="cta-band">
+        <div class="wrap">
+          <h2 class="reveal" data-i18n="cta.title">Start with Majra.</h2>
+          <p class="reveal" style="--d: 70ms" data-i18n="cta.body">
+            The download manager that puts every connection on your PC to work on the same file. Free, open source,
+            and ready in one installer.
+          </p>
+          <div class="btn-row reveal" style="--d: 130ms">
+            <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <span data-i18n="cta.primary">Download Majra 1.2.3</span>
+            </a>
+            <a class="btn btn-ghost" href="apps/droidcrate/" data-i18n="cta.secondary">See DroidCrate</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="index.html" aria-label="Asraab — home">
+              <img src="assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+              <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+            </a>
+            <p data-i18n="footer.tagline">Two Windows tools, built in the open. Free to use, free to read, free to fork.</p>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.appsTitle">Apps</h4>
+            <ul>
+              <li><a href="apps/majra/">Majra</a></li>
+              <li><a href="apps/droidcrate/">DroidCrate</a></li>
+              <li><a href="extension/privacy/" data-i18n="footer.privacy">Extension privacy</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.projectTitle">Project</h4>
+            <ul>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/Majra" target="_blank" rel="noopener" data-i18n="footer.repoMajra">Majra on GitHub</a></li>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/DroidCrate" target="_blank" rel="noopener" data-i18n="footer.repoDroid">DroidCrate on GitHub</a></li>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/Majra/releases" target="_blank" rel="noopener" data-i18n="footer.releases">All releases</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.stackTitle">Stack</h4>
+            <ul>
+              <li><span data-i18n="footer.stack1">Windows 10 / 11 · 64-bit</span></li>
+              <li><span data-i18n="footer.stack2">MIT license</span></li>
+              <li><span data-i18n="footer.stack3">No account required</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-base">
+          <span>© <span id="year">2026</span> Asraab</span>
+          <span data-i18n="footer.note">Not affiliated with Google or Microsoft. Android is a trademark of Google LLC.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="assets/js/i18n.js"></script>
+    <script src="assets/js/site.js"></script>
+    <script type="module" src="assets/js/scene-home.js"></script>
+  </body>
+</html>

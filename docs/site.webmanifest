@@ -1,0 +1,22 @@
+{
+  "name": "Asraab — apps that fly together",
+  "short_name": "Asraab",
+  "description": "Majra, a multi-network download manager, and DroidCrate, a careful Android workbench. Free, open source, local-first.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07080c",
+  "theme_color": "#07080c",
+  "icons": [
+    {
+      "src": "assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "assets/img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

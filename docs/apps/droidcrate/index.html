@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-page="droidcrate">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DroidCrate — know the phone before you touch it · Asraab</title>
+    <meta
+      name="description"
+      content="DroidCrate is a free, open-source Android workbench for Windows: apps, files, screen mirroring, fastboot flashing, adb and logcat in one window, with real device specs and verified Platform Tools."
+    />
+    <meta name="theme-color" content="#07080c" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Asraab" />
+    <meta property="og:title" content="DroidCrate — know the phone before you touch it" />
+    <meta
+      property="og:description"
+      content="Six Android tools in one window. Real device specs, verified Platform Tools, and checklists before the risky parts."
+    />
+    <meta property="og:url" content="https://bouadjadjatamer2-hub.github.io/Majra/apps/droidcrate/" />
+    <meta property="og:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="manifest" href="../../site.webmanifest" />
+    <link rel="preload" href="../../assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="../../assets/css/site.css" />
+    <script>
+      try {
+        if (localStorage.getItem("asraab:lang") === "ar") {
+          document.documentElement.lang = "ar";
+          document.documentElement.dir = "rtl";
+        }
+      } catch (e) {}
+        document.documentElement.classList.add("has-js");
+    </script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
+
+    <header class="site-header" id="top">
+      <div class="header-inner">
+        <a class="brand" href="../../index.html" aria-label="Asraab — home" data-i18n-aria="brand.aria">
+          <img src="../../assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+        </a>
+        <nav class="nav" id="nav" aria-label="Primary" data-i18n-aria="nav.aria">
+          <a href="../../index.html#apps" data-i18n="nav.apps">Apps</a>
+          <a href="../../index.html#standards" data-i18n="nav.standards">Standards</a>
+          <a href="../../index.html#how" data-i18n="nav.how">How it works</a>
+          <a href="../../index.html#about" data-i18n="nav.about">About</a>
+        </nav>
+        <div class="header-actions">
+          <button class="lang-btn" id="langToggle" type="button" aria-label="Switch to Arabic">ع</button>
+          <a class="btn btn-jade btn-sm header-cta" href="#download" data-i18n="nav.download">Download</a>
+          <button class="menu-btn" id="menuBtn" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav">
+            <span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main id="main">
+      <!-- ================= HERO ================= -->
+      <section class="page-hero">
+        <div class="wrap hero-inner">
+          <div class="hero-copy">
+            <img class="hero-icon jade" src="../../assets/img/droidcrate-icon.png" alt="DroidCrate app icon" width="58" height="58" />
+            <div class="badge-row reveal">
+              <span class="badge jade"><span class="dot"></span>v0.2.1</span>
+              <span class="badge" data-i18n="dc.badgePlatform">Windows 10 / 11 · 64-bit</span>
+              <span class="badge" data-i18n="dc.badgeFree">Free &amp; open source</span>
+            </div>
+            <h1 class="display reveal" style="--d: 60ms">
+              <span class="line" data-i18n="dc.title1">Know the phone</span>
+              <span class="line grad-text" data-i18n="dc.title2">before you touch it.</span>
+            </h1>
+            <p class="lede reveal" style="--d: 120ms" data-i18n="dc.lede">
+              One workbench for Android: install apps, move files, mirror the screen, flash partitions and run adb
+              or fastboot commands. Real device specs, verified Platform Tools, and checklists that slow you down
+              before the risky parts.
+            </p>
+            <div class="hero-actions reveal" style="--d: 180ms">
+              <a class="btn btn-jade" href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.2.1/DroidCrate-0.2.1-Setup.exe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <span data-i18n="dc.download">Download for Windows</span>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/DroidCrate" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .7a11.3 11.3 0 0 0-3.6 22c.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1-.7.1-.7.1-.7 1.1.1 1.7 1.2 1.7 1.2 1 1.7 2.6 1.2 3.3.9.1-.7.4-1.2.7-1.5-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.2 1.2a11 11 0 0 1 5.8 0c2.2-1.5 3.2-1.2 3.2-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.2c0 .3.2.6.8.5A11.3 11.3 0 0 0 12 .7Z" /></svg>
+                <span data-i18n="dc.github">View on GitHub</span>
+              </a>
+            </div>
+            <div class="hero-meta reveal" style="--d: 240ms">
+              <span>117.6 MB</span><span class="sep"></span>
+              <span data-i18n="dc.meta1">SHA-256 published</span><span class="sep"></span>
+              <span data-i18n="dc.meta2">MIT license</span>
+            </div>
+          </div>
+
+          <div class="scene-frame jade reveal-scale" style="--d: 140ms">
+            <div class="scene" data-scene="droidcrate" data-fallback="../../assets/img/droidcrate-icon.png" role="img" aria-label="A rotating 3D phone showing a live DroidCrate workbench screen inside two orbit rings" data-i18n-aria="dc.sceneAria"></div>
+            <span class="scene-tag"><i></i><span data-i18n="dc.sceneTag">Live WebGL · device workbench</span></span>
+            <span class="scene-badge" data-i18n="dc.sceneBadge">ADB connected</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FACTS ================= -->
+      <section class="wrap" aria-label="DroidCrate at a glance" data-i18n-aria="dc.factsAria">
+        <dl class="facts reveal">
+          <div class="fact">
+            <dt data-i18n="dc.fact1t">Workbench</dt>
+            <dd><span data-i18n="dc.fact1v">Six tools</span><small data-i18n="dc.fact1s">one window</small></dd>
+          </div>
+          <div class="fact">
+            <dt data-i18n="dc.fact2t">Checklists</dt>
+            <dd><span data-i18n="dc.fact2v">46 steps</span><small data-i18n="dc.fact2s">five operations</small></dd>
+          </div>
+          <div class="fact">
+            <dt data-i18n="dc.fact3t">Learning path</dt>
+            <dd><span data-i18n="dc.fact3v">9 lessons</span><small data-i18n="dc.fact3s">with a quiz</small></dd>
+          </div>
+          <div class="fact">
+            <dt data-i18n="dc.fact4t">Platform Tools</dt>
+            <dd><span data-i18n="dc.fact4v">37.0.1</span><small data-i18n="dc.fact4s">SHA-256 verified</small></dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- ================= FEATURES ================= -->
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="dc.features.kicker">Why DroidCrate</span>
+            <h2 class="h2" data-i18n="dc.features.title">The phone stays connected. The work stays in one place.</h2>
+            <p class="section-lede" data-i18n="dc.features.lede">
+              Most Android tasks are scattered across five programs, three websites and a folder of remembered
+              command lines. DroidCrate reads the phone over USB and does the job with one verified toolchain.
+            </p>
+          </div>
+          <div class="feature-grid three">
+            <article class="feature jade reveal">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10 5.5h4M11 18.5h2" stroke-linecap="round" /></svg></span>
+              <h3 data-i18n="dc.f1t">Real device facts</h3>
+              <p data-i18n="dc.f1b">Read the model, Android version, build, security patch, chipset and bootloader state before any action.</p>
+            </article>
+            <article class="feature jade reveal" style="--d: 60ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke-linecap="round" /><path d="m18 15 3 2-3 2" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+              <h3 data-i18n="dc.f2t">Apps without another tool</h3>
+              <p data-i18n="dc.f2b">Install an APK by picking it or dropping it on the window, export a package, freeze, unfreeze, clear data or uninstall.</p>
+            </article>
+            <article class="feature jade reveal" style="--d: 120ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke-linejoin="round" /><path d="M8 14h8" stroke-linecap="round" /></svg></span>
+              <h3 data-i18n="dc.f3t">Files and full backup</h3>
+              <p data-i18n="dc.f3b">Push and pull files or folders with progress, then back up DCIM, Pictures, Download, Documents, Movies, Music and WhatsApp.</p>
+            </article>
+            <article class="feature jade reveal">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" /><path d="M8 21h8M12 17v4" stroke-linecap="round" /><circle cx="12" cy="10.5" r="2.2" /></svg></span>
+              <h3 data-i18n="dc.f4t">Screen capture and live view</h3>
+              <p data-i18n="dc.f4b">Take a PNG screenshot, record up to three minutes of MP4, or open a live view and tap the phone from the window.</p>
+            </article>
+            <article class="feature jade reveal" style="--d: 60ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2Z" stroke-linejoin="round" /></svg></span>
+              <h3 data-i18n="dc.f5t">Fastboot from your own disk</h3>
+              <p data-i18n="dc.f5b">Flash a partition from a local image, erase, sideload an OTA ZIP, and lock or unlock the bootloader. Nothing is downloaded.</p>
+            </article>
+            <article class="feature jade reveal" style="--d: 120ms">
+              <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round" /><path d="m8.5 12 2.4 2.4 4.6-4.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+              <h3 data-i18n="dc.f6t">Guard rails, not hidden commands</h3>
+              <p data-i18n="dc.f6b">No bypasses, no FRP tricks. Every high-risk action needs a second click, a checklist, and a visible command.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= WORKBENCH ================= -->
+      <section class="section tight" id="workbench">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="dc.work.kicker">The workbench</span>
+            <h2 class="h2" data-i18n="dc.work.title">Six tabs. One device picker.</h2>
+            <p class="section-lede" data-i18n="dc.work.lede">
+              The phone stays connected while you move between them. Everything runs on the bundled, verified
+              Platform Tools.
+            </p>
+          </div>
+          <div class="tabs-grid">
+            <article class="tab-card reveal">
+              <span class="tab-card__num">01</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10 5.5h4M11 18.5h2" stroke-linecap="round" /></svg><span data-i18n="dc.work.t1">Overview</span></h3>
+              <p data-i18n="dc.work.b1">Model, Android version, build, security patch, chipset and bootloader state. Restart to system, bootloader, recovery, fastbootd or power off.</p>
+            </article>
+            <article class="tab-card reveal" style="--d: 50ms">
+              <span class="tab-card__num">02</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.6" /><rect x="13.5" y="3.5" width="7" height="7" rx="1.6" /><rect x="3.5" y="13.5" width="7" height="7" rx="1.6" /><rect x="13.5" y="13.5" width="7" height="7" rx="1.6" /></svg><span data-i18n="dc.work.t2">Apps</span></h3>
+              <p data-i18n="dc.work.b2">List every package, install or export an APK, freeze or unfreeze, clear data and uninstall — through pm with safe arguments.</p>
+            </article>
+            <article class="tab-card reveal" style="--d: 100ms">
+              <span class="tab-card__num">03</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke-linejoin="round" /><path d="M12 11v6m0 0 3-3m-3 3-3-3" stroke-linecap="round" stroke-linejoin="round" /></svg><span data-i18n="dc.work.t3">Files</span></h3>
+              <p data-i18n="dc.work.b3">Send any file to any phone path, pull a file or folder back, and run a full backup or restore of the usual phone folders.</p>
+            </article>
+            <article class="tab-card reveal">
+              <span class="tab-card__num">04</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="13" rx="2" /><path d="M8 21h8M12 17v4" stroke-linecap="round" /><circle cx="12" cy="10.5" r="2.2" /></svg><span data-i18n="dc.work.t4">Screen</span></h3>
+              <p data-i18n="dc.work.b4">Screenshot, up to three minutes of MP4, or a live view that refreshes about once per second with Back, Home, Recents and Power.</p>
+            </article>
+            <article class="tab-card reveal" style="--d: 50ms">
+              <span class="tab-card__num">05</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M13 2 4.5 13.5H11L9.5 22 19 10h-6.5L13 2Z" stroke-linejoin="round" /></svg><span data-i18n="dc.work.t5">Flash</span></h3>
+              <p data-i18n="dc.work.b5">Pick a local boot, recovery or system image and flash it in fastboot, erase a partition, sideload an OTA ZIP, unlock or lock.</p>
+            </article>
+            <article class="tab-card reveal" style="--d: 100ms">
+              <span class="tab-card__num">06</span>
+              <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="2.5" y="4" width="19" height="16" rx="2" /><path d="m6.5 9 3 3-3 3M12 15h5" stroke-linecap="round" stroke-linejoin="round" /></svg><span data-i18n="dc.work.t6">Terminal</span></h3>
+              <p data-i18n="dc.work.b6">Run any adb or fastboot command with presets, output, exit status and duration, plus a streaming logcat with a live filter.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= GALLERY ================= -->
+      <section class="section" id="screens">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" data-i18n="dc.gallery.kicker">Screenshots</span>
+            <h2 class="h2" data-i18n="dc.gallery.title">A real workbench, not a mockup.</h2>
+            <p class="section-lede" data-i18n="dc.gallery.lede">
+              Every view below is the app itself, connected to a real phone. Click any shot to open it full size.
+            </p>
+          </div>
+          <div class="gallery">
+            <figure class="shot reveal-scale" style="margin: 0">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-overview-en.png" data-full="../../assets/img/droidcrate/workbench-overview-en.png" data-caption="Overview tab with a connected phone and its real specs">
+                <img src="../../assets/img/droidcrate/workbench-overview-en.png" alt="DroidCrate Overview tab showing a connected phone, Android version, chipset and restart actions" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c1">Overview · real device facts</figcaption>
+            </figure>
+            <figure class="shot reveal-scale" style="margin: 0; --d: 60ms">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-apps-en.png" data-full="../../assets/img/droidcrate/workbench-apps-en.png" data-caption="Apps tab with install, export, freeze, clear data and uninstall">
+                <img src="../../assets/img/droidcrate/workbench-apps-en.png" alt="DroidCrate Apps tab with install, export, freeze, clear data and uninstall actions" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c2">Apps · install, export, freeze</figcaption>
+            </figure>
+            <figure class="shot reveal-scale" style="margin: 0; --d: 120ms">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-files-en.png" data-full="../../assets/img/droidcrate/workbench-files-en.png" data-caption="Files tab for sending, receiving and backing up phone folders">
+                <img src="../../assets/img/droidcrate/workbench-files-en.png" alt="DroidCrate Files tab for sending, receiving and backing up phone folders" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c3">Files · push, pull, backup</figcaption>
+            </figure>
+            <figure class="shot reveal-scale" style="margin: 0">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-screen-en.png" data-full="../../assets/img/droidcrate/workbench-screen-en.png" data-caption="Screen tab with screenshot, recording and live view">
+                <img src="../../assets/img/droidcrate/workbench-screen-en.png" alt="DroidCrate Screen tab with screenshot, recording and live view controls" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c4">Screen · capture and live view</figcaption>
+            </figure>
+            <figure class="shot reveal-scale" style="margin: 0; --d: 60ms">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-flash-en.png" data-full="../../assets/img/droidcrate/workbench-flash-en.png" data-caption="Flash tab with a local image, partition picker and confirmation">
+                <img src="../../assets/img/droidcrate/workbench-flash-en.png" alt="DroidCrate Flash tab with a local image, partition picker and confirmation" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c5">Flash · local image, explicit confirm</figcaption>
+            </figure>
+            <figure class="shot reveal-scale" style="margin: 0; --d: 120ms">
+              <a class="shot-open" href="../../assets/img/droidcrate/workbench-terminal-en.png" data-full="../../assets/img/droidcrate/workbench-terminal-en.png" data-caption="Terminal tab with adb commands and a live logcat filter">
+                <img src="../../assets/img/droidcrate/workbench-terminal-en.png" alt="DroidCrate Terminal tab with adb commands and a live logcat filter" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.gallery.c6">Terminal · adb, fastboot, logcat</figcaption>
+            </figure>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= SAFETY ================= -->
+      <section class="section tight" id="safety">
+        <div class="wrap split">
+          <div class="reveal">
+            <span class="kicker" style="color: var(--jade)" data-i18n="dc.safety.kicker">Safety</span>
+            <h2 class="h2" data-i18n="dc.safety.title">Real tools. Explicit guard rails.</h2>
+            <p class="section-lede" data-i18n="dc.safety.lede">
+              DroidCrate can flash, erase and unlock, so it says exactly what it will do and asks before it does it.
+              It is a workbench for phones you own — never a bypass.
+            </p>
+            <div class="callout jade reveal" style="margin-top: 2rem">
+              <span class="callout-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round" /><path d="m8.5 12 2.4 2.4 4.6-4.8" stroke-linecap="round" stroke-linejoin="round" /></svg></span>
+              <div>
+                <h3 data-i18n="dc.safety.calloutTitle">The line DroidCrate does not cross</h3>
+                <p data-i18n="dc.safety.calloutBody">It cannot remove a screen lock, bypass an account or FRP, or defeat ownership protection. There is no hidden command, plugin or build that adds this.</p>
+              </div>
+            </div>
+          </div>
+          <div class="limits jade reveal" style="--d: 100ms">
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i1"><strong>Flashing is deliberate.</strong> The Flash tab needs a fastboot device and a local image you chose, plus a confirmation before every write.</p>
+            </div>
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i2"><strong>Erase and unlock are gated.</strong> Each one requires a second click, and the command is shown before it runs.</p>
+            </div>
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i3"><strong>Commands are visible.</strong> The terminal shows the exact command, output, exit status and duration, and history keeps it.</p>
+            </div>
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i4"><strong>Ownership gate.</strong> First launch asks you to confirm that you own the devices you connect. High-risk checklists ask again.</p>
+            </div>
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i5"><strong>Nothing leaves the PC.</strong> No telemetry, no account, no cloud. The only calls are the one-time Platform Tools download and an optional update check.</p>
+            </div>
+            <div class="limit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M5 12.5 9.5 17 19 7" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              <p data-i18n-html="dc.safety.i6"><strong>Verified toolchain.</strong> Google's Platform Tools 37.0.1 is checked against a pinned SHA-256 before extraction, and adb runs only from that copy.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= LEARN ================= -->
+      <section class="section" id="learn">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" style="color: var(--jade)" data-i18n="dc.learn.kicker">Slow down before risk</span>
+            <h2 class="h2" data-i18n="dc.learn.title">Checklists and lessons, built in.</h2>
+            <p class="section-lede" data-i18n="dc.learn.lede">
+              Five operations, 46 ordered steps and nine lessons that explain what each stage of an Android boot
+              does — and when to stop.
+            </p>
+          </div>
+          <div class="showcase">
+            <figure class="shot reveal-scale" style="margin: 0">
+              <a class="shot-open" href="../../assets/img/droidcrate/stage-3-checklists.png" data-full="../../assets/img/droidcrate/stage-3-checklists.png" data-caption="Five pre-flight checklists with risk levels">
+                <img src="../../assets/img/droidcrate/stage-3-checklists.png" alt="Five DroidCrate pre-flight checklists with risk levels" loading="lazy" />
+              </a>
+              <figcaption data-i18n="dc.learn.c1">Five checklists · stock firmware, unlock, recovery, root, custom ROM</figcaption>
+            </figure>
+            <div class="shot-stack">
+              <figure class="shot reveal-scale" style="margin: 0; --d: 80ms">
+                <a class="shot-open" href="../../assets/img/droidcrate/stage-5-lessons.png" data-full="../../assets/img/droidcrate/stage-5-lessons.png" data-caption="The learning path with foundation, intermediate and advanced lessons">
+                  <img src="../../assets/img/droidcrate/stage-5-lessons.png" alt="DroidCrate learning path with foundation, intermediate and advanced lessons" loading="lazy" />
+                </a>
+                <figcaption data-i18n="dc.learn.c2">Nine lessons · a 60% pass mark and an explanation for every answer</figcaption>
+              </figure>
+              <div class="callout jade reveal" style="--d: 140ms">
+                <span class="callout-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5v-15Z" stroke-linejoin="round" /><path d="M8 7h8M8 11h6" stroke-linecap="round" /></svg></span>
+                <div>
+                  <h3 data-i18n="dc.learn.cardTitle">Progress stays on your PC</h3>
+                  <p data-i18n="dc.learn.cardBody">Lessons, checklists and operation history are local, searchable, and exportable as TXT or CSV.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= INSTALL ================= -->
+      <section class="section tight" id="install">
+        <div class="wrap split">
+          <div class="reveal">
+            <span class="kicker" style="color: var(--jade)" data-i18n="dc.install.kicker">Install</span>
+            <h2 class="h2" data-i18n="dc.install.title">One installer. Then the phone.</h2>
+            <p class="section-lede" data-i18n="dc.install.lede">
+              DroidCrate installs the verified Platform Tools once, then works offline. You choose every file from
+              your own PC.
+            </p>
+            <div class="steps" style="margin-top: 2.4rem">
+              <article class="step">
+                <h3 data-i18n="dc.install.s1t">Install the workbench</h3>
+                <p data-i18n="dc.install.s1b">Run the 117.6 MB installer on Windows 10 or 11, 64-bit.</p>
+              </article>
+              <article class="step">
+                <h3 data-i18n="dc.install.s2t">Connect with permission</h3>
+                <p data-i18n="dc.install.s2b">Enable USB debugging on the phone and accept the RSA prompt on its screen.</p>
+              </article>
+              <article class="step">
+                <h3 data-i18n="dc.install.s3t">Read before you act</h3>
+                <p data-i18n="dc.install.s3b">Start with Overview, open a checklist, and keep the command log visible.</p>
+              </article>
+            </div>
+          </div>
+          <div class="panel jade reveal" style="--d: 100ms">
+            <span class="kicker" style="margin-bottom: 0.6rem; color: var(--jade)" data-i18n="dc.verify.kicker">Verify the download</span>
+            <p style="color: var(--muted); font-size: 0.88rem; line-height: 1.65" data-i18n="dc.verify.body">
+              Hash the installer before you run it. The SHA-256 for v0.2.1 is:
+            </p>
+            <div class="code-block">
+              <button class="copy-btn" type="button" data-copy="#sha-droidcrate" data-i18n="dc.verify.copy">Copy</button>
+              <code id="sha-droidcrate">Get-FileHash .\DroidCrate-0.2.1-Setup.exe -Algorithm SHA256
+
+AB714C54412CC396F3D4F5154FE3817D0099049350754565346A1B24EC08123A</code>
+            </div>
+            <p class="mono" style="margin-top: 0.8rem; color: var(--muted-dim); font-size: 0.7rem" data-i18n="dc.verify.note">
+              A mismatch means the file is not the release. Stop and download it again.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= FAQ ================= -->
+      <section class="section" id="faq">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <span class="kicker" style="color: var(--jade)" data-i18n="dc.faq.kicker">Questions</span>
+            <h2 class="h2" data-i18n="dc.faq.title">Straight answers.</h2>
+          </div>
+          <div class="faq reveal">
+            <details>
+              <summary data-i18n="dc.faq.q1">Does DroidCrate bypass FRP or a screen lock?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a1">No. It cannot remove a screen lock, bypass an account or FRP, or defeat ownership protection. There is no hidden command or build that adds this.</div>
+            </details>
+            <details>
+              <summary data-i18n="dc.faq.q2">Is flashing safe?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a2">Flashing is never risk-free. DroidCrate only flashes a local image you selected, shows the command, and asks for confirmation before every write. Read the checklist first and keep a backup.</div>
+            </details>
+            <details>
+              <summary data-i18n="dc.faq.q3">Does it need internet?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a3">Only for the one-time Platform Tools download and an optional content update. The workbench, lessons, checklists and history work offline.</div>
+            </details>
+            <details>
+              <summary data-i18n="dc.faq.q4">Which phones are supported?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a4">Any Android phone that exposes adb or fastboot over USB and that you own. Device detection reads Windows Plug and Play locally, so it works without adb for the first identification.</div>
+            </details>
+            <details>
+              <summary data-i18n="dc.faq.q5">Does it send anything to a server?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a5">No telemetry, no account, no cloud. Files you push, pull, export or flash go between your PC and your phone. Operation history stays on the PC.</div>
+            </details>
+            <details>
+              <summary data-i18n="dc.faq.q6">Why is the installer unsigned?</summary>
+              <div class="faq-a" data-i18n="dc.faq.a6">There is no code-signing certificate yet, so SmartScreen may warn you. Check the SHA-256 on this page, or build from source.</div>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= DOWNLOAD ================= -->
+      <section class="section tight" id="download">
+        <div class="wrap">
+          <div class="download jade reveal">
+            <div>
+              <span class="kicker" style="color: var(--jade)" data-i18n="dc.dl.kicker">Take it with you</span>
+              <h2 data-i18n="dc.dl.title">DroidCrate 0.2.1 for Windows.</h2>
+              <p data-i18n="dc.dl.body">One installer, no account. Windows 10 or 11, 64-bit. Keep the SHA-256 for your own check.</p>
+              <div class="download-meta">
+                <div><span data-i18n="dc.dl.version">Version</span><span>0.2.1</span></div>
+                <div><span data-i18n="dc.dl.size">Installer size</span><span>117.6 MB</span></div>
+                <div><span data-i18n="dc.dl.sha">SHA-256</span><span>AB714C54412CC396F3D4F5154FE3817D0099049350754565346A1B24EC08123A</span></div>
+              </div>
+            </div>
+            <div class="download-side">
+              <a class="btn btn-jade" href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.2.1/DroidCrate-0.2.1-Setup.exe">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
+                <span data-i18n="dc.dl.primary">Download DroidCrate 0.2.1</span>
+              </a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases" target="_blank" rel="noopener" data-i18n="dc.dl.secondary">All releases</a>
+              <p class="note" data-i18n="dc.dl.note">Unsigned installer. SmartScreen may ask you to confirm — verify the hash first.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= CROSS ================= -->
+      <section class="cta-band">
+        <div class="wrap">
+          <h2 class="reveal" data-i18n="dc.cross.title">Back to the download side.</h2>
+          <p class="reveal" style="--d: 70ms" data-i18n="dc.cross.body">
+            Majra splits one file across every connection on your PC: Wi-Fi, Ethernet and USB tethering at the same
+            time.
+          </p>
+          <div class="btn-row reveal" style="--d: 130ms">
+            <a class="btn btn-primary" href="../majra/" data-i18n="dc.cross.cta">Open Majra</a>
+            <a class="btn btn-ghost" href="../../index.html" data-i18n="dc.cross.home">Back to Asraab</a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="wrap">
+        <div class="footer-grid">
+          <div class="footer-brand">
+            <a class="brand" href="../../index.html" aria-label="Asraab — home">
+              <img src="../../assets/img/asraab-mark.svg" alt="" width="38" height="38" />
+              <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+            </a>
+            <p data-i18n="footer.tagline">Two Windows tools, built in the open. Free to use, free to read, free to fork.</p>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.appsTitle">Apps</h4>
+            <ul>
+              <li><a href="../majra/">Majra</a></li>
+              <li><a href="../droidcrate/">DroidCrate</a></li>
+              <li><a href="../../extension/privacy/" data-i18n="footer.privacy">Extension privacy</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.projectTitle">Project</h4>
+            <ul>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/Majra" target="_blank" rel="noopener" data-i18n="footer.repoMajra">Majra on GitHub</a></li>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/DroidCrate" target="_blank" rel="noopener" data-i18n="footer.repoDroid">DroidCrate on GitHub</a></li>
+              <li><a href="https://github.com/bouadjadjatamer2-hub/Majra/releases" target="_blank" rel="noopener" data-i18n="footer.releases">All releases</a></li>
+            </ul>
+          </div>
+          <div class="footer-col">
+            <h4 data-i18n="footer.stackTitle">Stack</h4>
+            <ul>
+              <li><span data-i18n="footer.stack1">Windows 10 / 11 · 64-bit</span></li>
+              <li><span data-i18n="footer.stack2">MIT license</span></li>
+              <li><span data-i18n="footer.stack3">No account required</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="footer-base">
+          <span>© <span id="year">2026</span> Asraab</span>
+          <span data-i18n="footer.note">Not affiliated with Google or Microsoft. Android is a trademark of Google LLC.</span>
+        </div>
+      </div>
+    </footer>
+
+    <script src="../../assets/js/i18n.js"></script>
+    <script src="../../assets/js/site.js"></script>
+    <script type="module" src="../../assets/js/scene-droidcrate.js"></script>
+  </body>
+</html>
