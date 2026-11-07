@@ -2,6 +2,10 @@
   <a href="docs/banner.png"><img src="docs/banner.png" alt="مجرى — كل رابط يهبط هنا" width="100%" /></a>
 </p>
 
+<p align="center">
+  <img src="docs/icon.png" width="96" height="96" alt="أيقونة تطبيق مجرى" />
+</p>
+
 <h1 align="center">مجرى · Majra</h1>
 
 <p align="center">

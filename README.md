@@ -2,6 +2,10 @@
   <a href="docs/banner.png"><img src="docs/banner.png" alt="Majra — every link lands here" width="100%" /></a>
 </p>
 
+<p align="center">
+  <img src="docs/icon.png" width="96" height="96" alt="Majra app icon" />
+</p>
+
 <h1 align="center">Majra · مجرى</h1>
 
 <p align="center">
