@@ -65,7 +65,7 @@ pub fn download_snapshot(
 }
 
 #[tauri::command]
-pub fn set_max_active(state: State<'_, AppState>, value: u32) -> u32 {
+pub async fn set_max_active(state: State<'_, AppState>, value: u32) -> Result<u32, String> {
     state.manager.set_max_active(value);
-    state.manager.max_active() as u32
+    Ok(state.manager.max_active() as u32)
 }

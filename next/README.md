@@ -104,7 +104,7 @@ visual checks.
 
 Numbers from the development machine (Windows, 125% DPI), not a promise for every device:
 
-- NSIS installer: 2.76 MiB (`Majra_0.1.0_x64-setup.exe`); app binary 6.39 MiB.
+- NSIS installer: 2.77 MiB (`Majra_0.1.0_x64-setup.exe`); app binary 6.43 MiB.
 - RAM with the window open and no downloads: about 306 MB working set in total, of which
   the Rust app is about 24 MB and WebView2 owns the rest. WebView2 runs with
   `--disable-gpu`, which removed roughly 90 MB here; the GPU process share is

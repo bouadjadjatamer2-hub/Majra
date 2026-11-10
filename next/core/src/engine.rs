@@ -239,7 +239,7 @@ impl DownloadManager {
     pub fn set_max_active(&self, value: u32) {
         let value = (value as usize).clamp(1, MAX_ACTIVE_LIMIT);
         self.max_active.store(value, Ordering::Relaxed);
-        self.promote_next();
+        self.fill_slots();
     }
 
     pub fn max_active(&self) -> usize {
@@ -272,40 +272,47 @@ impl DownloadManager {
             .count()
     }
 
-    /// Move the oldest queued row into a free slot. Called when a download stops for any
-    /// reason and when the limit is raised.
-    fn promote_next(&self) {
-        let next = {
-            let mut queue = self.queue.lock().unwrap();
-            let mut found = None;
-            while let Some(id) = queue.pop_front() {
-                if let Some(record) = self.records.lock().unwrap().get(&id).cloned() {
-                    let queued = matches!(
-                        record.snapshot.lock().unwrap().status,
-                        DownloadStatus::Queued
-                    );
-                    if queued {
-                        found = Some(record);
-                        break;
+    /// Start queued rows while the parallel limit has room. Called when a download stops,
+    /// when the limit changes, and after a queued row is resumed. The admission gate makes
+    /// the check-and-start atomic, so two workers finishing together cannot overshoot.
+    fn fill_slots(&self) {
+        loop {
+            let _gate = self.admission.lock().unwrap();
+            if self.active_count() >= self.max_active() {
+                return;
+            }
+            let next = {
+                let mut queue = self.queue.lock().unwrap();
+                let mut found = None;
+                while let Some(id) = queue.pop_front() {
+                    if let Some(record) = self.records.lock().unwrap().get(&id).cloned() {
+                        let queued = matches!(
+                            record.snapshot.lock().unwrap().status,
+                            DownloadStatus::Queued
+                        );
+                        if queued {
+                            found = Some(record);
+                            break;
+                        }
                     }
                 }
+                found
+            };
+            let Some(record) = next else {
+                return;
+            };
+            {
+                let mut snapshot = record.snapshot.lock().unwrap();
+                snapshot.status = DownloadStatus::Downloading;
+                snapshot.error = None;
             }
-            found
-        };
-        let Some(record) = next else {
-            return;
-        };
-        {
-            let mut snapshot = record.snapshot.lock().unwrap();
-            snapshot.status = DownloadStatus::Downloading;
-            snapshot.error = None;
+            self.catalog.upsert(saved_from(&record));
+            self.launch(record);
         }
-        self.catalog.upsert(saved_from(&record));
-        self.launch(record);
     }
 
     /// Spawn the worker for a prepared record. The worker hands control back to
-    /// `promote_next` when it stops, so the queue keeps moving.
+    /// `fill_slots` when it stops, so the queue keeps moving.
     fn launch(&self, record: Arc<Record>) {
         let events = self.events.clone();
         let catalog = self.catalog.clone();
@@ -972,8 +979,8 @@ async fn run(
     }
     let _ = events.send(event);
 
-    // This row stopped (finished, paused, failed or cancelled): a queued one may start.
-    manager.promote_next();
+    // This row stopped (finished, paused, failed or cancelled): queued rows may start.
+    manager.fill_slots();
 }
 
 fn outcome(record: &Record) -> Outcome {

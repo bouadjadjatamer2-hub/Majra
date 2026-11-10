@@ -224,6 +224,72 @@ async fn second_download_waits_in_queue_until_a_slot_frees() {
     server.abort();
 }
 
+/// Raising the limit must fill every free slot, not just one, and lowering it must not
+/// start anything while the running rows still exceed it.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn raising_the_limit_fills_every_free_slot() {
+    let data = Arc::new(payload(16 * 1024 * 1024));
+    let (addr, server) = start_server(
+        data,
+        ServerConfig {
+            ranges: true,
+            throttle: Some((16 * 1024, Duration::from_millis(10))),
+        },
+    )
+    .await;
+    let dir = tempfile::tempdir().expect("tempdir");
+    let manager = DownloadManager::with_catalog_path(dir.path().join("downloads.json"));
+    manager.set_max_active(1);
+    let mut rx = manager.subscribe();
+
+    let start = |name: &str| {
+        let manager = manager.clone();
+        let url = format!("http://{addr}/{name}");
+        let destination = dir.path().join(name).display().to_string();
+        async move {
+            manager
+                .start(DownloadRequest {
+                    url,
+                    destination,
+                    connections: 2,
+                    interface_ids: Vec::new(),
+                    block_size: None,
+                    extract: false,
+                })
+                .await
+                .expect("start")
+        }
+    };
+
+    let first = start("raise-a.bin").await;
+    let second = start("raise-b.bin").await;
+    let third = start("raise-c.bin").await;
+    wait_status(&mut rx, &second, DownloadStatus::Queued).await;
+    wait_status(&mut rx, &third, DownloadStatus::Queued).await;
+    assert_eq!(manager.active_count(), 1);
+
+    manager.set_max_active(3);
+    wait_status(&mut rx, &second, DownloadStatus::Downloading).await;
+    wait_status(&mut rx, &third, DownloadStatus::Downloading).await;
+    assert_eq!(manager.active_count(), 3);
+
+    manager.set_max_active(1);
+    assert_eq!(
+        manager.active_count(),
+        3,
+        "lowering the limit never stops a running row"
+    );
+    let fourth = start("raise-d.bin").await;
+    wait_status(&mut rx, &fourth, DownloadStatus::Queued).await;
+    assert_eq!(manager.active_count(), 3);
+
+    for id in [&first, &second, &third, &fourth] {
+        manager.cancel(id).await.ok();
+        manager.forget(id);
+    }
+    server.abort();
+}
+
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn multi_connection_download_matches_bytes() {
     let data = Arc::new(payload(4 * 1024 * 1024));
