@@ -290,49 +290,6 @@ async fn raising_the_limit_fills_every_free_slot() {
     server.abort();
 }
 
-/// The limiter is global: four connections share one 512 KiB/s budget, so a 1 MiB file
-/// cannot finish before the budget allows it.
-#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
-async fn a_speed_limit_throttles_the_whole_download() {
-    let data = Arc::new(payload(1024 * 1024));
-    let (addr, server) = start_server(
-        data.clone(),
-        ServerConfig {
-            ranges: true,
-            throttle: None,
-        },
-    )
-    .await;
-    let dir = tempfile::tempdir().expect("tempdir");
-    let target = dir.path().join("limited.bin");
-    let manager = DownloadManager::with_catalog_path(dir.path().join("downloads.json"));
-    manager.set_speed_limit(512 * 1024);
-    assert_eq!(manager.speed_limit(), 512 * 1024);
-    let mut rx = manager.subscribe();
-    let started = std::time::Instant::now();
-    let id = manager
-        .start(DownloadRequest {
-            url: format!("http://{addr}/limited.bin"),
-            destination: target.display().to_string(),
-            connections: 4,
-            interface_ids: Vec::new(),
-            block_size: None,
-            extract: false,
-        })
-        .await
-        .expect("start");
-
-    let done = wait_status(&mut rx, &id, DownloadStatus::Completed).await;
-    let elapsed = started.elapsed();
-    assert_eq!(done.downloaded_bytes, data.len() as u64);
-    assert_eq!(std::fs::read(&target).expect("read"), *data);
-    assert!(
-        elapsed >= Duration::from_millis(1200),
-        "1 MiB at 512 KiB/s finished in {elapsed:?}"
-    );
-    server.abort();
-}
-
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn multi_connection_download_matches_bytes() {
     let data = Arc::new(payload(4 * 1024 * 1024));

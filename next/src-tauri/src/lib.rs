@@ -42,7 +42,6 @@ pub fn run() {
             commands::forget_download,
             commands::list_downloads,
             commands::set_max_active,
-            commands::set_speed_limit,
             commands::download_snapshot,
         ])
         .run(tauri::generate_context!())

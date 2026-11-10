@@ -16,7 +16,6 @@ use uuid::Uuid;
 use crate::catalog::{Catalog, SavedDownload};
 use crate::error::{MajraError, Result};
 use crate::extract::{self, ExtractionSnapshot};
-use crate::limit::SpeedLimiter;
 use crate::net::{self, InterfaceInfo, InterfaceKind};
 use crate::plan::{self, Block, MAX_CONNECTIONS};
 use crate::probe::{client_builder, probe_url, ProbeResult};
@@ -136,8 +135,6 @@ struct Record {
     completed: Mutex<HashSet<u64>>,
     stats: Vec<Arc<ConnectionStat>>,
     clients: Vec<reqwest::Client>,
-    /// Shared with every other row: one budget caps the whole list.
-    limiter: Arc<SpeedLimiter>,
     /// The adapters the user picked, kept so the catalog can rebuild the request.
     interface_ids: Vec<String>,
     snapshot: Mutex<DownloadSnapshot>,
@@ -199,7 +196,6 @@ pub struct DownloadManager {
     max_active: Arc<AtomicUsize>,
     /// Serialises "is there a free slot?" so two starts cannot both take the last one.
     admission: Arc<Mutex<()>>,
-    limiter: Arc<SpeedLimiter>,
     events: broadcast::Sender<DownloadEvent>,
 }
 
@@ -234,7 +230,6 @@ impl DownloadManager {
             queue: Arc::new(Mutex::new(VecDeque::new())),
             max_active: Arc::new(AtomicUsize::new(DEFAULT_MAX_ACTIVE)),
             admission: Arc::new(Mutex::new(())),
-            limiter: Arc::new(SpeedLimiter::unlimited()),
             events,
         }
     }
@@ -249,16 +244,6 @@ impl DownloadManager {
 
     pub fn max_active(&self) -> usize {
         self.max_active.load(Ordering::Relaxed)
-    }
-
-    /// A global ceiling for the whole list, in bytes per second. `0` removes it. Rows
-    /// already running pick the new value up on their next chunk, without a restart.
-    pub fn set_speed_limit(&self, bytes_per_sec: u64) {
-        self.limiter.set_limit(bytes_per_sec);
-    }
-
-    pub fn speed_limit(&self) -> u64 {
-        self.limiter.limit()
     }
 
     /// Number of rows that are actually transferring right now.
@@ -418,7 +403,6 @@ impl DownloadManager {
             completed: Mutex::new(completed),
             stats,
             clients,
-            limiter: self.limiter.clone(),
             interface_ids: request.interface_ids.clone(),
             snapshot: Mutex::new(snapshot),
             cancel: Mutex::new(CancellationToken::new()),
@@ -1362,7 +1346,6 @@ async fn worker(
                 block,
                 &tx,
                 &cancel,
-                &record.limiter,
                 stat.id,
             )
             .await
@@ -1401,7 +1384,6 @@ async fn download_block(
     block: Block,
     tx: &mpsc::Sender<WriteChunk>,
     cancel: &CancellationToken,
-    limiter: &SpeedLimiter,
     connection_id: u32,
 ) -> Result<()> {
     let response = client
@@ -1427,9 +1409,6 @@ async fn download_block(
         let chunk = item?;
         if chunk.is_empty() {
             continue;
-        }
-        if !limiter.acquire(chunk.len(), cancel).await {
-            return Err(MajraError::Cancelled);
         }
         if offset + chunk.len() as u64 > block.end + 1 {
             return Err(MajraError::Message(
@@ -1557,10 +1536,6 @@ async fn run_single(
             return Ok(outcome(record));
         }
         let chunk = item?;
-        if !record.limiter.acquire(chunk.len(), cancel).await {
-            file.sync_all().await?;
-            return Ok(outcome(record));
-        }
         buffer.extend_from_slice(&chunk);
         if buffer.len() >= WRITE_CHUNK {
             file.write_all(&buffer).await?;

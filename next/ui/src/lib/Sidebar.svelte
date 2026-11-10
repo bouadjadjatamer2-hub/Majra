@@ -77,25 +77,6 @@
     </div>
   </div>
 
-  <div class="speed-limit" title={t('speedLimitHint')}>
-    <span class="speed-title">{t('speedLimit')}</span>
-    <select
-      class="speed-select"
-      aria-label={t('speedLimit')}
-      value={String(app.speedLimit)}
-      onchange={(event) => app.setSpeedLimit(Number(event.currentTarget.value))}
-    >
-      <option value="0">{t('speedUnlimited')}</option>
-      <option value="262144">256 KB/s</option>
-      <option value="524288">512 KB/s</option>
-      <option value="1048576">1 MB/s</option>
-      <option value="2097152">2 MB/s</option>
-      <option value="5242880">5 MB/s</option>
-      <option value="10485760">10 MB/s</option>
-      <option value="20971520">20 MB/s</option>
-    </select>
-  </div>
-
   <div class="low-ram">
     <div class="low-ram-text">
       <div class="low-ram-title">{t('lowRam')}</div>
@@ -258,37 +239,6 @@
     font-family: var(--font-mono);
     font-size: 11px;
     color: var(--text-2);
-  }
-
-  .speed-limit {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin: 6px 4px 0;
-    padding: 7px 10px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-md);
-    background: var(--surface);
-  }
-
-  .speed-title {
-    font-size: 11.5px;
-    font-weight: 700;
-    color: var(--text-2);
-  }
-
-  .speed-select {
-    height: 22px;
-    max-width: 92px;
-    padding-inline: 4px 2px;
-    border: 1px solid var(--line);
-    border-radius: var(--r-sm);
-    background: var(--bg-elev);
-    color: var(--text-2);
-    font-family: var(--font-mono);
-    font-size: 10.5px;
-    cursor: pointer;
   }
 
   .low-ram {

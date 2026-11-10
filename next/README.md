@@ -8,7 +8,7 @@ existing Electron app so the shipped `1.2.3` release stays untouched.
 - **Transfer engine in Rust.** Ranged probe, block planning, parallel range requests,
   bounded writer channel, pause/resume with persisted block state, cancel, retry, and a
   single-stream fallback for servers that ignore `Range`.
-- **Thin Tauri shell.** The window hosts the same core through eleven commands; progress
+- **Thin Tauri shell.** The window hosts the same core through ten commands; progress
   crosses to the webview as one aggregated event stream at 4 Hz.
 - **Original UI.** A dense, IDM-like workspace with Majra's amber/jade identity, built from
   scratch in Svelte 5 and CSS. No Plexo styles, assets, or `window.plexo` calls.
@@ -29,10 +29,6 @@ existing Electron app so the shipped `1.2.3` release stays untouched.
 - **IDM-style queue.** Up to N downloads run at once (default 3, maximum 8, adjustable in
   the sidebar); every extra row shows *Queued* and starts by itself when a slot frees.
   Pausing a queued row removes it from the queue, and resuming still respects the limit.
-- **Global speed limit.** One ceiling for the whole list, chosen in the sidebar (256 KB/s
-  up to 20 MB/s, or unlimited). The token bucket is shared by every connection, takes
-  effect on the next chunk without restarting a row, and costs one atomic load when it is
-  off.
 - **Low-RAM defaults.** A "4 GB mode" switch is on by default: 32 px rows and no per-row
   host sub-line, which cuts the rendered text and layout work per visible row. Light/dark
   themes and EN/AR RTL are included.

@@ -2,7 +2,6 @@ pub mod catalog;
 pub mod engine;
 pub mod error;
 pub mod extract;
-pub mod limit;
 pub mod net;
 pub mod plan;
 pub mod probe;

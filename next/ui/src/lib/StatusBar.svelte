@@ -20,11 +20,6 @@
     {#if app.lowRam}
       <span class="chip" data-tone="ok">{t('lowRam')}</span>
     {/if}
-    {#if app.speedLimit > 0}
-      <span class="chip" data-tone="warn">
-        {t('speedLimit')} {formatSpeed(app.speedLimit)}
-      </span>
-    {/if}
   </div>
 
   <div class="side right">
