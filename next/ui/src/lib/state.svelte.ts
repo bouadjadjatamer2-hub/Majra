@@ -129,6 +129,8 @@ class AppState {
   detailsOpen = $state(true);
   lowRam = $state(true);
   maxActive = $state(3);
+  /// Global ceiling in bytes per second, 0 = unlimited.
+  speedLimit = $state(0);
   speedHistory = $state<Record<string, number[]>>({});
   toasts = $state<Toast[]>([]);
   loaded = $state(false);
@@ -192,6 +194,7 @@ class AppState {
     try {
       this.interfaces = await api.listInterfaces();
       await api.setMaxActive(this.maxActive);
+      await api.setSpeedLimit(this.speedLimit);
       this.downloads = await api.listDownloads();
       this.selectedId = this.downloads[0]?.id ?? null;
     } catch (error) {
@@ -317,6 +320,15 @@ class AppState {
     this.maxActive = next;
     this.persist('majra.maxActive', String(next));
     if (isTauri) void api.setMaxActive(next);
+  }
+
+  /// One ceiling for the whole list, in bytes per second. Zero means unlimited.
+  setSpeedLimit(bytesPerSec: number): void {
+    const next = Math.max(0, Math.min(100 * MB, Math.round(bytesPerSec)));
+    if (next === this.speedLimit) return;
+    this.speedLimit = next;
+    this.persist('majra.speedLimit', String(next));
+    if (isTauri) void api.setSpeedLimit(next);
   }
 
   toast(kind: Toast['kind'], text: string): void {
@@ -475,6 +487,10 @@ class AppState {
       const maxActive = Number(localStorage.getItem('majra.maxActive'));
       if (Number.isFinite(maxActive) && maxActive >= 1 && maxActive <= 8) {
         this.maxActive = Math.round(maxActive);
+      }
+      const speedLimit = Number(localStorage.getItem('majra.speedLimit'));
+      if (Number.isFinite(speedLimit) && speedLimit >= 0 && speedLimit <= 100 * MB) {
+        this.speedLimit = Math.round(speedLimit);
       }
     }
 

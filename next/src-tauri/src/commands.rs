@@ -69,3 +69,10 @@ pub async fn set_max_active(state: State<'_, AppState>, value: u32) -> Result<u3
     state.manager.set_max_active(value);
     Ok(state.manager.max_active() as u32)
 }
+
+/// Global ceiling for the whole list, in bytes per second. Zero means unlimited.
+#[tauri::command]
+pub fn set_speed_limit(state: State<'_, AppState>, bytes_per_sec: u64) -> u64 {
+    state.manager.set_speed_limit(bytes_per_sec);
+    state.manager.speed_limit()
+}

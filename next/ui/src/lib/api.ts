@@ -93,6 +93,12 @@ export const api = {
     return isTauri ? invoke<number>('set_max_active', { value }) : Promise.resolve(value);
   },
 
+  setSpeedLimit(bytesPerSec: number): Promise<number> {
+    return isTauri
+      ? invoke<number>('set_speed_limit', { bytesPerSec })
+      : Promise.resolve(bytesPerSec);
+  },
+
   onDownloadEvent(handler: (event: DownloadEvent) => void): Promise<() => void> {
     if (!isTauri) return Promise.resolve(() => {});
     return listen<DownloadEvent>('majra://download', (event) => handler(event.payload));
