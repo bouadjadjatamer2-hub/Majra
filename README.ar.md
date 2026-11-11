@@ -89,7 +89,11 @@
 Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 ```
 
-بصمة SHA-256 للإصدار `v2.0.0` تُنشر مع الإصدار.
+بصمة SHA-256 للإصدار `v2.0.0`:
+
+```text
+37D0B80ACAC3C0B67FD614DD2DA903505FB83604738CDA1BE6C08AAFD051E65C
+```
 
 ## كيف يعمل
 

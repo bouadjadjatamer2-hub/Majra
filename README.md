@@ -92,7 +92,11 @@ them to Majra with the right cookies.
 Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 ```
 
-The SHA-256 for `v2.0.0` is published with the release.
+The SHA-256 for `v2.0.0` is:
+
+```text
+37D0B80ACAC3C0B67FD614DD2DA903505FB83604738CDA1BE6C08AAFD051E65C
+```
 
 ## How it works
 
