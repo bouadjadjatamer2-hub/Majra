@@ -2,10 +2,11 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use url::Url;
 
+use crate::browser::{base_headers, BrowserContext};
 use crate::error::{MajraError, Result};
 
 const PROBE_BYTES: u64 = 16 * 1024;
-const USER_AGENT: &str = "Majra/0.1 (+https://github.com/bouadjadjatamer2-hub/Majra)";
+const MAX_REDIRECTS: u8 = 10;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -21,11 +22,12 @@ pub struct ProbeResult {
 }
 
 pub fn client_builder() -> reqwest::ClientBuilder {
-    reqwest::Client::builder()
-        .redirect(reqwest::redirect::Policy::limited(10))
-        .connect_timeout(Duration::from_secs(15))
-        .read_timeout(Duration::from_secs(45))
-        .user_agent(USER_AGENT)
+    crate::proxy::apply(
+        reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::limited(10))
+            .connect_timeout(Duration::from_secs(15))
+            .read_timeout(Duration::from_secs(45)),
+    )
 }
 
 fn header(response: &reqwest::Response, name: &str) -> Option<String> {
@@ -107,16 +109,31 @@ pub fn sanitize_file_name(raw: &str) -> String {
     if base.is_empty() {
         return String::new();
     }
-    let stem = base
-        .split('.')
-        .next()
-        .unwrap_or(base)
-        .to_ascii_uppercase();
+    let stem = base.split('.').next().unwrap_or(base).to_ascii_uppercase();
     let reserved = matches!(
         stem.as_str(),
-        "CON" | "PRN" | "AUX" | "NUL" | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6"
-            | "COM7" | "COM8" | "COM9" | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6"
-            | "LPT7" | "LPT8" | "LPT9"
+        "CON"
+            | "PRN"
+            | "AUX"
+            | "NUL"
+            | "COM1"
+            | "COM2"
+            | "COM3"
+            | "COM4"
+            | "COM5"
+            | "COM6"
+            | "COM7"
+            | "COM8"
+            | "COM9"
+            | "LPT1"
+            | "LPT2"
+            | "LPT3"
+            | "LPT4"
+            | "LPT5"
+            | "LPT6"
+            | "LPT7"
+            | "LPT8"
+            | "LPT9"
     );
     if reserved {
         format!("_{base}")
@@ -128,6 +145,12 @@ pub fn sanitize_file_name(raw: &str) -> String {
 /// One small ranged GET is enough to learn the size, whether ranges work, and the validators.
 /// HEAD is deliberately not used: many file hosts reject it or omit the fields we need.
 pub async fn probe_url(url: &str) -> Result<ProbeResult> {
+    probe_url_with(url, None).await
+}
+
+/// The same probe, sent as the browser that handed the link over. Redirects are followed
+/// by hand so every hop gets only the cookies that belong to it, never the previous site's.
+pub async fn probe_url_with(url: &str, browser: Option<&BrowserContext>) -> Result<ProbeResult> {
     let parsed = Url::parse(url)?;
     if !matches!(parsed.scheme(), "http" | "https") {
         return Err(MajraError::Message(
@@ -135,16 +158,42 @@ pub async fn probe_url(url: &str) -> Result<ProbeResult> {
         ));
     }
 
-    let client = client_builder().build()?;
-    let response = client
-        .get(parsed.clone())
-        .header(reqwest::header::RANGE, format!("bytes=0-{}", PROBE_BYTES - 1))
-        .header(reqwest::header::ACCEPT, "*/*")
-        .send()
-        .await?;
+    let client = client_builder()
+        .redirect(reqwest::redirect::Policy::none())
+        .build()?;
+    let mut current = parsed.clone();
+    let mut redirects = 0u8;
+    let response = loop {
+        let mut request = client.get(current.clone()).header(
+            reqwest::header::RANGE,
+            format!("bytes=0-{}", PROBE_BYTES - 1),
+        );
+        for (name, value) in base_headers(browser, &current) {
+            request = request.header(name, value);
+        }
+        let response = request.send().await?;
+        if response.status().is_redirection() {
+            let Some(location) = header(&response, "location") else {
+                return Err(MajraError::Http(response.status().as_u16()));
+            };
+            redirects += 1;
+            if redirects > MAX_REDIRECTS {
+                return Err(MajraError::Message("too many redirects".into()));
+            }
+            let next = current.join(&location)?;
+            if !matches!(next.scheme(), "http" | "https") {
+                return Err(MajraError::Message(
+                    "the server redirected to a non-HTTP address".into(),
+                ));
+            }
+            current = next;
+            continue;
+        }
+        break response;
+    };
 
     let status = response.status();
-    let final_url = response.url().to_string();
+    let final_url = current.to_string();
     let content_type = header(&response, "content-type");
     let etag = header(&response, "etag");
     let last_modified = header(&response, "last-modified");
@@ -158,9 +207,7 @@ pub async fn probe_url(url: &str) -> Result<ProbeResult> {
             .or_else(|| response.content_length());
         (true, total)
     } else if status == reqwest::StatusCode::RANGE_NOT_SATISFIABLE {
-        let total = content_range
-            .as_deref()
-            .and_then(content_range_total);
+        let total = content_range.as_deref().and_then(content_range_total);
         (true, total)
     } else if status.is_success() {
         (false, response.content_length())
@@ -217,7 +264,9 @@ mod tests {
             Some("report final.pdf".into())
         );
         assert_eq!(
-            filename_from_disposition("attachment; filename=\"old.pdf\"; filename*=UTF-8''%D9%85%D9%84%D9%81.pdf"),
+            filename_from_disposition(
+                "attachment; filename=\"old.pdf\"; filename*=UTF-8''%D9%85%D9%84%D9%81.pdf"
+            ),
             Some("ملف.pdf".into())
         );
     }

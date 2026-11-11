@@ -8,20 +8,22 @@
   import Icon from './Icon.svelte';
 
   let links = $state(
-    typeof location !== 'undefined'
-      ? (new URLSearchParams(location.search).get('url') ?? '')
-      : '',
+    app.prefillUrl ??
+      (typeof location !== 'undefined'
+        ? (new URLSearchParams(location.search).get('url') ?? '')
+        : ''),
   );
-  let destination = $state('');
-  let connections = $state(8);
+  let destination = $state(app.defaultDestination);
+  let connections = $state(app.defaultConnections);
   let auto = $state(true);
   let chosen = $state<string[]>([]);
-  let extract = $state(false);
+  let extract = $state(app.extractByDefault);
   let probe = $state<ProbeResult | null>(null);
   let probing = $state(false);
   let starting = $state(false);
   let error = $state<string | null>(null);
   let textarea = $state<HTMLTextAreaElement | null>(null);
+  let lastOfferId = $state<string | null>(null);
 
   let urls = $derived(
     links
@@ -30,8 +32,12 @@
       .filter(Boolean),
   );
 
+  let usableInterfaces = $derived(
+    app.interfaces.filter((iface) => iface.id !== 'auto' && iface.usable),
+  );
+
   let chosenNetworks = $derived(
-    app.interfaces
+    usableInterfaces
       .filter((iface) => !auto && chosen.includes(iface.id) && iface.network)
       .map((iface) => iface.network as string),
   );
@@ -41,8 +47,36 @@
   );
 
   onMount(() => {
+    // The clipboard watcher hands one link over, then forgets it so reopening the dialog
+    // does not silently repeat an old copy.
+    app.prefillUrl = null;
     textarea?.focus();
   });
+
+  // The extension already probed the link with the browser's own sign-in. Adopt that
+  // result so Check and Start cost no extra request, and a signed link is not fetched twice.
+  $effect(() => {
+    const offer = app.offer;
+    if (!offer) {
+      lastOfferId = null;
+      return;
+    }
+    if (offer.id === lastOfferId) return;
+    lastOfferId = offer.id;
+    links = offer.url;
+    probe = offer.probe;
+    error = null;
+    void textarea?.focus();
+  });
+
+  function offerIdFor(url: string): string | null {
+    return app.offer && app.offer.url === url ? app.offer.id : null;
+  }
+
+  function onLinksInput(): void {
+    const first = urls[0];
+    if (probe && probe.requestedUrl !== first) probe = null;
+  }
 
   function validUrl(value: string): boolean {
     return /^https?:\/\/\S+$/i.test(value);
@@ -62,7 +96,7 @@
     }
     probing = true;
     try {
-      probe = await api.probeLink(first);
+      probe = await api.probeLink(first, offerIdFor(first));
     } catch (caught) {
       error = `${t('probeFailed')}: ${errorText(caught)}`;
     } finally {
@@ -71,14 +105,30 @@
   }
 
   function toggleInterface(id: string): void {
+    const iface = app.interfaces.find((item) => item.id === id);
+    if (!iface?.usable) return;
+    auto = false;
     chosen = chosen.includes(id)
       ? chosen.filter((item) => item !== id)
       : [...chosen, id];
+    // An empty manual selection is the same as automatic in the backend; show that
+    // honestly instead of leaving Auto unchecked with no adapter selected.
+    if (chosen.length === 0) auto = true;
   }
 
   function useAllInterfaces(): void {
-    auto = false;
-    chosen = app.interfaces.filter((iface) => iface.id !== 'auto').map((iface) => iface.id);
+    auto = usableInterfaces.length === 0;
+    chosen = usableInterfaces.map((iface) => iface.id);
+  }
+
+  async function pasteLink(): Promise<void> {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (!text.trim()) return;
+      links = links.trim() ? `${links.trim()}\n${text.trim()}` : text.trim();
+    } catch {
+      error = t('pasteFailed');
+    }
   }
 
   async function start(): Promise<void> {
@@ -95,15 +145,18 @@
     starting = true;
     try {
       for (const url of urls) {
-        await app.addDownload({
-          url,
-          destination: destination.trim(),
-          connections,
-          interfaceIds: auto ? [] : chosen,
-          extract,
-        });
+        await app.addDownload(
+          {
+            url,
+            destination: destination.trim(),
+            connections,
+            interfaceIds: auto ? [] : chosen,
+            extract,
+          },
+          offerIdFor(url),
+        );
       }
-      app.showAdd = false;
+      app.closeAdd();
     } catch (caught) {
       error = `${t('startFailed')}: ${errorText(caught)}`;
     } finally {
@@ -114,7 +167,7 @@
 
 <svelte:window
   onkeydown={(event) => {
-    if (event.key === 'Escape') app.showAdd = false;
+    if (event.key === 'Escape') app.closeAdd();
   }}
 />
 
@@ -122,7 +175,7 @@
   class="overlay"
   role="presentation"
   onclick={(event) => {
-    if (event.target === event.currentTarget) app.showAdd = false;
+    if (event.target === event.currentTarget) app.closeAdd();
   }}
 >
   <div class="dialog" role="dialog" aria-modal="true" aria-labelledby="add-title">
@@ -135,21 +188,38 @@
         class="icon-btn"
         type="button"
         aria-label={t('cancel')}
-        onclick={() => (app.showAdd = false)}
+        onclick={() => app.closeAdd()}
       >
         <Icon name="close" size={14} />
       </button>
     </header>
 
     <div class="dialog-body">
+      {#if app.offer}
+        <div class="offer">
+          <span class="offer-mark"><Icon name="link" size={14} /></span>
+          <span class="offer-text">
+            <b>{t('browserOffer')}</b>
+            {#if app.offer.from}<span class="offer-from">{app.offer.from}</span>{/if}
+            <span class="hint">{t('browserOfferHint')}</span>
+          </span>
+        </div>
+      {/if}
+
       <div class="field">
-        <label class="field-label" for="add-links">{t('links')}</label>
+        <div class="field-head">
+          <label class="field-label" for="add-links">{t('links')}</label>
+          <button class="link-btn" type="button" onclick={pasteLink}>
+            {t('paste')}
+          </button>
+        </div>
         <textarea
           id="add-links"
           class="textarea"
           rows="3"
           bind:this={textarea}
           bind:value={links}
+          oninput={onLinksInput}
           placeholder={'https://example.com/file.zip'}
           spellcheck="false"
         ></textarea>
@@ -200,32 +270,44 @@
         <label class="iface auto">
           <input type="checkbox" bind:checked={auto} />
           <span class="iface-name">{t('auto')}</span>
+          <span class="iface-addr">{t('autoHint')}</span>
         </label>
-        {#if !auto}
-          <div class="ifaces">
-            {#each app.interfaces as iface (iface.id)}
-              {#if iface.id !== 'auto'}
-                <label class="iface" class:shared={sameNetwork && chosen.includes(iface.id)}>
-                  <input
-                    type="checkbox"
-                    checked={chosen.includes(iface.id)}
-                    onchange={() => toggleInterface(iface.id)}
-                  />
-                  <span class="iface-name">
-                    {iface.name}
-                    {#if iface.isDefault}<span class="tag">{t('defaultAdapter')}</span>{/if}
-                  </span>
-                  <span class="iface-addr num">{iface.network ?? iface.address}</span>
-                </label>
-              {/if}
-            {/each}
+        <div class="ifaces">
+          {#each app.interfaces as iface (iface.id)}
+            {#if iface.id !== 'auto'}
+              <label
+                class="iface"
+                class:shared={sameNetwork && chosen.includes(iface.id)}
+                class:unusable={!iface.usable}
+                title={iface.usable ? iface.address : t('noRouteHint')}
+              >
+                <input
+                  type="checkbox"
+                  disabled={!iface.usable}
+                  checked={!auto && chosen.includes(iface.id)}
+                  onchange={() => toggleInterface(iface.id)}
+                />
+                <span class="iface-name">
+                  {iface.name}
+                  {#if iface.isDefault}<span class="tag">{t('defaultAdapter')}</span>{/if}
+                  {#if !iface.usable}<span class="tag dead">{t('noRoute')}</span>{/if}
+                </span>
+                <span class="iface-addr num">{iface.network ?? iface.address}</span>
+              </label>
+            {/if}
+          {/each}
+        </div>
+        {#if usableInterfaces.length === 0}
+          <div class="warn">
+            <Icon name="alert" size={13} />
+            <span>{t('noUsableInterfaces')}</span>
           </div>
-          {#if sameNetwork}
-            <div class="warn">
-              <Icon name="alert" size={13} />
-              <span>{t('sameNetworkHint')}</span>
-            </div>
-          {/if}
+        {/if}
+        {#if sameNetwork}
+          <div class="warn">
+            <Icon name="alert" size={13} />
+            <span>{t('sameNetworkHint')}</span>
+          </div>
         {/if}
         <span class="hint">{t('interfacesHint')}</span>
       </div>
@@ -278,7 +360,7 @@
         {probing ? t('checking') : t('check')}
       </button>
       <span class="flex"></span>
-      <button class="btn btn-ghost" type="button" onclick={() => (app.showAdd = false)}>
+      <button class="btn btn-ghost" type="button" onclick={() => app.closeAdd()}>
         {t('cancel')}
       </button>
       <button
@@ -363,6 +445,51 @@
 
   .dialog .textarea {
     min-height: 64px;
+  }
+
+  .offer {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 9px 10px;
+    border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+    border-radius: var(--r-sm);
+    background: var(--accent-soft);
+  }
+
+  .offer-mark {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    flex: none;
+    border-radius: var(--r-sm);
+    background: var(--surface);
+    color: var(--accent);
+  }
+
+  .offer-text {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 2px 7px;
+    min-width: 0;
+  }
+
+  .offer-text b {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-2);
+  }
+
+  .offer-from {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .offer-text .hint {
+    flex-basis: 100%;
   }
 
   .row {
@@ -482,6 +609,15 @@
     border-color: var(--warn);
   }
 
+  .iface.unusable {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  .iface.unusable:hover {
+    border-color: var(--line);
+  }
+
   .ifaces {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -498,6 +634,11 @@
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.02em;
+  }
+
+  .tag.dead {
+    background: var(--danger-soft);
+    color: var(--danger);
   }
 
   .warn {

@@ -7,6 +7,7 @@
   import DetailsPanel from './lib/DetailsPanel.svelte';
   import StatusBar from './lib/StatusBar.svelte';
   import AddDownloadDialog from './lib/AddDownloadDialog.svelte';
+  import SettingsDialog from './lib/SettingsDialog.svelte';
   import { app } from './lib/state.svelte';
   import { api, isTauri } from './lib/api';
   import { t } from './lib/i18n';
@@ -14,21 +15,99 @@
 
   let rows = $derived(app.visible);
 
+  let lastClipboard = '';
+  let clipboardBusy = false;
+
+  /// Only runs while the setting is on, no dialog is open, and Majra has focus. A copied
+  /// link is offered once; copying the same link again does not reopen the dialog.
+  async function pollClipboard(): Promise<void> {
+    if (
+      !isTauri ||
+      !app.clipboardWatch ||
+      app.showAdd ||
+      app.showSettings ||
+      clipboardBusy ||
+      (typeof document !== 'undefined' && !document.hasFocus())
+    ) {
+      return;
+    }
+    clipboardBusy = true;
+    try {
+      const text = (await api.readClipboard()).trim();
+      if (!text || text === lastClipboard) return;
+      lastClipboard = text;
+      if (text.length > 4096 || !/^https?:\/\/\S+$/i.test(text)) return;
+      app.prefillUrl = text;
+      app.showAdd = true;
+    } catch {
+      // An empty or locked clipboard is not an error worth a toast.
+    } finally {
+      clipboardBusy = false;
+    }
+  }
+
   onMount(() => {
     void app.init();
     const params = new URLSearchParams(location.search);
     if (params.get('add') === '1' || params.has('url')) app.showAdd = true;
-    let dispose: (() => void) | null = null;
+    const disposers: (() => void)[] = [];
     if (isTauri) {
       api
         .onDownloadEvent((event) => app.applyEvent(event))
-        .then((off) => {
-          dispose = off;
+        .then((off) => disposers.push(off))
+        .catch(() => {});
+      api
+        .onOffer((offer) => app.receiveOffer(offer))
+        .then((off) => disposers.push(off))
+        .catch(() => {});
+      api
+        .onScan((result) => {
+          const text = `${result.fileName}: ${
+            result.status === 'threat'
+              ? t('scanThreat')
+              : result.status === 'clean'
+                ? t('scanClean')
+                : result.status === 'unavailable'
+                  ? t('scanUnavailable')
+                  : t('scanFailed')
+          }`;
+          app.toast(result.status === 'threat' ? 'error' : 'info', text);
         })
+        .then((off) => disposers.push(off))
+        .catch(() => {});
+      api
+        .onShutdown((seconds) => {
+          app.toast(
+            'info',
+            t('shutdownSoon').replace('{s}', String(seconds)),
+            {
+              label: t('cancelShutdown'),
+              run: () => {
+                void api
+                  .cancelShutdown()
+                  .then(() => app.toast('info', t('shutdownCancelled')))
+                  .catch(() => app.toast('error', t('shutdownCancelFailed')));
+              },
+            },
+            seconds * 1000 + 2000,
+          );
+        })
+        .then((off) => disposers.push(off))
+        .catch(() => {});
+      api
+        .onSchedule((event) => {
+          app.toast(
+            'info',
+            event.state === 'start' ? t('scheduleStarted') : t('scheduleStopped'),
+          );
+        })
+        .then((off) => disposers.push(off))
         .catch(() => {});
     }
+    const timer = window.setInterval(() => void pollClipboard(), 1200);
     return () => {
-      dispose?.();
+      disposers.forEach((dispose) => dispose());
+      window.clearInterval(timer);
     };
   });
 
@@ -46,6 +125,17 @@
         target.tagName === 'TEXTAREA' ||
         target.isContentEditable);
 
+    // A dialog owns the keyboard while it is open, so a shortcut cannot stack a second
+    // dialog on top of it.
+    if (app.showSettings) {
+      if (event.key === 'Escape') app.showSettings = false;
+      return;
+    }
+    if (app.showAdd) {
+      if (event.key === 'Escape') app.closeAdd();
+      return;
+    }
+
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'n') {
       event.preventDefault();
       app.showAdd = true;
@@ -54,6 +144,11 @@
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'f') {
       event.preventDefault();
       document.getElementById('majra-search')?.focus();
+      return;
+    }
+    if ((event.ctrlKey || event.metaKey) && event.key === ',') {
+      event.preventDefault();
+      app.showSettings = true;
       return;
     }
     if (typing) return;
@@ -65,7 +160,8 @@
       event.preventDefault();
       app.togglePause(app.selectedId);
     } else if (event.key === 'Escape') {
-      app.showAdd = false;
+      if (app.showSettings) app.showSettings = false;
+      else app.closeAdd();
     }
   }
 </script>
@@ -89,16 +185,32 @@
   <AddDownloadDialog />
 {/if}
 
+{#if app.showSettings}
+  <SettingsDialog />
+{/if}
+
 <div class="toasts" aria-live="polite">
   {#each app.toasts as toast (toast.id)}
     <div class="toast" data-kind={toast.kind}>
       <Icon name={toast.kind === 'error' ? 'alert' : 'check'} size={14} />
       <span class="toast-text">{toast.text}</span>
+      {#if toast.action}
+        <button
+          class="toast-action"
+          type="button"
+          onclick={() => {
+            toast.action?.run();
+            app.dismissToast(toast.id);
+          }}
+        >
+          {toast.action.label}
+        </button>
+      {/if}
       <button
         class="icon-btn"
         type="button"
         aria-label={t('dismiss')}
-        onclick={() => (app.toasts = app.toasts.filter((item) => item.id !== toast.id))}
+        onclick={() => app.dismissToast(toast.id)}
       >
         <Icon name="close" size={12} />
       </button>
@@ -169,6 +281,22 @@
     height: 20px;
     margin-block-start: -2px;
     margin-inline-end: -3px;
+  }
+
+  .toast-action {
+    flex: none;
+    padding: 2px 7px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--r-sm);
+    background: var(--surface-3);
+    color: var(--text);
+    font-size: 10.5px;
+    font-weight: 700;
+  }
+
+  .toast-action:hover {
+    border-color: var(--accent);
+    color: var(--accent);
   }
 
   @media (max-width: 1080px) {

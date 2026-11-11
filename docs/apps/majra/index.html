@@ -6,7 +6,7 @@
     <title>Majra — every link lands here · Asraab</title>
     <meta
       name="description"
-      content="Majra is a free, open-source Windows download manager that splits one file across Wi-Fi, Ethernet and USB tethering at the same time. Resume, queues, torrents and extract-while-downloading."
+      content="Majra is a free, open-source Windows download manager that splits one file across Wi-Fi, Ethernet and USB tethering at the same time. Resume, queues, proxy control and extract-while-downloading."
     />
     <meta name="theme-color" content="#07080c" />
     <meta property="og:type" content="website" />
@@ -66,7 +66,7 @@
           <div class="hero-copy">
             <img class="hero-icon" src="../../assets/img/majra-icon.png" alt="Majra app icon" width="58" height="58" />
             <div class="badge-row reveal">
-              <span class="badge gold"><span class="dot"></span>v1.2.3</span>
+              <span class="badge gold"><span class="dot"></span>v2.0.0</span>
               <span class="badge" data-i18n="majra.badgePlatform">Windows 10 / 11 · 64-bit</span>
               <span class="badge" data-i18n="majra.badgeFree">Free &amp; open source</span>
             </div>
@@ -80,7 +80,7 @@
               connection, at the same time.
             </p>
             <div class="hero-actions reveal" style="--d: 180ms">
-              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
+              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 <span data-i18n="majra.download">Download for Windows</span>
               </a>
@@ -90,7 +90,7 @@
               </a>
             </div>
             <div class="hero-meta reveal" style="--d: 240ms">
-              <span>127.8 MB</span><span class="sep"></span>
+              <span>3.1 MB</span><span class="sep"></span>
               <span data-i18n="majra.meta1">SHA-256 published</span><span class="sep"></span>
               <span data-i18n="majra.meta2">MIT license</span>
             </div>
@@ -113,11 +113,11 @@
           </div>
           <div class="fact">
             <dt data-i18n="majra.fact2t">Connections</dt>
-            <dd><span data-i18n="majra.fact2v">2 to 64</span><small data-i18n="majra.fact2s">per network</small></dd>
+            <dd><span data-i18n="majra.fact2v">1 to 32</span><small data-i18n="majra.fact2s">per download</small></dd>
           </div>
           <div class="fact">
             <dt data-i18n="majra.fact3t">Archives</dt>
-            <dd><span data-i18n="majra.fact3v">ZIP · RAR · TAR</span><small data-i18n="majra.fact3s">extract while downloading</small></dd>
+            <dd><span data-i18n="majra.fact3v">ZIP · TAR · TAR.GZ</span><small data-i18n="majra.fact3s">extract while downloading</small></dd>
           </div>
           <div class="fact">
             <dt data-i18n="majra.fact4t">Privacy</dt>
@@ -146,13 +146,13 @@
             </article>
             <article class="feature reveal" style="--d: 60ms">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10" stroke-linecap="round" /><circle cx="19" cy="17" r="2" /></svg></span>
-              <h3 data-i18n="majra.f2t">2 to 64 connections</h3>
-              <p data-i18n="majra.f2b">Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64.</p>
+              <h3 data-i18n="majra.f2t">1 to 32 connections</h3>
+              <p data-i18n="majra.f2b">Choose 1 to 32 parallel connections per download. There is no global speed cap: each link uses what the server and the path can give.</p>
             </article>
             <article class="feature reveal" style="--d: 120ms">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7Z" stroke-linejoin="round" /><path d="M9 13h6M12 10v6" stroke-linecap="round" /></svg></span>
               <h3 data-i18n="majra.f3t">Download + extract</h3>
-              <p data-i18n="majra.f3b">ZIP, RAR and TAR archives — including .tar.gz, .tar.bz2 and .tar.xz — unpack while they arrive.</p>
+              <p data-i18n="majra.f3b">ZIP and TAR unpack while their blocks land; .tar.gz and .tgz unpack in one pass when the file is complete. RAR is not supported yet.</p>
             </article>
             <article class="feature reveal" style="--d: 180ms">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.1 0l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1" stroke-linecap="round" /><path d="M14 11a5 5 0 0 0-7.1 0l-2 2A5 5 0 0 0 12 20.1l1.1-1.1" stroke-linecap="round" /></svg></span>
@@ -171,8 +171,8 @@
             </article>
             <article class="feature reveal" style="--d: 120ms">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3v10m0 0 4-4m-4 4-4-4" stroke-linecap="round" stroke-linejoin="round" /><path d="M4 15v3a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-3" stroke-linecap="round" /></svg></span>
-              <h3 data-i18n="majra.f7t">Torrents &amp; magnets</h3>
-              <p data-i18n="majra.f7b">Open a .torrent or a magnet link as one more source, not as a second app.</p>
+              <h3 data-i18n="majra.f7t">Proxy, scan and finish</h3>
+              <p data-i18n="majra.f7b">System, direct or a manual HTTP/SOCKS proxy. Finished files can be scanned with Windows Defender, and the PC can shut down when the queue is empty.</p>
             </article>
             <article class="feature reveal" style="--d: 180ms">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 3 4 6v6c0 5 3.4 8 8 9 4.6-1 8-4 8-9V6l-8-3Z" stroke-linejoin="round" /><path d="M9 12h6" stroke-linecap="round" /></svg></span>
@@ -217,7 +217,7 @@
               <div class="flow-merge" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v14m0 0 5-5m-5 5-5-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </div>
-              <div class="flow-target"><span class="cube"></span><span data-i18n="majra.flow.scheduler">Block scheduler</span><span class="mono" style="margin-inline-start: auto; color: var(--muted)">64 streams</span></div>
+              <div class="flow-target"><span class="cube"></span><span data-i18n="majra.flow.scheduler">Block scheduler</span><span class="mono" style="margin-inline-start: auto; color: var(--muted)">32 streams</span></div>
               <div class="flow-merge" aria-hidden="true">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v14m0 0 5-5m-5 5-5-5" stroke-linecap="round" stroke-linejoin="round" /></svg>
               </div>
@@ -262,8 +262,8 @@
               <div class="panel reveal" style="--d: 200ms">
                 <div class="mono" style="font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em">MAJRA / QUEUE</div>
                 <div style="display: flex; align-items: baseline; gap: 0.7rem; margin-top: 0.5rem">
-                  <span class="grad-text" style="font-family: var(--font-display); font-size: 2.1rem; font-weight: 600">64</span>
-                  <span style="color: var(--muted); font-size: 0.82rem" data-i18n="majra.shot.card3b">parallel streams at the Turbo ceiling</span>
+                  <span class="grad-text" style="font-family: var(--font-display); font-size: 2.1rem; font-weight: 600">32</span>
+                  <span style="color: var(--muted); font-size: 0.82rem" data-i18n="majra.shot.card3b">parallel streams at the per-download ceiling</span>
                 </div>
               </div>
             </div>
@@ -289,7 +289,7 @@
             </div>
             <div class="limit reveal" style="--d: 60ms">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v5M12 16.5h.01" stroke-linecap="round" /><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" /></svg>
-              <p data-i18n-html="majra.limit2"><strong>Turbo raises the count, not the server's capacity.</strong> Some servers rate-limit or block aggressive parallel requests.</p>
+              <p data-i18n-html="majra.limit2"><strong>More connections do not raise the server's capacity.</strong> Some servers rate-limit or block aggressive parallel requests.</p>
             </div>
             <div class="limit reveal" style="--d: 120ms">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v5M12 16.5h.01" stroke-linecap="round" /><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" /></svg>
@@ -301,7 +301,7 @@
             </div>
             <div class="limit reveal">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v5M12 16.5h.01" stroke-linecap="round" /><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" /></svg>
-              <p data-i18n-html="majra.limit5"><strong>It is a download manager, not a VPN or a proxy.</strong> It uses the connections Windows already has.</p>
+              <p data-i18n-html="majra.limit5"><strong>It is a download manager, not a VPN.</strong> The proxy setting only routes Majra's own traffic over a proxy you already have.</p>
             </div>
           </div>
         </div>
@@ -320,7 +320,7 @@
             <div class="steps" style="margin-top: 2.4rem">
               <article class="step">
                 <h3 data-i18n="majra.install.s1t">Download</h3>
-                <p data-i18n="majra.install.s1b">Get the 127.8 MB installer from the latest GitHub release.</p>
+                <p data-i18n="majra.install.s1b">Get the 3.1 MB installer from the latest GitHub release.</p>
               </article>
               <article class="step">
                 <h3 data-i18n="majra.install.s2t">Run it</h3>
@@ -335,11 +335,11 @@
           <div class="panel reveal" style="--d: 100ms">
             <span class="kicker" style="margin-bottom: 0.6rem" data-i18n="majra.verify.kicker">Verify the download</span>
             <p style="color: var(--muted); font-size: 0.88rem; line-height: 1.65" data-i18n="majra.verify.body">
-              Hash the installer before you run it. The SHA-256 for v1.2.3 is:
+              Hash the installer before you run it. The SHA-256 for v2.0.0 is:
             </p>
             <div class="code-block">
               <button class="copy-btn" type="button" data-copy="#sha-majra" data-i18n="majra.verify.copy">Copy</button>
-              <code id="sha-majra">Get-FileHash .\Majra-1.2.3-Setup.exe -Algorithm SHA256
+              <code id="sha-majra">Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 
 E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E</code>
             </div>
@@ -380,7 +380,7 @@ E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E</code>
             </article>
           </div>
           <div class="btn-row" style="margin-top: 2rem">
-            <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-Browser-Extension.zip">
+            <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra-Browser-Extension.zip">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
               <span data-i18n="majra.ext.download">Download the extension</span>
             </a>
@@ -431,20 +431,20 @@ E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E</code>
           <div class="download reveal">
             <div>
               <span class="kicker" data-i18n="majra.dl.kicker">Take it with you</span>
-              <h2 data-i18n="majra.dl.title">Majra 1.2.3 for Windows.</h2>
+              <h2 data-i18n="majra.dl.title">Majra 2.0.0 for Windows.</h2>
               <p data-i18n="majra.dl.body">One installer, no account. Windows 10 or 11, 64-bit. Keep the SHA-256 for your own check.</p>
               <div class="download-meta">
-                <div><span data-i18n="majra.dl.version">Version</span><span>1.2.3</span></div>
-                <div><span data-i18n="majra.dl.size">Installer size</span><span>127.8 MB</span></div>
+                <div><span data-i18n="majra.dl.version">Version</span><span>2.0.0</span></div>
+                <div><span data-i18n="majra.dl.size">Installer size</span><span>3.1 MB</span></div>
                 <div><span data-i18n="majra.dl.sha">SHA-256</span><span>E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E</span></div>
               </div>
             </div>
             <div class="download-side">
-              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe">
+              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <span data-i18n="majra.dl.primary">Download Majra 1.2.3</span>
+                <span data-i18n="majra.dl.primary">Download Majra 2.0.0</span>
               </a>
-              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-Browser-Extension.zip" data-i18n="majra.dl.secondary">Browser extension (.zip)</a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra-Browser-Extension.zip" data-i18n="majra.dl.secondary">Browser extension (.zip)</a>
               <p class="note" data-i18n="majra.dl.note">Unsigned installer. SmartScreen may ask you to confirm — verify the hash first.</p>
             </div>
           </div>

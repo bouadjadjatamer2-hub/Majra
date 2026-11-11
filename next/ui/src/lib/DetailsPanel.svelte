@@ -312,6 +312,14 @@
           {t('resume')}
         </button>
       {/if}
+      <button
+        class="btn btn-ghost"
+        type="button"
+        onclick={() => app.revealPath(download.destination)}
+      >
+        <Icon name="folder" size={14} />
+        {t('openFolder')}
+      </button>
       <span class="flex"></span>
       <button class="btn btn-danger" type="button" onclick={() => app.remove(download.id)}>
         <Icon name="trash" size={14} />

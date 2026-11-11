@@ -1,6 +1,9 @@
-import { api, demoInterfaces, errorText, isTauri } from './api';
+import { api, demoInterfaces, demoSettings, errorText, isTauri } from './api';
 import { categoryOf } from './format';
 import type {
+  AppSettings,
+  BridgeOffer,
+  BridgeStatus,
   Category,
   ConnectionSnapshot,
   DownloadEvent,
@@ -8,6 +11,12 @@ import type {
   DownloadSnapshot,
   InterfaceInfo,
 } from './types';
+
+export type InterfaceTest = {
+  state: 'testing' | 'ok' | 'fail';
+  latency: number | null;
+  error: string | null;
+};
 
 export type Filter =
   | 'all'
@@ -18,7 +27,13 @@ export type Filter =
   | 'error'
   | Category;
 
-export type Toast = { id: number; kind: 'error' | 'info'; text: string };
+export type ToastAction = { label: string; run: () => void };
+export type Toast = {
+  id: number;
+  kind: 'error' | 'info';
+  text: string;
+  action?: ToastAction;
+};
 
 const MB = 1024 * 1024;
 const GB = 1024 * MB;
@@ -126,9 +141,36 @@ class AppState {
   lang = $state<'en' | 'ar'>('en');
   theme = $state<'dark' | 'light'>('dark');
   showAdd = $state(false);
+  showSettings = $state(false);
+  /// A link the browser extension confirmed and the user hasn't started or dismissed.
+  offer = $state<BridgeOffer | null>(null);
   detailsOpen = $state(true);
   lowRam = $state(true);
   maxActive = $state(3);
+  defaultDestination = $state('');
+  defaultConnections = $state(8);
+  extractByDefault = $state(false);
+  confirmRemove = $state(true);
+  closeToTray = $state(true);
+  startMinimized = $state(false);
+  startAtLogin = $state(false);
+  shutdownWhenDone = $state(false);
+  scanWithDefender = $state(false);
+  clipboardWatch = $state(false);
+  scheduleEnabled = $state(false);
+  scheduleStart = $state('02:00');
+  scheduleStop = $state('07:00');
+  scheduleStopAction = $state<'pause' | 'exit' | 'shutdown'>('pause');
+  proxyMode = $state<'system' | 'none' | 'manual'>('system');
+  proxyUrl = $state('');
+  proxyUsername = $state('');
+  proxyPassword = $state('');
+  /// A link the clipboard watcher found; the add dialog picks it up when it mounts.
+  prefillUrl = $state<string | null>(null);
+  settingsPath = $state('');
+  dataFolder = $state('');
+  bridge = $state<BridgeStatus | null>(null);
+  interfaceTests = $state<Record<string, InterfaceTest>>({});
   speedHistory = $state<Record<string, number[]>>({});
   toasts = $state<Toast[]>([]);
   loaded = $state(false);
@@ -175,8 +217,12 @@ class AppState {
   async init(): Promise<void> {
     this.restorePreferences();
     if (!isTauri) {
+      this.applySettings(demoSettings());
       this.downloads = seedDownloads();
       this.seedHistory();
+      this.bridge = await api.bridgeStatus();
+      this.settingsPath = await api.settingsPath();
+      this.dataFolder = await api.dataFolder();
       const wanted =
         typeof location !== 'undefined'
           ? new URLSearchParams(location.search).get('select')
@@ -190,14 +236,112 @@ class AppState {
       return;
     }
     try {
-      this.interfaces = await api.listInterfaces();
-      await api.setMaxActive(this.maxActive);
-      this.downloads = await api.listDownloads();
+      const [interfaces, settings, downloads, bridge, settingsPath, dataFolder] =
+        await Promise.all([
+          api.listInterfaces(),
+          api.getSettings(),
+          api.listDownloads(),
+          api.bridgeStatus(),
+          api.settingsPath(),
+          api.dataFolder(),
+        ]);
+      this.interfaces = interfaces;
+      this.applySettings(settings);
+      this.downloads = downloads;
+      this.bridge = bridge;
+      this.settingsPath = settingsPath;
+      this.dataFolder = dataFolder;
       this.selectedId = this.downloads[0]?.id ?? null;
     } catch (error) {
       this.toast('error', errorText(error));
     } finally {
       this.loaded = true;
+    }
+  }
+
+  applySettings(settings: AppSettings): void {
+    this.defaultDestination = settings.defaultDestination ?? '';
+    this.defaultConnections = clamp(settings.defaultConnections, 1, 32);
+    this.maxActive = clamp(settings.maxActive, 1, 8);
+    this.extractByDefault = Boolean(settings.extractByDefault);
+    this.closeToTray = settings.closeToTray !== false;
+    this.startMinimized = Boolean(settings.startMinimized);
+    this.confirmRemove = settings.confirmRemove !== false;
+    this.startAtLogin = Boolean(settings.startAtLogin);
+    this.shutdownWhenDone = Boolean(settings.shutdownWhenDone);
+    this.scanWithDefender = Boolean(settings.scanWithDefender);
+    this.clipboardWatch = Boolean(settings.clipboardWatch);
+    this.scheduleEnabled = Boolean(settings.scheduleEnabled);
+    this.scheduleStart = settings.scheduleStart || '02:00';
+    this.scheduleStop = settings.scheduleStop || '07:00';
+    this.scheduleStopAction = settings.scheduleStopAction ?? 'pause';
+    this.proxyMode = settings.proxyMode ?? 'system';
+    this.proxyUrl = settings.proxyUrl ?? '';
+    this.proxyUsername = settings.proxyUsername ?? '';
+    this.proxyPassword = settings.proxyPassword ?? '';
+  }
+
+  currentSettings(): AppSettings {
+    return {
+      defaultDestination: this.defaultDestination,
+      defaultConnections: this.defaultConnections,
+      maxActive: this.maxActive,
+      extractByDefault: this.extractByDefault,
+      closeToTray: this.closeToTray,
+      startMinimized: this.startMinimized,
+      confirmRemove: this.confirmRemove,
+      startAtLogin: this.startAtLogin,
+      shutdownWhenDone: this.shutdownWhenDone,
+      scanWithDefender: this.scanWithDefender,
+      clipboardWatch: this.clipboardWatch,
+      scheduleEnabled: this.scheduleEnabled,
+      scheduleStart: this.scheduleStart,
+      scheduleStop: this.scheduleStop,
+      scheduleStopAction: this.scheduleStopAction,
+      proxyMode: this.proxyMode,
+      proxyUrl: this.proxyUrl,
+      proxyUsername: this.proxyUsername,
+      proxyPassword: this.proxyPassword,
+    };
+  }
+
+  async saveSettings(settings: AppSettings): Promise<boolean> {
+    try {
+      const saved = await api.saveSettings(settings);
+      this.applySettings(saved);
+      this.persist('majra.maxActive', String(saved.maxActive));
+      return true;
+    } catch (error) {
+      this.toast('error', errorText(error));
+      return false;
+    }
+  }
+
+  async refreshInterfaces(): Promise<void> {
+    try {
+      this.interfaces = await api.listInterfaces();
+      this.interfaceTests = {};
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
+  async testInterface(interfaceInfo: InterfaceInfo): Promise<void> {
+    this.interfaceTests = {
+      ...this.interfaceTests,
+      [interfaceInfo.id]: { state: 'testing', latency: null, error: null },
+    };
+    try {
+      const latency = await api.testInterface(interfaceInfo.address);
+      this.interfaceTests = {
+        ...this.interfaceTests,
+        [interfaceInfo.id]: { state: 'ok', latency, error: null },
+      };
+    } catch (error) {
+      this.interfaceTests = {
+        ...this.interfaceTests,
+        [interfaceInfo.id]: { state: 'fail', latency: null, error: errorText(error) },
+      };
     }
   }
 
@@ -224,13 +368,29 @@ class AppState {
     this.speedHistory = { ...this.speedHistory, [id]: next };
   }
 
-  async addDownload(request: DownloadRequest): Promise<void> {
+  async addDownload(request: DownloadRequest, offerId: string | null = null): Promise<void> {
     if (!isTauri) {
       this.addDemo(request);
       return;
     }
-    const id = await api.startDownload(request);
+    const id = await api.startDownload(request, offerId);
     this.selectedId = id;
+  }
+
+  /// The extension confirmed that its own copy is gone: show the link it handed over.
+  receiveOffer(offer: BridgeOffer): void {
+    this.offer = offer;
+    this.showAdd = true;
+  }
+
+  /// Closing the dialog also drops an unstarted offer, so its cookies are not kept alive.
+  closeAdd(): void {
+    if (this.offer) {
+      if (isTauri) void api.releaseOffer(this.offer.id);
+      this.offer = null;
+    }
+    this.prefillUrl = null;
+    this.showAdd = false;
   }
 
   async pause(id: string): Promise<void> {
@@ -268,9 +428,14 @@ class AppState {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, force = false): Promise<void> {
     const download = this.downloads.find((item) => item.id === id);
     if (!download) return;
+    if (!force && this.confirmRemove) {
+      const question =
+        this.lang === 'ar' ? 'تحذف هذا التحميل من القائمة؟' : 'Remove this download from the list?';
+      if (typeof window !== 'undefined' && !window.confirm(question)) return;
+    }
     if (isTauri) {
       try {
         if (download.status === 'downloading' || download.status === 'paused' || download.status === 'queued') {
@@ -287,6 +452,56 @@ class AppState {
     }
   }
 
+  /// Drop finished, failed and cancelled rows from the list. Files already on disk are
+  /// never touched; this only clears Majra's own history.
+  async clearHistory(): Promise<number> {
+    const ids = this.downloads
+      .filter((download) =>
+        ['completed', 'cancelled', 'error'].includes(download.status),
+      )
+      .map((download) => download.id);
+    for (const id of ids) {
+      if (isTauri) {
+        try {
+          await api.forget(id);
+        } catch (error) {
+          this.toast('error', errorText(error));
+        }
+      }
+    }
+    if (ids.length > 0) {
+      this.downloads = this.downloads.filter((download) => !ids.includes(download.id));
+      if (this.selectedId && ids.includes(this.selectedId)) {
+        this.selectedId = this.downloads[0]?.id ?? null;
+      }
+    }
+    return ids.length;
+  }
+
+  async openFolder(path: string): Promise<void> {
+    try {
+      await api.openFolder(path);
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
+  async revealPath(path: string): Promise<void> {
+    try {
+      await api.revealPath(path);
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
+  async openUrl(url: string): Promise<void> {
+    try {
+      await api.openUrl(url);
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
   togglePause(id: string): void {
     const download = this.downloads.find((item) => item.id === id);
     if (!download) return;
@@ -294,19 +509,31 @@ class AppState {
     else if (download.status === 'paused' || download.status === 'error') void this.resume(id);
   }
 
+  setTheme(theme: 'dark' | 'light'): void {
+    this.theme = theme;
+    this.persist('majra.theme', theme);
+  }
+
+  setLang(lang: 'en' | 'ar'): void {
+    this.lang = lang;
+    this.persist('majra.lang', lang);
+  }
+
+  setLowRam(value: boolean): void {
+    this.lowRam = value;
+    this.persist('majra.lowRam', value ? '1' : '0');
+  }
+
   toggleTheme(): void {
-    this.theme = this.theme === 'dark' ? 'light' : 'dark';
-    this.persist('majra.theme', this.theme);
+    this.setTheme(this.theme === 'dark' ? 'light' : 'dark');
   }
 
   toggleLang(): void {
-    this.lang = this.lang === 'en' ? 'ar' : 'en';
-    this.persist('majra.lang', this.lang);
+    this.setLang(this.lang === 'en' ? 'ar' : 'en');
   }
 
   toggleLowRam(): void {
-    this.lowRam = !this.lowRam;
-    this.persist('majra.lowRam', this.lowRam ? '1' : '0');
+    this.setLowRam(!this.lowRam);
   }
 
   /// How many downloads may run at once. Rows above the limit wait as Queued and the
@@ -316,15 +543,19 @@ class AppState {
     if (next === this.maxActive) return;
     this.maxActive = next;
     this.persist('majra.maxActive', String(next));
-    if (isTauri) void api.setMaxActive(next);
+    if (isTauri) void api.setMaxActive(next).catch((error) => this.toast('error', errorText(error)));
   }
 
-  toast(kind: Toast['kind'], text: string): void {
+  toast(kind: Toast['kind'], text: string, action?: ToastAction, ttl = 5200): void {
     const id = ++this.toastSeq;
-    this.toasts = [...this.toasts, { id, kind, text }];
+    this.toasts = [...this.toasts, { id, kind, text, action }];
     setTimeout(() => {
       this.toasts = this.toasts.filter((toast) => toast.id !== id);
-    }, 5200);
+    }, ttl);
+  }
+
+  dismissToast(id: number): void {
+    this.toasts = this.toasts.filter((toast) => toast.id !== id);
   }
 
   private setDemoStatus(id: string, status: DownloadSnapshot['status']): void {
@@ -496,6 +727,11 @@ class AppState {
       // A locked-down webview can refuse storage; the session still works.
     }
   }
+}
+
+function clamp(value: number, min: number, max: number): number {
+  const number = Number.isFinite(value) ? Math.round(value) : min;
+  return Math.max(min, Math.min(max, number));
 }
 
 function fileNameOf(url: string): string {

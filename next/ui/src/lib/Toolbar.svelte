@@ -91,6 +91,17 @@
   <span class="spacer"></span>
 
   <button
+    class="btn btn-ghost"
+    type="button"
+    aria-pressed={app.showSettings}
+    onclick={() => (app.showSettings = true)}
+    title={`${t('settings')} (Ctrl+,)`}
+  >
+    <Icon name="gear" size={15} />
+    <span class="label">{t('settings')}</span>
+  </button>
+
+  <button
     class="btn btn-ghost details-toggle"
     type="button"
     aria-pressed={app.detailsOpen}

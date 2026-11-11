@@ -135,10 +135,7 @@ async fn wait_status(
     }
 }
 
-async fn wait_progress(
-    rx: &mut broadcast::Receiver<DownloadEvent>,
-    id: &str,
-) -> DownloadSnapshot {
+async fn wait_progress(rx: &mut broadcast::Receiver<DownloadEvent>, id: &str) -> DownloadSnapshot {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
     loop {
         let event = tokio::time::timeout_at(deadline, rx.recv())
@@ -185,6 +182,8 @@ async fn second_download_waits_in_queue_until_a_slot_frees() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start first");
@@ -196,6 +195,8 @@ async fn second_download_waits_in_queue_until_a_slot_frees() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start second");
@@ -255,6 +256,8 @@ async fn raising_the_limit_fills_every_free_slot() {
                     interface_ids: Vec::new(),
                     block_size: None,
                     extract: false,
+                    file_name: None,
+                    browser: None,
                 })
                 .await
                 .expect("start")
@@ -314,6 +317,8 @@ async fn multi_connection_download_matches_bytes() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -350,6 +355,8 @@ async fn pause_then_resume_keeps_integrity() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -370,7 +377,10 @@ async fn pause_then_resume_keeps_integrity() {
     assert_eq!(done.downloaded_bytes, data.len() as u64);
     let written = std::fs::read(&target).expect("read file");
     assert_eq!(written, *data, "resumed bytes differ from the source");
-    assert!(!state_file.exists(), "completed download drops its state file");
+    assert!(
+        !state_file.exists(),
+        "completed download drops its state file"
+    );
     server.abort();
 }
 
@@ -398,6 +408,8 @@ async fn cancel_after_pause_removes_partial_file() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -444,6 +456,8 @@ async fn server_without_ranges_falls_back_to_one_stream() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -480,6 +494,8 @@ async fn history_survives_a_restart_and_resumes() {
             interface_ids: Vec::new(),
             block_size: None,
             extract: false,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -595,6 +611,8 @@ async fn extracts_zip_while_the_download_is_running() {
             interface_ids: Vec::new(),
             block_size: Some(128 * 1024),
             extract: true,
+            file_name: None,
+            browser: None,
         })
         .await
         .expect("start");
@@ -625,7 +643,10 @@ async fn extracts_zip_while_the_download_is_running() {
     assert_eq!(done.id, id);
     assert_eq!(extraction.status, "done", "{:?}", extraction.error);
     assert_eq!(extraction.entries_total, Some(3));
-    assert_eq!(extraction.entries_done, 3, "the traversal entry is processed");
+    assert_eq!(
+        extraction.entries_done, 3,
+        "the traversal entry is processed"
+    );
     assert!(overlapped, "extraction must start before the download ends");
 
     let root = dir.path().join("bundle");

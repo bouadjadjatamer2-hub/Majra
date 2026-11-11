@@ -37,6 +37,8 @@ async fn main() {
             interface_ids: Vec::new(),
             block_size: None,
             extract,
+            file_name: None,
+            browser: None,
         })
         .await
     {

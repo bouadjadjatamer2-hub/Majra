@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
-use std::net::{IpAddr, Ipv4Addr, UdpSocket};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr, UdpSocket};
+use std::time::{Duration, Instant};
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -20,6 +21,11 @@ pub struct InterfaceInfo {
     /// True for the adapter Windows would use for an unbound connection. Detected with a
     /// route lookup only (a UDP socket that is never sent to), so it costs no traffic.
     pub is_default: bool,
+    /// True when Windows has an outbound route from this address. A disconnected or
+    /// host-only virtual adapter can keep a private address but has no route; offering it
+    /// as a download path would fail every block assigned to it.
+    #[serde(default)]
+    pub usable: bool,
     /// IPv4 network in CIDR form, e.g. `192.168.1.0/24`. Two adapters on the same network
     /// reach the same router, so spreading connections over them adds no bandwidth.
     #[serde(default)]
@@ -82,8 +88,18 @@ fn network_of(address: Ipv4Addr, netmask: Ipv4Addr) -> Option<String> {
     Some(format!("{network}/{prefix}"))
 }
 
-/// IPv4 interfaces that can carry a normal outbound connection. Loopback and link-local
-/// addresses are omitted: they are never a second path to the internet.
+/// A route lookup from one interface address to a public address. Connecting a UDP
+/// socket only asks the routing table; no packet leaves the machine.
+fn has_route(address: Ipv4Addr) -> bool {
+    let Ok(socket) = UdpSocket::bind((address, 0)) else {
+        return false;
+    };
+    socket.connect("1.1.1.1:53").is_ok()
+}
+
+/// Every non-loopback IPv4 adapter, including ones Windows currently cannot route.
+/// The UI can show a dead adapter as "no route" instead of silently offering a path that
+/// would fail every block. Loopback is never a second path to the internet.
 pub fn list_interfaces() -> Vec<InterfaceInfo> {
     let mut out = Vec::new();
     let Ok(interfaces) = if_addrs::get_if_addrs() else {
@@ -98,7 +114,7 @@ pub fn list_interfaces() -> Vec<InterfaceInfo> {
         let if_addrs::IfAddr::V4(v4) = interface.addr else {
             continue;
         };
-        if v4.ip.is_link_local() || v4.ip.is_unspecified() {
+        if v4.ip.is_unspecified() {
             continue;
         }
 
@@ -112,12 +128,45 @@ pub fn list_interfaces() -> Vec<InterfaceInfo> {
             address: address.to_string(),
             kind,
             is_default: default == Some(address),
+            usable: has_route(address),
             network,
         });
     }
 
-    out.sort_by(|a, b| a.name.cmp(&b.name).then(a.address.cmp(&b.address)));
+    // A ready adapter first, then the Windows default, then a stable name order.
+    out.sort_by(|a, b| {
+        b.usable
+            .cmp(&a.usable)
+            .then(b.is_default.cmp(&a.is_default))
+            .then(a.name.cmp(&b.name))
+            .then(a.address.cmp(&b.address))
+    });
     out
+}
+
+/// Prove that one adapter can really reach the internet: bind a TCP socket to its
+/// address and open a connection to a public resolver. Unlike a route lookup this also
+/// catches an adapter whose router is up but has no working uplink.
+pub async fn test_interface(address: &str) -> Result<u64, String> {
+    use tokio::net::TcpSocket;
+
+    let ip = address
+        .parse::<Ipv4Addr>()
+        .map_err(|_| "invalid IPv4 address".to_string())?;
+    let socket = TcpSocket::new_v4().map_err(|error| error.to_string())?;
+    socket
+        .bind(SocketAddr::new(IpAddr::V4(ip), 0))
+        .map_err(|error| format!("could not bind {ip}: {error}"))?;
+    let target = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(1, 1, 1, 1)), 443);
+    let start = Instant::now();
+    match tokio::time::timeout(Duration::from_secs(6), socket.connect(target)).await {
+        Ok(Ok(stream)) => {
+            drop(stream);
+            Ok(start.elapsed().as_millis() as u64)
+        }
+        Ok(Err(error)) => Err(format!("connection failed: {error}")),
+        Err(_) => Err("connection timed out".into()),
+    }
 }
 
 #[cfg(test)]
@@ -127,7 +176,10 @@ mod tests {
     #[test]
     fn classifies_windows_adapter_names() {
         assert_eq!(classify("Wi-Fi"), InterfaceKind::Wifi);
-        assert_eq!(classify("Intel(R) Wi-Fi 6 AX201 160MHz"), InterfaceKind::Wifi);
+        assert_eq!(
+            classify("Intel(R) Wi-Fi 6 AX201 160MHz"),
+            InterfaceKind::Wifi
+        );
         assert_eq!(classify("Ethernet 2"), InterfaceKind::Ethernet);
         assert_eq!(
             classify("Realtek PCIe GbE Family Controller"),
@@ -142,9 +194,17 @@ mod tests {
     }
 
     #[test]
+    fn loopback_has_no_public_route() {
+        assert!(!has_route(Ipv4Addr::LOCALHOST));
+    }
+
+    #[test]
     fn builds_the_network_prefix() {
         assert_eq!(
-            network_of(Ipv4Addr::new(192, 168, 1, 4), Ipv4Addr::new(255, 255, 255, 0)),
+            network_of(
+                Ipv4Addr::new(192, 168, 1, 4),
+                Ipv4Addr::new(255, 255, 255, 0)
+            ),
             Some("192.168.1.0/24".into())
         );
         assert_eq!(
@@ -152,7 +212,10 @@ mod tests {
             Some("10.42.0.0/16".into())
         );
         assert_eq!(
-            network_of(Ipv4Addr::new(172, 20, 5, 9), Ipv4Addr::new(255, 255, 255, 252)),
+            network_of(
+                Ipv4Addr::new(172, 20, 5, 9),
+                Ipv4Addr::new(255, 255, 255, 252)
+            ),
             Some("172.20.5.8/30".into())
         );
         assert_eq!(
@@ -160,10 +223,7 @@ mod tests {
             None
         );
         assert_eq!(
-            network_of(
-                Ipv4Addr::new(1, 2, 3, 4),
-                Ipv4Addr::new(255, 0, 255, 0)
-            ),
+            network_of(Ipv4Addr::new(1, 2, 3, 4), Ipv4Addr::new(255, 0, 255, 0)),
             None
         );
     }

@@ -1,3 +1,4 @@
+use crate::browser::BrowserContext;
 use crate::engine::DownloadStatus;
 use serde::{Deserialize, Serialize};
 use std::fs;
@@ -20,6 +21,9 @@ pub struct SavedDownload {
     pub interface_ids: Vec<String>,
     #[serde(default)]
     pub extract: bool,
+    /// The browser's sign-in, so a download paused before a restart can still resume.
+    #[serde(default)]
+    pub browser: Option<BrowserContext>,
     pub total_bytes: u64,
     pub downloaded_bytes: u64,
     pub status: DownloadStatus,
@@ -148,6 +152,7 @@ mod tests {
             connections: 8,
             interface_ids: vec!["wifi|192.168.1.4".into()],
             extract: true,
+            browser: None,
             total_bytes: 1000,
             downloaded_bytes: 250,
             status,

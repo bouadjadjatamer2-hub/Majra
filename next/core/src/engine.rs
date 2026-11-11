@@ -11,14 +11,16 @@ use tokio::io::{AsyncSeekExt, AsyncWriteExt};
 use tokio::sync::{broadcast, mpsc};
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
+use url::Url;
 use uuid::Uuid;
 
+use crate::browser::{base_headers, BrowserContext};
 use crate::catalog::{Catalog, SavedDownload};
 use crate::error::{MajraError, Result};
 use crate::extract::{self, ExtractionSnapshot};
 use crate::net::{self, InterfaceInfo, InterfaceKind};
 use crate::plan::{self, Block, MAX_CONNECTIONS};
-use crate::probe::{client_builder, probe_url, ProbeResult};
+use crate::probe::{client_builder, probe_url_with, sanitize_file_name, ProbeResult};
 use crate::state;
 
 const WRITE_CHUNK: usize = 256 * 1024;
@@ -85,6 +87,12 @@ pub struct DownloadRequest {
     /// Unpack a ZIP archive while its bytes are still arriving.
     #[serde(default)]
     pub extract: bool,
+    /// The name the browser picked, when only it saw a link's `download` attribute.
+    #[serde(default)]
+    pub file_name: Option<String>,
+    /// The browser that handed the link over: its User-Agent, page and cookies.
+    #[serde(default)]
+    pub browser: Option<BrowserContext>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -135,8 +143,16 @@ struct Record {
     completed: Mutex<HashSet<u64>>,
     stats: Vec<Arc<ConnectionStat>>,
     clients: Vec<reqwest::Client>,
+    /// An unbound client. If a selected adapter drops mid-transfer, its workers finish
+    /// the block through this instead of failing the whole download.
+    auto_client: reqwest::Client,
+    /// False when the request already uses the Windows route; there is nothing to fall
+    /// back to in that case.
+    fallback_allowed: bool,
     /// The adapters the user picked, kept so the catalog can rebuild the request.
     interface_ids: Vec<String>,
+    /// The browser's sign-in, kept for every request and for a resume after a restart.
+    browser: Option<BrowserContext>,
     snapshot: Mutex<DownloadSnapshot>,
     cancel: Mutex<CancellationToken>,
     cancel_kind: Mutex<CancelKind>,
@@ -329,7 +345,17 @@ impl DownloadManager {
     }
 
     pub async fn start(&self, request: DownloadRequest) -> Result<String> {
-        self.start_inner(request, None).await
+        self.start_inner(request, None, None).await
+    }
+
+    /// Start from a probe the browser bridge already made. The extension's link may be
+    /// one-time or already signed, so it must not be fetched again just to plan the blocks.
+    pub async fn start_with_probe(
+        &self,
+        request: DownloadRequest,
+        probe: ProbeResult,
+    ) -> Result<String> {
+        self.start_inner(request, Some(probe), None).await
     }
 
     /// `reuse_id` keeps the row identity when a restored download resumes, so the list
@@ -337,13 +363,33 @@ impl DownloadManager {
     async fn start_inner(
         &self,
         request: DownloadRequest,
+        given_probe: Option<ProbeResult>,
         reuse_id: Option<String>,
     ) -> Result<String> {
         if request.url.trim().is_empty() {
             return Err(MajraError::Message("the link is empty".into()));
         }
 
-        let probe = probe_url(&request.url).await?;
+        let browser = match request.browser.as_ref() {
+            Some(context) => Some(context.validated().ok_or_else(|| {
+                MajraError::Message(
+                    "the browser's details for this download couldn't be read".into(),
+                )
+            })?),
+            None => None,
+        };
+        let mut probe = match given_probe {
+            Some(probe) if probe.requested_url == request.url => probe,
+            _ => probe_url_with(&request.url, browser.as_ref()).await?,
+        };
+        if let Some(name) = request
+            .file_name
+            .as_deref()
+            .map(sanitize_file_name)
+            .filter(|name| !name.is_empty())
+        {
+            probe.file_name = name;
+        }
         let total_bytes = probe.total_bytes.unwrap_or(0);
         let connections = request.connections.clamp(1, MAX_CONNECTIONS);
         let block_size = request
@@ -355,7 +401,12 @@ impl DownloadManager {
             Vec::new()
         };
 
-        let file_path = resolve_destination(&request.destination, &probe.file_name);
+        let mut file_path = resolve_destination(&request.destination, &probe.file_name);
+        // A fresh download never overwrites an existing file. A resume keeps its path
+        // because its `.majra.json` state file proves the partial file is ours.
+        if reuse_id.is_none() && file_path.exists() && !state_path_for(&file_path).exists() {
+            file_path = unique_path(&file_path);
+        }
         if let Some(parent) = file_path.parent() {
             tokio::fs::create_dir_all(parent).await?;
         }
@@ -369,7 +420,8 @@ impl DownloadManager {
 
         let interfaces = selected_interfaces(&request.interface_ids);
         let stats = make_stats(&interfaces, connections);
-        let clients = build_clients(&interfaces);
+        let (clients, auto_client) = build_clients(&interfaces);
+        let fallback_allowed = interfaces.iter().any(|interface| interface.id != "auto");
         let id = reuse_id.unwrap_or_else(|| Uuid::new_v4().to_string());
         let now = now_ms();
         let extract_root = extract_root_for(&file_path);
@@ -403,7 +455,10 @@ impl DownloadManager {
             completed: Mutex::new(completed),
             stats,
             clients,
+            auto_client,
+            fallback_allowed,
             interface_ids: request.interface_ids.clone(),
+            browser,
             snapshot: Mutex::new(snapshot),
             cancel: Mutex::new(CancellationToken::new()),
             cancel_kind: Mutex::new(CancelKind::None),
@@ -528,6 +583,56 @@ impl DownloadManager {
         Ok(())
     }
 
+    /// Pause every row that is transferring or waiting for a slot. The scheduler uses this
+    /// at the end of its window; a toolbar action would take the same path.
+    pub async fn pause_all(&self) {
+        let ids: Vec<String> = self
+            .list()
+            .into_iter()
+            .filter(|snapshot| {
+                matches!(
+                    snapshot.status,
+                    DownloadStatus::Downloading | DownloadStatus::Queued
+                )
+            })
+            .map(|snapshot| snapshot.id)
+            .collect();
+        for id in ids {
+            let _ = self.pause(&id).await;
+        }
+    }
+
+    /// Resume every paused or failed row, oldest first. Queued rows are already waiting and
+    /// need no help. The parallel limit still applies, so this only fills the free slots.
+    pub async fn resume_paused(&self) {
+        let mut ids: Vec<(u64, String)> = self
+            .list()
+            .into_iter()
+            .filter(|snapshot| {
+                matches!(
+                    snapshot.status,
+                    DownloadStatus::Paused | DownloadStatus::Error
+                )
+            })
+            .map(|snapshot| (snapshot.started_at, snapshot.id))
+            .collect();
+        ids.sort_by_key(|(started_at, _)| *started_at);
+        for (_, id) in ids {
+            let _ = self.resume(&id).await;
+        }
+    }
+
+    /// True while at least one row is transferring or waiting for a free slot. Used by the
+    /// "shut down when finished" check.
+    pub fn has_pending(&self) -> bool {
+        self.list().iter().any(|snapshot| {
+            matches!(
+                snapshot.status,
+                DownloadStatus::Downloading | DownloadStatus::Queued
+            )
+        })
+    }
+
     /// A row restored from the catalog has no worker. Rebuild its request and start it
     /// again with the same id, so the partial file and its block map are reused.
     async fn resume_restored(&self, id: &str) -> Result<()> {
@@ -545,8 +650,11 @@ impl DownloadManager {
             interface_ids: saved.interface_ids,
             block_size: None,
             extract: saved.extract,
+            file_name: None,
+            browser: saved.browser,
         };
-        self.start_inner(request, Some(id.to_string())).await?;
+        self.start_inner(request, None, Some(id.to_string()))
+            .await?;
         Ok(())
     }
 
@@ -619,11 +727,7 @@ impl DownloadManager {
         if let Some(record) = self.live(id) {
             return Some(record.snapshot.lock().unwrap().clone());
         }
-        self.restored
-            .lock()
-            .unwrap()
-            .get(id)
-            .map(saved_snapshot)
+        self.restored.lock().unwrap().get(id).map(saved_snapshot)
     }
 
     pub fn list(&self) -> Vec<DownloadSnapshot> {
@@ -686,6 +790,7 @@ fn saved_from(record: &Record) -> SavedDownload {
         connections: record.stats.len() as u32,
         interface_ids: record.interface_ids.clone(),
         extract: record.extract,
+        browser: record.browser.clone(),
         total_bytes: record.total_bytes,
         downloaded_bytes: snapshot.downloaded_bytes,
         status: snapshot.status,
@@ -721,7 +826,14 @@ fn saved_snapshot(saved: &SavedDownload) -> DownloadSnapshot {
 }
 
 fn resolve_destination(raw: &str, file_name: &str) -> PathBuf {
-    let raw = raw.trim();
+    // Windows accepts `/` in its own file APIs but not every tool does (Defender's scanner
+    // rejects it), so one shape is chosen here and kept for the whole download.
+    let raw = if cfg!(windows) {
+        raw.trim().replace('/', "\\")
+    } else {
+        raw.trim().to_string()
+    };
+    let raw = raw.as_str();
     if raw.is_empty() {
         return dirs::download_dir()
             .unwrap_or_else(|| PathBuf::from("."))
@@ -736,12 +848,37 @@ fn resolve_destination(raw: &str, file_name: &str) -> PathBuf {
     }
     // A path that does not exist yet: a dotted last segment is a file name, anything else
     // is a new folder. "D:\Media" stays a folder; "D:\Media\clip.mp4" stays a file.
-    let last = path.file_name().and_then(|name| name.to_str()).unwrap_or("");
+    let last = path
+        .file_name()
+        .and_then(|name| name.to_str())
+        .unwrap_or("");
     if last.contains('.') {
         path
     } else {
         path.join(file_name)
     }
+}
+
+/// `movie.mp4` -> `movie (1).mp4`, `movie (2).mp4`, ... until both the file and its
+/// resume state are free. This keeps a second download from silently overwriting the
+/// first one, which is the behavior a download manager user expects.
+fn unique_path(path: &Path) -> PathBuf {
+    let parent = path.parent().unwrap_or_else(|| Path::new("."));
+    let name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("download");
+    let (stem, extension) = match name.rfind('.') {
+        Some(index) if index > 0 => (&name[..index], &name[index..]),
+        _ => (name, ""),
+    };
+    for number in 1..10_000u32 {
+        let candidate = parent.join(format!("{stem} ({number}){extension}"));
+        if !candidate.exists() && !state_path_for(&candidate).exists() {
+            return candidate;
+        }
+    }
+    parent.join(format!("{stem}-{}{extension}", Uuid::new_v4()))
 }
 
 fn state_path_for(destination: &Path) -> PathBuf {
@@ -751,12 +888,24 @@ fn state_path_for(destination: &Path) -> PathBuf {
 }
 
 /// Archives unpack into a folder named after the archive, next to the archive itself.
+/// A double suffix such as `.tar.gz` is removed as a whole, so the folder is `sample`,
+/// not `sample.tar`.
 fn extract_root_for(file: &Path) -> PathBuf {
     let parent = file.parent().unwrap_or_else(|| Path::new("."));
-    let stem = file
-        .file_stem()
+    let name = file
+        .file_name()
         .and_then(|value| value.to_str())
         .unwrap_or("extracted");
+    let lower = name.to_ascii_lowercase();
+    let stem = [".tar.gz", ".tar.bz2", ".tar.xz", ".tgz", ".gz"]
+        .iter()
+        .find(|suffix| lower.ends_with(*suffix))
+        .map(|suffix| &name[..name.len() - suffix.len()])
+        .unwrap_or_else(|| {
+            file.file_stem()
+                .and_then(|value| value.to_str())
+                .unwrap_or("extracted")
+        });
     parent.join(stem)
 }
 
@@ -767,18 +916,27 @@ fn auto_interface() -> InterfaceInfo {
         address: String::new(),
         kind: InterfaceKind::Other,
         is_default: true,
+        usable: false,
         network: None,
     }
 }
 
 fn selected_interfaces(ids: &[String]) -> Vec<InterfaceInfo> {
+    choose_interfaces(net::list_interfaces(), ids)
+}
+
+/// Only adapters that Windows can route are accepted. A selected adapter that went down
+/// since the dialog opened is skipped, and if nothing usable remains the request uses the
+/// Windows route instead of failing every block.
+fn choose_interfaces(all: Vec<InterfaceInfo>, ids: &[String]) -> Vec<InterfaceInfo> {
     if ids.is_empty() {
         return vec![auto_interface()];
     }
-    let selected = net::list_interfaces()
+    let mut selected = all
         .into_iter()
-        .filter(|interface| ids.iter().any(|id| id == &interface.id))
+        .filter(|interface| interface.usable && ids.iter().any(|id| id == &interface.id))
         .collect::<Vec<_>>();
+    selected.dedup_by(|a, b| a.id == b.id);
     if selected.is_empty() {
         vec![auto_interface()]
     } else {
@@ -806,11 +964,11 @@ fn make_stats(interfaces: &[InterfaceInfo], connections: u32) -> Vec<Arc<Connect
         .collect()
 }
 
-fn build_clients(interfaces: &[InterfaceInfo]) -> Vec<reqwest::Client> {
+fn build_clients(interfaces: &[InterfaceInfo]) -> (Vec<reqwest::Client>, reqwest::Client) {
     let default = client_builder()
         .build()
         .expect("the default HTTP client must build");
-    interfaces
+    let clients = interfaces
         .iter()
         .map(|interface| {
             if interface.id == "auto" {
@@ -824,7 +982,8 @@ fn build_clients(interfaces: &[InterfaceInfo]) -> Vec<reqwest::Client> {
                 .build()
                 .unwrap_or_else(|_| default.clone())
         })
-        .collect()
+        .collect();
+    (clients, default)
 }
 
 fn empty_connections(stats: &[Arc<ConnectionStat>]) -> Vec<ConnectionSnapshot> {
@@ -1008,11 +1167,14 @@ fn set_extraction_status(record: &Record, status: &str) {
 }
 
 /// Record that `length` bytes at `offset` reached disk, then advance the contiguous prefix.
-fn note_written(record: &Record, offset: u64, length: u64) {
+/// Returns only the bytes that were not already present, so a retried block does not
+/// inflate the progress counter when it overwrites its own partial data.
+fn note_written(record: &Record, offset: u64, length: u64) -> u64 {
     if length == 0 {
-        return;
+        return 0;
     }
     let mut ranges = record.ranges.lock().unwrap();
+    let before = covered_bytes(&ranges);
     let mut start = offset;
     let mut end = offset.saturating_add(length);
 
@@ -1036,6 +1198,7 @@ fn note_written(record: &Record, offset: u64, length: u64) {
         ranges.remove(&key);
     }
     ranges.insert(start, end);
+    let after = covered_bytes(&ranges);
 
     let mut prefix = record.prefix.load(Ordering::Relaxed);
     loop {
@@ -1047,6 +1210,14 @@ fn note_written(record: &Record, offset: u64, length: u64) {
         prefix = next;
     }
     record.prefix.store(prefix, Ordering::Relaxed);
+    after.saturating_sub(before)
+}
+
+fn covered_bytes(ranges: &BTreeMap<u64, u64>) -> u64 {
+    ranges
+        .iter()
+        .map(|(start, end)| end.saturating_sub(*start))
+        .sum()
 }
 
 async fn wait_prefix(
@@ -1076,6 +1247,19 @@ async fn progressive_extract(
     let mut entries_done = 0u64;
     let mut bytes_written = 0u64;
 
+    // A ZIP local header is 30 bytes; a TAR header is 512. Wait for the larger of the two
+    // once, then decide whether this is a format the progressive pass understands.
+    if !wait_prefix(&record, 512, &cancel, &stop).await {
+        return;
+    }
+    let kind_path = record.file_path.clone();
+    let kind = tokio::task::spawn_blocking(move || extract::detect(&kind_path)).await;
+    match kind {
+        Ok(extract::ArchiveKind::Zip) | Ok(extract::ArchiveKind::Tar) => {}
+        // A gzip stream cannot be resumed in the middle; the final pass unpacks it.
+        _ => return,
+    }
+
     loop {
         if !wait_prefix(&record, offset.saturating_add(30), &cancel, &stop).await {
             return;
@@ -1084,10 +1268,8 @@ async fn progressive_extract(
         // Read the header first, then wait for the whole entry. Reading it early would see
         // the preallocated zeros that sit beyond the contiguous prefix.
         let path = record.file_path.clone();
-        let requirement = tokio::task::spawn_blocking(move || {
-            extract::local_requirement(&path, offset)
-        })
-        .await;
+        let requirement =
+            tokio::task::spawn_blocking(move || extract::local_requirement(&path, offset)).await;
         let needed = match requirement {
             Ok(Ok(Some(needed))) => needed,
             Ok(Ok(None)) => return,
@@ -1166,7 +1348,7 @@ async fn progressive_extract(
 /// Final pass: read the central directory, fill the gaps the progressive pass left, and
 /// report the exact entry count and uncompressed size.
 async fn finish_extract(record: &Arc<Record>, cancel: &CancellationToken) {
-    if !extract::looks_like_zip(&record.file_path) {
+    if !extract::is_archive(&record.file_path) {
         update_extraction(record, |extraction| {
             extraction.status = "skipped".into();
             extraction.current = None;
@@ -1188,10 +1370,13 @@ async fn finish_extract(record: &Arc<Record>, cancel: &CancellationToken) {
     let progress_record = record.clone();
 
     let result = tokio::task::spawn_blocking(move || {
-        let mut progress = |name: &str, done: u64, bytes: u64, total: u64| {
+        let mut progress = |name: &str, done: u64, bytes: u64, total: Option<u64>| {
             update_extraction(&progress_record, |extraction| {
                 extraction.entries_done = base_entries.saturating_add(done);
-                extraction.entries_total = Some(total);
+                // A gzip stream has no index, so its total stays unknown until the end.
+                if total.is_some() {
+                    extraction.entries_total = total;
+                }
                 extraction.bytes_written = base_bytes.saturating_add(bytes);
                 extraction.current = Some(name.to_string());
             });
@@ -1270,9 +1455,18 @@ async fn run_inner(
     ));
 
     let queue = Arc::new(Mutex::new(record.pending_blocks()));
+    let headers = Arc::new(base_headers(
+        record.browser.as_ref(),
+        &Url::parse(&record.probe.final_url)?,
+    ));
     let mut workers = Vec::new();
     for index in 0..record.stats.len() {
-        let client = record.clients[index % record.clients.len()].clone();
+        let context = WorkerContext {
+            client: record.clients[index % record.clients.len()].clone(),
+            fallback: record.auto_client.clone(),
+            can_fallback: record.fallback_allowed,
+            headers: headers.clone(),
+        };
         let stat = record.stats[index].clone();
         let queue = queue.clone();
         let tx = tx.clone();
@@ -1280,7 +1474,7 @@ async fn run_inner(
         let cancel = cancel.clone();
         let fatal = fatal.clone();
         workers.push(tokio::spawn(async move {
-            worker(record, client, stat, queue, tx, cancel, fatal).await
+            worker(record, context, stat, queue, tx, cancel, fatal).await
         }));
     }
     drop(tx);
@@ -1303,8 +1497,7 @@ async fn run_inner(
     if let Some(error) = worker_error {
         return Err(error);
     }
-    writer_result
-        .map_err(|error| MajraError::Message(format!("writer stopped: {error}")))??;
+    writer_result.map_err(|error| MajraError::Message(format!("writer stopped: {error}")))??;
 
     if cancel.is_cancelled() {
         return Ok(outcome(record));
@@ -1315,15 +1508,29 @@ async fn run_inner(
     Ok(Outcome::Completed)
 }
 
+/// The per-worker HTTP client and the headers every range request carries. Bundled so a
+/// worker keeps its arguments readable.
+struct WorkerContext {
+    client: reqwest::Client,
+    fallback: reqwest::Client,
+    can_fallback: bool,
+    headers: Arc<Vec<(&'static str, String)>>,
+}
+
 async fn worker(
     record: Arc<Record>,
-    client: reqwest::Client,
+    context: WorkerContext,
     stat: Arc<ConnectionStat>,
     queue: Arc<Mutex<VecDeque<usize>>>,
     tx: mpsc::Sender<WriteChunk>,
     cancel: CancellationToken,
     fatal: Arc<Mutex<Option<String>>>,
 ) -> Result<()> {
+    // A worker starts on its chosen adapter. If that adapter loses its route, the same
+    // block continues through the Windows route instead of burning every retry and
+    // failing the whole download.
+    let mut client = context.client.clone();
+    let mut used_fallback = false;
     loop {
         if cancel.is_cancelled() {
             return Ok(());
@@ -1347,6 +1554,7 @@ async fn worker(
                 &tx,
                 &cancel,
                 stat.id,
+                &context.headers,
             )
             .await
             {
@@ -1357,11 +1565,17 @@ async fn worker(
                 }
                 Err(MajraError::Cancelled) => return Ok(()),
                 Err(error) => {
+                    if !used_fallback && context.can_fallback && matches!(error, MajraError::Network(_))
+                    {
+                        used_fallback = true;
+                        client = context.fallback.clone();
+                        *stat.status.lock().unwrap() = "fallback".into();
+                        continue;
+                    }
                     if attempt >= MAX_RETRIES {
                         *fatal.lock().unwrap() = Some(format!(
                             "block {} failed after {} retries: {error}",
-                            block.index,
-                            MAX_RETRIES
+                            block.index, MAX_RETRIES
                         ));
                         cancel.cancel();
                         return Ok(());
@@ -1385,16 +1599,16 @@ async fn download_block(
     tx: &mpsc::Sender<WriteChunk>,
     cancel: &CancellationToken,
     connection_id: u32,
+    headers: &[(&'static str, String)],
 ) -> Result<()> {
-    let response = client
-        .get(url)
-        .header(
-            reqwest::header::RANGE,
-            format!("bytes={}-{}", block.start, block.end),
-        )
-        .header(reqwest::header::ACCEPT, "*/*")
-        .send()
-        .await?;
+    let mut request = client.get(url).header(
+        reqwest::header::RANGE,
+        format!("bytes={}-{}", block.start, block.end),
+    );
+    for (name, value) in headers {
+        request = request.header(*name, value.as_str());
+    }
+    let response = request.send().await?;
     if response.status() != reqwest::StatusCode::PARTIAL_CONTENT {
         return Err(MajraError::RangeRejected);
     }
@@ -1482,10 +1696,10 @@ async fn writer_task(
             return Err(error.into());
         }
         let length = chunk.data.len() as u64;
-        downloaded.fetch_add(length, Ordering::Relaxed);
-        note_written(&record, chunk.offset, length);
+        let added = note_written(&record, chunk.offset, length);
+        downloaded.fetch_add(added, Ordering::Relaxed);
         if let Some(stat) = record.stats.get(chunk.connection_id as usize) {
-            stat.downloaded.fetch_add(length, Ordering::Relaxed);
+            stat.downloaded.fetch_add(added, Ordering::Relaxed);
         }
     }
     file.sync_all().await?;
@@ -1497,8 +1711,37 @@ async fn run_single(
     cancel: &CancellationToken,
     downloaded: &Arc<AtomicU64>,
 ) -> Result<Outcome> {
+    let mut client = record.clients[0].clone();
+    let mut used_fallback = false;
+    loop {
+        match run_single_once(record, cancel, downloaded, &client).await {
+            Err(MajraError::Network(_)) if !used_fallback && record.fallback_allowed => {
+                used_fallback = true;
+                client = record.auto_client.clone();
+                downloaded.store(0, Ordering::Relaxed);
+                for stat in &record.stats {
+                    stat.downloaded.store(0, Ordering::Relaxed);
+                }
+                record.ranges.lock().unwrap().clear();
+                record.prefix.store(0, Ordering::Relaxed);
+            }
+            other => return other,
+        }
+    }
+}
+
+async fn run_single_once(
+    record: &Arc<Record>,
+    cancel: &CancellationToken,
+    downloaded: &Arc<AtomicU64>,
+    client: &reqwest::Client,
+) -> Result<Outcome> {
     record.ranges.lock().unwrap().clear();
     record.prefix.store(0, Ordering::Relaxed);
+    let headers = base_headers(
+        record.browser.as_ref(),
+        &Url::parse(&record.probe.final_url)?,
+    );
     let mut file = tokio::fs::OpenOptions::new()
         .create(true)
         .read(true)
@@ -1506,11 +1749,11 @@ async fn run_single(
         .truncate(true)
         .open(&record.file_path)
         .await?;
-    let response = record.clients[0]
-        .get(&record.probe.final_url)
-        .header(reqwest::header::ACCEPT, "*/*")
-        .send()
-        .await?;
+    let mut request = client.get(&record.probe.final_url);
+    for (name, value) in &headers {
+        request = request.header(*name, value.as_str());
+    }
+    let response = request.send().await?;
     if !response.status().is_success() {
         return Err(MajraError::Http(response.status().as_u16()));
     }
@@ -1540,11 +1783,12 @@ async fn run_single(
         if buffer.len() >= WRITE_CHUNK {
             file.write_all(&buffer).await?;
             let length = buffer.len() as u64;
+            let offset = written;
             written += length;
-            note_written(record, written - length, length);
-            downloaded.fetch_add(length, Ordering::Relaxed);
+            let added = note_written(record, offset, length);
+            downloaded.fetch_add(added, Ordering::Relaxed);
             if let Some(stat) = record.stats.first() {
-                stat.downloaded.fetch_add(length, Ordering::Relaxed);
+                stat.downloaded.fetch_add(added, Ordering::Relaxed);
             }
             buffer.clear();
         }
@@ -1552,11 +1796,12 @@ async fn run_single(
     if !buffer.is_empty() {
         file.write_all(&buffer).await?;
         let length = buffer.len() as u64;
+        let offset = written;
         written += length;
-        note_written(record, written - length, length);
-        downloaded.fetch_add(length, Ordering::Relaxed);
+        let added = note_written(record, offset, length);
+        downloaded.fetch_add(added, Ordering::Relaxed);
         if let Some(stat) = record.stats.first() {
-            stat.downloaded.fetch_add(length, Ordering::Relaxed);
+            stat.downloaded.fetch_add(added, Ordering::Relaxed);
         }
     }
     file.sync_all().await?;
@@ -1707,6 +1952,7 @@ mod tests {
                 address: "192.168.1.10".into(),
                 kind: InterfaceKind::Wifi,
                 is_default: false,
+                usable: true,
                 network: Some("192.168.1.0/24".into()),
             },
             InterfaceInfo {
@@ -1715,6 +1961,7 @@ mod tests {
                 address: "10.0.0.4".into(),
                 kind: InterfaceKind::Ethernet,
                 is_default: false,
+                usable: true,
                 network: Some("10.0.0.0/8".into()),
             },
             InterfaceInfo {
@@ -1723,6 +1970,7 @@ mod tests {
                 address: "192.168.42.2".into(),
                 kind: InterfaceKind::Usb,
                 is_default: false,
+                usable: true,
                 network: Some("192.168.42.0/24".into()),
             },
         ];
@@ -1738,6 +1986,65 @@ mod tests {
                 "connections were not spread over {name}"
             );
         }
+    }
+
+    fn test_interface(id: &str, usable: bool) -> InterfaceInfo {
+        InterfaceInfo {
+            id: id.into(),
+            name: id.into(),
+            address: "192.0.2.10".into(),
+            kind: InterfaceKind::Other,
+            is_default: false,
+            usable,
+            network: Some("192.0.2.0/24".into()),
+        }
+    }
+
+    #[test]
+    fn unusable_adapters_are_never_used() {
+        let all = vec![
+            test_interface("wifi|192.0.2.10", true),
+            test_interface("eth|192.0.2.11", false),
+        ];
+        let chosen = choose_interfaces(
+            all.clone(),
+            &["eth|192.0.2.11".to_string(), "wifi|192.0.2.10".to_string()],
+        );
+        assert_eq!(chosen.len(), 1);
+        assert_eq!(chosen[0].id, "wifi|192.0.2.10");
+
+        let none = choose_interfaces(all, &["eth|192.0.2.11".to_string()]);
+        assert_eq!(none.len(), 1);
+        assert_eq!(none[0].id, "auto");
+    }
+
+    #[test]
+    #[cfg(windows)]
+    fn a_typed_destination_gets_native_separators() {
+        // The scanner rejects forward slashes with exit code 2, which used to look like a
+        // detection, so the path is normalized before it ever reaches disk.
+        let path = resolve_destination("D:/Media/Clips/", "clip.mp4");
+        assert_eq!(path.to_string_lossy(), r"D:\Media\Clips\clip.mp4");
+        let unc = resolve_destination("//server/share", "file.bin");
+        assert_eq!(unc.to_string_lossy(), r"\\server\share\file.bin");
+    }
+
+    #[test]
+    fn a_second_download_does_not_overwrite_the_first() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let first = dir.path().join("movie.mp4");
+        std::fs::write(&first, b"old").expect("write");
+        let second = unique_path(&first);
+        assert_eq!(
+            second.file_name().and_then(|name| name.to_str()),
+            Some("movie (1).mp4")
+        );
+        std::fs::write(&second, b"new").expect("write");
+        let third = unique_path(&first);
+        assert_eq!(
+            third.file_name().and_then(|name| name.to_str()),
+            Some("movie (2).mp4")
+        );
     }
 
     /// Binding a client to an interface address must change the source address the server
@@ -1760,7 +2067,9 @@ mod tests {
                 let mut buffer = [0u8; 512];
                 let _ = socket.read(&mut buffer).await;
                 let _ = socket
-                    .write_all(b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok")
+                    .write_all(
+                        b"HTTP/1.1 200 OK\r\nContent-Length: 2\r\nConnection: close\r\n\r\nok",
+                    )
                     .await;
                 let _ = socket.shutdown().await;
             }
@@ -1773,6 +2082,7 @@ mod tests {
                 address: "127.0.0.1".into(),
                 kind: InterfaceKind::Other,
                 is_default: false,
+                usable: true,
                 network: None,
             },
             InterfaceInfo {
@@ -1781,11 +2091,12 @@ mod tests {
                 address: "127.0.0.2".into(),
                 kind: InterfaceKind::Other,
                 is_default: false,
+                usable: true,
                 network: None,
             },
         ];
 
-        for client in build_clients(&interfaces) {
+        for client in build_clients(&interfaces).0 {
             let response = client
                 .get(format!("http://{target}/"))
                 .send()

@@ -70,6 +70,9 @@
       app.selectedId = id;
     } else if (event.key === ' ') {
       event.preventDefault();
+      // The window-level shortcut also watches Space; stop it here so one press is one
+      // pause/resume, not a toggle that immediately undoes itself.
+      event.stopPropagation();
       app.togglePause(id);
     }
   }

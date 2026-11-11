@@ -60,7 +60,52 @@ export interface InterfaceInfo {
   address: string;
   kind: InterfaceKind;
   isDefault: boolean;
+  usable: boolean;
   network: string | null;
+}
+
+export type ScheduleStopAction = 'pause' | 'exit' | 'shutdown';
+export type ProxyMode = 'system' | 'none' | 'manual';
+
+export interface AppSettings {
+  defaultDestination: string;
+  defaultConnections: number;
+  maxActive: number;
+  extractByDefault: boolean;
+  closeToTray: boolean;
+  startMinimized: boolean;
+  confirmRemove: boolean;
+  startAtLogin: boolean;
+  shutdownWhenDone: boolean;
+  scanWithDefender: boolean;
+  clipboardWatch: boolean;
+  scheduleEnabled: boolean;
+  scheduleStart: string;
+  scheduleStop: string;
+  scheduleStopAction: ScheduleStopAction;
+  proxyMode: ProxyMode;
+  proxyUrl: string;
+  proxyUsername: string;
+  proxyPassword: string;
+}
+
+export interface ScanResult {
+  id: string;
+  fileName: string;
+  status: 'clean' | 'threat' | 'unavailable' | 'failed';
+  detail: string;
+}
+
+export interface ScheduleEvent {
+  state: 'start' | 'stop';
+  action: string;
+}
+
+export interface BridgeStatus {
+  running: boolean;
+  port: number;
+  ports: number[];
+  api: number;
 }
 
 export interface ProbeResult {
@@ -81,6 +126,16 @@ export interface DownloadRequest {
   interfaceIds: string[];
   blockSize?: number | null;
   extract?: boolean;
+}
+
+/// One link the browser extension confirmed. The cookies stay in the Rust backend.
+export interface BridgeOffer {
+  id: string;
+  url: string;
+  fileName: string | null;
+  pageUrl: string | null;
+  from: string | null;
+  probe: ProbeResult;
 }
 
 export interface DownloadEvent {

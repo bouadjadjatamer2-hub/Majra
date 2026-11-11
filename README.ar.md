@@ -15,13 +15,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.0-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="حالة CI" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="صفحة مجرى" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.0"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.0-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="عدد التنزيلات" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="ويندوز 10 و11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
@@ -53,46 +53,43 @@
 | الميزة                           | ما تفعله                                                                                 |
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | **كل الاتصالات معاً**            | الواي فاي والإيثرنت وتوصيل USB وبيانات الهاتف يمكنهم حمل نفس الملف في الوقت نفسه.        |
-| **من 2 إلى 64 اتصالاً**          | اختر 2 أو 4 أو 8 أو 16 أو 32 اتصالاً متوازياً لكل شبكة. وضع Turbo يصل إلى 64.            |
-| **تنزيل + فك ضغط**               | أرشيفات ZIP وRAR وTAR — بما فيها `.tar.gz` و`.tar.bz2` و`.tar.xz` — تُفكّ وهي تصل.       |
+| **من 1 إلى 32 اتصالاً**          | اختر من 1 إلى 32 اتصالاً متوازياً لكل تنزيل. لا يوجد سقف سرعة عام.                       |
+| **تنزيل + فك ضغط**               | ZIP وTAR يُفكّان أثناء وصول الكتل، و`.tar.gz` و`.tgz` يُفكّان بعد اكتمال الملف.           |
 | **الروابط المباشرة تبقى مباشرة** | الصق رابط ملف وابدأ. بلا صفحة وسيطة وبلا حساب إجباري. التنزيلات المسجّلة تحتفظ بكوكيزها. |
 | **من المتصفح إلى مجرى**          | إضافة Chromium ترسل التنزيل إلى مجرى مع كوكيز المتصفح، ثم تنسحب من الطريق.               |
-| **تورنت ومغناطيس**               | افتح ملف `.torrent` أو رابط magnet كمصدر إضافي، لا كتطبيق ثانٍ.                          |
-| **استئناف وجدولة**               | أوقف مؤقتاً، استأنف بعد إعادة التشغيل، وابدأ التنزيل في الوقت الذي تختاره.               |
+| **بروكسي ومسارات**               | بروكسي النظام أو مباشر أو يدوي HTTP/SOCKS. كل فحص وكل تنزيل يتبع نفس الاختيار.           |
+| **استئناف وجدولة**               | أوقف مؤقتاً، استأنف بعد إعادة التشغيل، وشغّل القائمة داخل نافذة يومية.                    |
 | **يُغلق إلى شريط النظام**        | يواصل التنزيل بعد إغلاق النافذة. شغّله مع ويندوز يجده جاهزاً.                            |
 | **فحص Defender**                 | يمكن فحص الملفات المنتهية بـ Windows Defender قبل فتحها.                                 |
+| **إغلاق الجهاز عند الانتهاء**    | يُغلق الجهاز بعد آخر تنزيل، مع تنبيه يتيح لك الإلغاء.                                    |
 | **محلي بالتصميم**                | الإعدادات والسجل وقائمة الانتظار على جهازك. لا شيء يُرسل إلى أي خادم.                    |
 
 ## التثبيت
 
 ### ويندوز 10 / 11 · 64-bit
 
-1. نزّل **[Majra-1.2.3-Setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe)** (127.8 ميغابايت).
+1. نزّل **[Majra_2.0.0_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe)**.
 2. شغّل المثبّت. الملف غير موقّع، لذا قد يُنبّهك Windows SmartScreen — اختر **More info → Run anyway**، أو ابنِ من المصدر.
 3. افتح مجرى، الصق رابطاً، واضغط **Start**.
 
-المثبّت مساعد: يمكنك اختيار المجلد والقرص، وينشئ اختصاراً على سطح المكتب.
+الإصدار 2.0.0 هو إعادة الكتابة بـ Rust وTauri. يحتفظ بنفس هوية التطبيق، لذا تثبيته يستبدل نسخة Electron القديمة. إعداداته وقائمته في `%APPDATA%\app.majra.desktop`، منفصلة عن بيانات التطبيق القديم.
 
 ### إضافة المتصفح
 
 إضافة Chromium (Chrome وEdge وBrave وOpera) تلتقط التنزيلات من المتصفح وتُسلّمها لمجرى مع
 الكوكيز الصحيحة.
 
-1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-Browser-Extension.zip)**.
+1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra-Browser-Extension.zip)**.
 2. فُكّ ضغطها في مكان ثابت.
 3. افتح `chrome://extensions`، فعّل **Developer mode**، اختر **Load unpacked**، ثم اختر المجلد.
 
 ### تحقّق من التنزيل
 
 ```powershell
-Get-FileHash .\Majra-1.2.3-Setup.exe -Algorithm SHA256
+Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 ```
 
-بصمة SHA-256 للإصدار `v1.2.3`:
-
-```text
-E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E
-```
+بصمة SHA-256 للإصدار `v2.0.0` تُنشر مع الإصدار.
 
 ## كيف يعمل
 
@@ -113,33 +110,36 @@ E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E
 ## حدود صريحة
 
 - **مجرى لا يخلق عرض نطاق غير موجود.** اتصالان خلف نفس الراوتر غالباً يتشاركان نفس المنفذ، والسرعة المجمّعة لن تتضاعف.
-- **Turbo يرفع عدد الاتصالات، لا قدرة الخادم.** بعض الخوادم تحدّ من الطلبات المتوازية الكثيفة أو تحجبها.
+- **زيادة الاتصالات لا ترفع قدرة الخادم.** بعض الخوادم تحدّ من الطلبات المتوازية الكثيفة أو تحجبها.
 - **ليست كل الروابط قابلة للتقسيم.** الخوادم التي لا تدعم byte-range تعود إلى مسار واحد.
 - **المثبّت غير موقّع.** لا توجد شهادة توقيع بعد، لذا قد يطلب SmartScreen تأكيداً.
-- **هو مدير تنزيلات، لا VPN ولا بروكسي.** يستخدم الاتصالات التي يراها ويندوز أصلاً.
+- **هو مدير تنزيلات، لا VPN.** إعداد البروكسي يوجّه حركة مجرى وحدها عبر بروكسي تملكه أنت.
+- **بعض الميزات غير موجودة في 2.0.0 بعد.** التورنت والمغناطيس، وفك RAR، والتقاط الوسائط، وسحب المواقع، والاستيراد من مدير آخر، والتحديث التلقائي. النسخة القديمة 1.2.3 كانت تعلن بعضها؛ هذا الملف والموقع يصفان الآن ما يفعله الإصدار فعلاً.
 
 ## البناء من المصدر
 
-المتطلبات: **Node.js 22+** و**npm 10+**، وويندوز 10/11 لبناء نسخة ويندوز.
+الإصدار 2.0.0 في [`next/`](next/): نواة Rust، وغلاف Tauri، وواجهة Svelte. مصادر Electron
+للإصدار 1.2.3 ما زالت في جذر المستودع للمرجع.
+
+المتطلبات: **Rust 1.82+** و**Node.js 22+** و**npm 10+**، ومتطلبات Tauri على ويندوز
+(WebView2 وأدوات بناء MSVC)، وويندوز 10/11.
 
 ```powershell
 git clone https://github.com/bouadjadjatamer2-hub/Majra.git
-cd Majra
+cd Majra/next
 npm install
-npm run dev
+npm run tauri dev
 ```
 
-| الأمر                     | ما يفعله                                          |
-| ------------------------- | ------------------------------------------------- |
-| `npm run dev`             | تشغيل التطبيق في وضع التطوير                      |
-| `npm run typecheck`       | فحص الأنواع للمعالج والواجهة والاختبارات والإضافة |
-| `npm run test:e2e`        | تشغيل اختبارات Playwright الشاملة                 |
-| `npm run build`           | بناء التطبيق                                      |
-| `npm run build:win`       | بناء مثبّت ويندوز                                 |
-| `npm run build:extension` | بناء إضافة المتصفح                                |
+| الأمر                 | ما يفعله                                        |
+| --------------------- | ----------------------------------------------- |
+| `npm run tauri dev`   | تشغيل تطبيق Rust وSvelte في وضع التطوير         |
+| `npm run check`       | فحص أنواع واجهة Svelte                          |
+| `cargo test`          | اختبارات النواة والجسر والتنزيل والإعدادات       |
+| `npm run tauri build` | بناء ملف ويندوز التنفيذي ومثبّت NSIS            |
 
-ملاحظات الحزم في [REBUILD.md](REBUILD.md)، ودليل الاستخدام بالعربية في
-[docs/USAGE_AR.md](docs/USAGE_AR.md)، وما هو قادم في [docs/ROADMAP.md](docs/ROADMAP.md).
+مصدر إضافة المتصفح في [`extension/`](extension). الموقع في [`docs/`](docs) يُنشر عبر
+GitHub Pages من فرع `main`.
 
 ## أسئلة شائعة
 
@@ -165,7 +165,7 @@ npm run dev
 
 <details>
 <summary><b>هل ينزّل من يوتيوب أو مواقع البث؟</b></summary>
-لا. ينزّل الملفات والتورنت، لا بثّ الوسائط. لا توجد أداة التقاط وسائط مرفقة.
+لا. ينزّل الملفات، لا بثّ الوسائط. لا توجد أداة التقاط وسائط ولا عميل تورنت في 2.0.0.
 </details>
 
 <details>

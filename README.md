@@ -15,14 +15,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download%20for%20Windows%20v1.2.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.0-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="Majra app page" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
   <a href="https://bouadjadjatamer2-hub.github.io/Majra/"><img alt="Asraab website" src="https://img.shields.io/badge/Website-Asraab-E8A35F?style=flat-square&logo=googlechrome&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v1.2.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v1.2.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.0"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.0-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
@@ -56,46 +56,43 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 | Feature                        | What it does                                                                                            |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | **Every connection, together** | Wi-Fi, Ethernet, USB tethering and mobile data can carry the same file at once.                         |
-| **2 to 64 connections**        | Pick 2, 4, 8, 16 or 32 parallel connections per network. Turbo mode scales to 64.                       |
-| **Download + extract**         | ZIP, RAR and TAR archives — including `.tar.gz`, `.tar.bz2` and `.tar.xz` — unpack while they arrive.   |
+| **1 to 32 connections**        | Choose 1 to 32 parallel connections per download. There is no global speed cap.                         |
+| **Download + extract**         | ZIP and TAR unpack while their blocks land; `.tar.gz` and `.tgz` unpack when the file is complete.      |
 | **Direct links stay direct**   | Paste a file URL and go. No in-between page, no forced account. Signed-in downloads keep their cookies. |
 | **Browser hand-off**           | The Chromium extension sends a download to Majra with the browser's cookies, then gets out of the way.  |
-| **Torrents and magnets**       | Open a `.torrent` or a magnet link as one more source, not as a second app.                             |
-| **Resume and schedule**        | Pause, resume after a reboot, and start downloads at a time you choose.                                 |
+| **Proxy and routes**           | System, direct or a manual HTTP/SOCKS proxy. Every probe and transfer follows the same choice.          |
+| **Resume and schedule**        | Pause, resume after a reboot, and run the queue inside a daily time window.                             |
 | **Closes to the tray**         | Keep downloading after the window closes. Start Majra with Windows and it is already there.             |
 | **Defender scan**              | Finished files can be scanned with Windows Defender before you open them.                               |
+| **Shut down when done**        | The PC can shut down after the last download, with a toast that lets you cancel.                        |
 | **Local by design**            | Settings, history and queue live on your PC. Nothing is sent to a server.                               |
 
 ## Install
 
 ### Windows 10 / 11 · 64-bit
 
-1. Download **[Majra-1.2.3-Setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-1.2.3-Setup.exe)** (127.8 MB).
+1. Download **[Majra_2.0.0_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe)**.
 2. Run the installer. It is unsigned, so Windows SmartScreen may warn you — choose **More info → Run anyway**, or build from source.
 3. Launch Majra, paste a link, and press **Start**.
 
-The installer is an assisted setup: you can choose the folder and the drive, and it creates a desktop shortcut.
+Version 2.0.0 is the Rust/Tauri rewrite. It keeps the same app identity as 1.2.3, so installing it replaces the old Electron build. Its settings and queue live in `%APPDATA%\app.majra.desktop`, separate from the old app's data.
 
 ### Browser extension
 
 The Chromium extension (Chrome, Edge, Brave, Opera) captures downloads from the browser and hands
 them to Majra with the right cookies.
 
-1. Download **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v1.2.3/Majra-Browser-Extension.zip)**.
+1. Download **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra-Browser-Extension.zip)**.
 2. Unzip it somewhere permanent.
 3. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder.
 
 ### Verify the download
 
 ```powershell
-Get-FileHash .\Majra-1.2.3-Setup.exe -Algorithm SHA256
+Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 ```
 
-The SHA-256 for `v1.2.3` is:
-
-```text
-E009724DD5601171F45874A69539C1464BC051B112472C11B87CCB40F5871B5E
-```
+The SHA-256 for `v2.0.0` is published with the release.
 
 ## How it works
 
@@ -116,33 +113,36 @@ for that link. That is a server limit, not a bug.
 ## Honest limits
 
 - **Majra cannot create bandwidth that is not there.** Two connections behind the same router often share one uplink; the combined speed will not double.
-- **Turbo raises the connection count, not the server's capacity.** Some servers rate-limit or block aggressive parallel requests.
+- **More connections do not raise the server's capacity.** Some servers rate-limit or block aggressive parallel requests.
 - **Not every link can be split.** Servers without byte-range support fall back to one stream.
 - **The installer is unsigned.** There is no code-signing certificate yet, so SmartScreen may ask you to confirm.
-- **It is a download manager, not a VPN or a proxy.** It uses the connections Windows already has.
+- **It is a download manager, not a VPN.** The proxy setting only routes Majra's own traffic over a proxy you already have.
+- **Some features are not in 2.0.0 yet.** Torrents and magnets, RAR extraction, media sniffing, site grabbing, importing from another manager, and auto-update are still missing. The old 1.2.3 app advertised some of these; this README and the website now describe what the release actually does.
 
 ## Build from source
 
-Requirements: **Node.js 22+**, **npm 10+**, and Windows 10/11 for the Windows build.
+Version 2.0.0 lives in [`next/`](next/): a Rust core, a Tauri shell and a Svelte UI. The
+1.2.3 Electron sources are still at the repository root for reference.
+
+Requirements: **Rust 1.82+**, **Node.js 22+**, **npm 10+**, the Tauri prerequisites for
+Windows (WebView2 and the MSVC build tools), and Windows 10/11.
 
 ```powershell
 git clone https://github.com/bouadjadjatamer2-hub/Majra.git
-cd Majra
+cd Majra/next
 npm install
-npm run dev
+npm run tauri dev
 ```
 
-| Command                   | What it does                                      |
-| ------------------------- | ------------------------------------------------- |
-| `npm run dev`             | Start the app in development mode                 |
-| `npm run typecheck`       | Type-check main, renderer, e2e and extension code |
-| `npm run test:e2e`        | Run the Playwright end-to-end suite               |
-| `npm run build`           | Build the app                                     |
-| `npm run build:win`       | Build the Windows installer                       |
-| `npm run build:extension` | Build the browser extension                       |
+| Command                | What it does                                      |
+| ---------------------- | ------------------------------------------------- |
+| `npm run tauri dev`    | Start the Rust + Svelte app in development mode   |
+| `npm run check`        | Type-check the Svelte UI                          |
+| `cargo test`           | Run the core, bridge, download and settings tests |
+| `npm run tauri build`  | Build the Windows executable and NSIS installer   |
 
-Packaging notes live in [REBUILD.md](REBUILD.md), and what is planned next is in
-[docs/ROADMAP.md](docs/ROADMAP.md).
+The browser extension source is in [`extension/`](extension). The site in [`docs/`](docs)
+is served by GitHub Pages from `main`.
 
 ## FAQ
 
@@ -168,7 +168,7 @@ The installer is not code-signed. Windows cannot verify the publisher, so it ask
 
 <details>
 <summary><b>Can Majra download from YouTube or other streaming sites?</b></summary>
-No. It downloads files and torrents, not media streams. There is no bundled media sniffer.
+No. It downloads files, not media streams. There is no bundled media sniffer and no torrent client in 2.0.0.
 </details>
 
 <details>
