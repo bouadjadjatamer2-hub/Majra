@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
 
 pub const MIN_BLOCK_BYTES: u64 = 1 << 20;
-pub const MAX_BLOCK_BYTES: u64 = 16 << 20;
+/// Big files get big segments. A 40 GB transfer at 16 MB a block is 2500 range
+/// requests; at 64 MB it is 600, and the last block is the only short one.
+pub const MAX_BLOCK_BYTES: u64 = 64 << 20;
 pub const DEFAULT_CONNECTIONS: u32 = 8;
 pub const MAX_CONNECTIONS: u32 = 32;
 
@@ -31,7 +33,9 @@ pub fn block_size_for(total_bytes: u64, connections: u32) -> u64 {
         return MIN_BLOCK_BYTES;
     }
     let connections = connections.clamp(1, MAX_CONNECTIONS) as u64;
-    (total_bytes / (connections * 8)).clamp(MIN_BLOCK_BYTES, MAX_BLOCK_BYTES)
+    // Four segments per connection is enough to keep every worker busy to the end
+    // without making the queue so long that a restart re-requests finished work.
+    (total_bytes / (connections * 4)).clamp(MIN_BLOCK_BYTES, MAX_BLOCK_BYTES)
 }
 
 pub fn plan_blocks(total_bytes: u64, block_size: u64) -> Vec<Block> {

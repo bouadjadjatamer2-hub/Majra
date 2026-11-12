@@ -1,5 +1,6 @@
 import { api, demoInterfaces, demoSettings, errorText, isTauri } from './api';
 import { categoryOf } from './format';
+import { t } from './i18n';
 import type {
   AppSettings,
   BridgeOffer,
@@ -10,6 +11,7 @@ import type {
   DownloadRequest,
   DownloadSnapshot,
   InterfaceInfo,
+  SystemProfile,
 } from './types';
 
 export type InterfaceTest = {
@@ -24,6 +26,7 @@ export type Filter =
   | 'queued'
   | 'paused'
   | 'completed'
+  | 'cancelled'
   | 'error'
   | Category;
 
@@ -78,6 +81,7 @@ function seedDownloads(): DownloadSnapshot[] {
     return {
       id,
       status,
+      phase: status === 'downloading' ? 'downloading' : '',
       url: `https://cdn.example.net/releases/${encodeURIComponent(fileName)}`,
       fileName,
       destination: `C:\\Users\\Lenovo\\Downloads\\${fileName}`,
@@ -165,10 +169,18 @@ class AppState {
   proxyUrl = $state('');
   proxyUsername = $state('');
   proxyPassword = $state('');
+  autoTune = $state(true);
+  keepAwake = $state(true);
+  /// What this machine can do, from the Rust side: a suggested connection count sized
+  /// for the default adapter's link rate and the CPU.
+  systemProfile = $state<SystemProfile | null>(null);
   /// A link the clipboard watcher found; the add dialog picks it up when it mounts.
   prefillUrl = $state<string | null>(null);
   settingsPath = $state('');
   dataFolder = $state('');
+  /// The running build's version, read from the shell so the window never claims a
+  /// version the binary is not. The browser preview fills it from the bundled string.
+  version = $state('');
   bridge = $state<BridgeStatus | null>(null);
   interfaceTests = $state<Record<string, InterfaceTest>>({});
   speedHistory = $state<Record<string, number[]>>({});
@@ -196,6 +208,13 @@ class AppState {
     ).length;
   }
 
+  /// The connection count a new download starts with. Auto-tune follows the adapter's
+  /// link rate; the manual setting is used when the user turns it off.
+  get effectiveConnections(): number {
+    if (!this.autoTune) return this.defaultConnections;
+    return this.systemProfile?.recommendedConnections ?? this.defaultConnections;
+  }
+
   get visible(): DownloadSnapshot[] {
     const query = this.query.trim().toLowerCase();
     return this.downloads.filter((download) => {
@@ -217,12 +236,14 @@ class AppState {
   async init(): Promise<void> {
     this.restorePreferences();
     if (!isTauri) {
+      this.version = t('version');
       this.applySettings(demoSettings());
       this.downloads = seedDownloads();
       this.seedHistory();
       this.bridge = await api.bridgeStatus();
       this.settingsPath = await api.settingsPath();
       this.dataFolder = await api.dataFolder();
+      this.systemProfile = await api.systemProfile();
       const wanted =
         typeof location !== 'undefined'
           ? new URLSearchParams(location.search).get('select')
@@ -236,21 +257,33 @@ class AppState {
       return;
     }
     try {
-      const [interfaces, settings, downloads, bridge, settingsPath, dataFolder] =
-        await Promise.all([
-          api.listInterfaces(),
-          api.getSettings(),
-          api.listDownloads(),
-          api.bridgeStatus(),
-          api.settingsPath(),
-          api.dataFolder(),
-        ]);
+      const [
+        interfaces,
+        settings,
+        downloads,
+        bridge,
+        settingsPath,
+        dataFolder,
+        systemProfile,
+        version,
+      ] = await Promise.all([
+        api.listInterfaces(),
+        api.getSettings(),
+        api.listDownloads(),
+        api.bridgeStatus(),
+        api.settingsPath(),
+        api.dataFolder(),
+        api.systemProfile(),
+        api.appVersion(),
+      ]);
       this.interfaces = interfaces;
       this.applySettings(settings);
       this.downloads = downloads;
       this.bridge = bridge;
       this.settingsPath = settingsPath;
       this.dataFolder = dataFolder;
+      this.systemProfile = systemProfile;
+      if (version) this.version = version;
       this.selectedId = this.downloads[0]?.id ?? null;
     } catch (error) {
       this.toast('error', errorText(error));
@@ -279,6 +312,8 @@ class AppState {
     this.proxyUrl = settings.proxyUrl ?? '';
     this.proxyUsername = settings.proxyUsername ?? '';
     this.proxyPassword = settings.proxyPassword ?? '';
+    this.autoTune = settings.autoTune !== false;
+    this.keepAwake = settings.keepAwake !== false;
   }
 
   currentSettings(): AppSettings {
@@ -302,6 +337,8 @@ class AppState {
       proxyUrl: this.proxyUrl,
       proxyUsername: this.proxyUsername,
       proxyPassword: this.proxyPassword,
+      autoTune: this.autoTune,
+      keepAwake: this.keepAwake,
     };
   }
 
@@ -359,6 +396,13 @@ class AppState {
     }
     if (event.type === 'error' && snapshot.error) {
       this.toast('error', snapshot.error);
+    } else if (event.type === 'done') {
+      // The file is on disk and unpacked. Offer to open it right there, so finishing a
+      // download does not require finding the row again.
+      this.toast('info', `${snapshot.fileName} · ${t('downloadFinished')}`, {
+        label: t('open'),
+        run: () => void this.openDownload(snapshot),
+      });
     }
   }
 
@@ -428,8 +472,45 @@ class AppState {
     }
   }
 
-  async remove(id: string, force = false): Promise<void> {
+  /// Stop a download and delete its partial file. The row stays in the list as
+  /// "cancelled" so the user sees what happened; it is not kept for the next session.
+  async cancel(id: string, force = false): Promise<void> {
     const download = this.downloads.find((item) => item.id === id);
+    if (!download || download.status === 'completed') return;
+    if (!force) {
+      const question =
+        this.lang === 'ar'
+          ? 'تلغي هذا التحميل وتحذف الملف الجزئي؟'
+          : 'Cancel this download and delete the partial file?';
+      if (typeof window !== 'undefined' && !window.confirm(question)) return;
+    }
+    if (!isTauri) {
+      this.setDemoStatus(id, 'cancelled');
+      return;
+    }
+    try {
+      await api.cancel(id);
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
+  /// Open a finished download: the extracted folder when unpacking finished, otherwise
+  /// the file with the program Windows associates with it.
+  async openDownload(download: DownloadSnapshot): Promise<void> {
+    if (download.status !== 'completed') return;
+    if (download.extraction?.status === 'done') {
+      await this.openFolder(download.extraction.folder);
+      return;
+    }
+    try {
+      await api.openFile(download.destination);
+    } catch (error) {
+      this.toast('error', errorText(error));
+    }
+  }
+
+  async remove(id: string, force = false): Promise<void> {    const download = this.downloads.find((item) => item.id === id);
     if (!download) return;
     if (!force && this.confirmRemove) {
       const question =
@@ -750,6 +831,7 @@ function matchesFilter(download: DownloadSnapshot, filter: Filter): boolean {
     filter === 'queued' ||
     filter === 'paused' ||
     filter === 'completed' ||
+    filter === 'cancelled' ||
     filter === 'error'
   ) {
     return download.status === filter;

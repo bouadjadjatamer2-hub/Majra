@@ -26,7 +26,14 @@ pub fn client_builder() -> reqwest::ClientBuilder {
         reqwest::Client::builder()
             .redirect(reqwest::redirect::Policy::limited(10))
             .connect_timeout(Duration::from_secs(15))
-            .read_timeout(Duration::from_secs(45)),
+            .read_timeout(Duration::from_secs(45))
+            // Keep a pool per adapter: a retried block reuses its TLS connection instead
+            // of paying a fresh handshake, and a dead peer is noticed by keep-alive
+            // probes instead of holding a worker forever.
+            .tcp_keepalive(Duration::from_secs(30))
+            .tcp_nodelay(true)
+            .pool_idle_timeout(Duration::from_secs(90))
+            .pool_max_idle_per_host(32),
     )
 }
 
@@ -160,6 +167,10 @@ pub async fn probe_url_with(url: &str, browser: Option<&BrowserContext>) -> Resu
 
     let client = client_builder()
         .redirect(reqwest::redirect::Policy::none())
+        // A probe must never outlive the user's patience. Thirty seconds is enough for a
+        // slow host to answer, and short enough that the dialog reports the failure
+        // instead of looking frozen.
+        .timeout(Duration::from_secs(30))
         .build()?;
     let mut current = parsed.clone();
     let mut redirects = 0u8;
@@ -225,6 +236,31 @@ pub async fn probe_url_with(url: &str, browser: Option<&BrowserContext>) -> Resu
         })
         .or_else(|| filename_from_url(&parsed))
         .unwrap_or_else(|| "download.bin".to_string());
+
+    // Headers are a promise; the first bytes are proof. Reading one probe-sized piece
+    // here turns a host that accepts the request and then goes silent into an immediate,
+    // understandable error instead of a row that sits at zero for minutes.
+    if status == reqwest::StatusCode::PARTIAL_CONTENT || status.is_success() {
+        use futures_util::StreamExt;
+        let read = async move {
+            let mut stream = response.bytes_stream();
+            let mut received = 0usize;
+            while received < PROBE_BYTES as usize {
+                match stream.next().await {
+                    Some(Ok(chunk)) => received += chunk.len(),
+                    _ => break,
+                }
+            }
+        };
+        if tokio::time::timeout(Duration::from_secs(20), read)
+            .await
+            .is_err()
+        {
+            return Err(MajraError::Message(
+                "the server accepted the request but sent no data".into(),
+            ));
+        }
+    }
 
     Ok(ProbeResult {
         requested_url: url.to_string(),

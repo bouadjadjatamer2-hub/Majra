@@ -2237,7 +2237,7 @@ checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
 
 [[package]]
 name = "majra-core"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -2260,11 +2260,12 @@ dependencies = [
  "tokio-util",
  "url",
  "uuid",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]
 name = "majra-desktop"
-version = "2.0.0"
+version = "2.0.1"
 dependencies = [
  "arboard",
  "chrono",
@@ -2281,6 +2282,7 @@ dependencies = [
  "tempfile",
  "tokio",
  "url",
+ "windows-sys 0.59.0",
 ]
 
 [[package]]

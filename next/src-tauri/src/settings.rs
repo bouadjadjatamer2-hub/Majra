@@ -37,6 +37,10 @@ pub struct Settings {
     pub proxy_url: String,
     pub proxy_username: String,
     pub proxy_password: String,
+    /// Pick the connection count from the adapter's link speed instead of a fixed number.
+    pub auto_tune: bool,
+    /// Keep Windows (and the disk) awake while a download is running.
+    pub keep_awake: bool,
 }
 
 impl Default for Settings {
@@ -61,6 +65,8 @@ impl Default for Settings {
             proxy_url: String::new(),
             proxy_username: String::new(),
             proxy_password: String::new(),
+            auto_tune: true,
+            keep_awake: true,
         }
     }
 }

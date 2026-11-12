@@ -4,10 +4,10 @@ use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, HashMap, HashSet, VecDeque};
 use std::net::IpAddr;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
-use tokio::io::{AsyncSeekExt, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 use tokio::sync::{broadcast, mpsc};
 use tokio::task::JoinHandle;
 use tokio_util::sync::CancellationToken;
@@ -23,11 +23,25 @@ use crate::plan::{self, Block, MAX_CONNECTIONS};
 use crate::probe::{client_builder, probe_url_with, sanitize_file_name, ProbeResult};
 use crate::state;
 
-const WRITE_CHUNK: usize = 256 * 1024;
+/// One write syscall's worth of data. Bigger chunks keep the writer out of the network's
+/// way: at a gigabit the disk sees roughly a hundred writes a second, not four hundred.
+const WRITE_CHUNK: usize = 1024 * 1024;
+/// Chunks the workers may queue ahead of the writer before they wait for the disk.
 const CHANNEL_CHUNKS: usize = 32;
 const REPORT_MS: u64 = 250;
-const CHECKPOINT_SECONDS: u64 = 2;
-const MAX_RETRIES: u32 = 3;
+/// How often the resume map is written beside the partial file. Five seconds is far
+/// more than a crash can lose and far less disk churn than a tick every other second.
+const CHECKPOINT_SECONDS: u64 = 5;
+/// Transient failures (a reset connection, a 503, a short body) get a few more tries than
+/// before; permanent ones (403, 404, 416) fail on the first answer instead of burning time.
+const MAX_RETRIES: u32 = 5;
+/// A transfer that delivers nothing for this long is treated as hung: the current attempt
+/// is cancelled and its missing blocks are requested again.
+const STALL_SECONDS: u64 = 35;
+/// Before the first byte there is nothing on screen to prove the app is alive, so a
+/// silent server gets less patience than one that has already started sending.
+const FIRST_BYTE_SECONDS: u64 = 20;
+const MAX_STALL_RETRIES: u32 = 2;
 /// Downloads running at once by default; the rest wait in the queue.
 const DEFAULT_MAX_ACTIVE: usize = 3;
 const MAX_ACTIVE_LIMIT: usize = 8;
@@ -59,6 +73,11 @@ pub struct ConnectionSnapshot {
 pub struct DownloadSnapshot {
     pub id: String,
     pub status: DownloadStatus,
+    /// What the transfer is doing right now. `starting` until the first byte reaches
+    /// the disk, then `downloading`; `reconnecting` after a stall restart, and
+    /// `finalizing` while the last blocks are flushed and the file is closed.
+    #[serde(default)]
+    pub phase: String,
     pub url: String,
     pub file_name: String,
     pub destination: String,
@@ -163,6 +182,10 @@ struct Record {
     extract_root: PathBuf,
     prefix: Arc<AtomicU64>,
     ranges: Mutex<BTreeMap<u64, u64>>,
+    /// Byte ranges that the writer has actually written to the file. Checkpoints use this
+    /// instead of `completed`: a block is only marked in `completed` once its bytes were
+    /// handed to the writer, which can be a moment before they reach the disk.
+    durable: Mutex<BTreeMap<u64, u64>>,
     extracted: Mutex<HashSet<String>>,
 }
 
@@ -174,6 +197,16 @@ impl Record {
             .filter(|block| completed.contains(&block.index))
             .map(Block::len)
             .sum()
+    }
+
+    /// Blocks whose every byte has reached the file. Safe to write into the resume state.
+    fn durable_blocks(&self) -> HashSet<u64> {
+        let ranges = self.durable.lock().unwrap();
+        self.blocks
+            .iter()
+            .filter(|block| covers(&ranges, block.start, block.end + 1))
+            .map(|block| block.index)
+            .collect()
     }
 
     fn pending_blocks(&self) -> VecDeque<usize> {
@@ -199,6 +232,35 @@ impl Record {
         }
         prefix
     }
+}
+
+/// True when one of the merged ranges fully contains `[start, end)`.
+fn covers(ranges: &BTreeMap<u64, u64>, start: u64, end: u64) -> bool {
+    ranges
+        .range(..=start)
+        .next_back()
+        .map_or(false, |(_, &range_end)| range_end >= end)
+}
+
+/// Merge a half-open byte range into a sorted, non-overlapping map.
+fn merge_range(ranges: &mut BTreeMap<u64, u64>, mut start: u64, mut end: u64) {
+    if let Some((&previous_start, &previous_end)) = ranges.range(..=start).next_back() {
+        if previous_end >= start {
+            start = previous_start;
+            end = end.max(previous_end);
+            ranges.remove(&previous_start);
+        }
+    }
+    let overlapping = ranges
+        .range(start..=end)
+        .map(|(&key, _)| key)
+        .collect::<Vec<_>>();
+    for key in overlapping {
+        if let Some(value) = ranges.remove(&key) {
+            end = end.max(value);
+        }
+    }
+    ranges.insert(start, end);
 }
 
 #[derive(Clone)]
@@ -330,6 +392,9 @@ impl DownloadManager {
     /// Spawn the worker for a prepared record. The worker hands control back to
     /// `fill_slots` when it stops, so the queue keeps moving.
     fn launch(&self, record: Arc<Record>) {
+        // Every launch is a fresh contact with the server, so the row shows "connecting"
+        // until bytes actually land, not a stale phase from the previous attempt.
+        set_phase(&record, "starting");
         let events = self.events.clone();
         let catalog = self.catalog.clone();
         let manager = self.clone();
@@ -413,7 +478,22 @@ impl DownloadManager {
         let state_path = state_path_for(&file_path);
 
         let completed = if probe.supports_ranges && total_bytes > 0 {
-            state::load_completed(&state_path, &probe, total_bytes, block_size).await
+            let loaded = state::load_completed(&state_path, &probe, total_bytes, block_size).await;
+            // The state file can outlive the file it describes (moved, deleted, truncated).
+            // A block that reaches past the real file is not on disk, so it must be fetched
+            // again instead of leaving a hole behind a "resumed" download.
+            let file_len = tokio::fs::metadata(&file_path)
+                .await
+                .map(|metadata| metadata.len())
+                .unwrap_or(0);
+            loaded
+                .into_iter()
+                .filter(|index| {
+                    blocks
+                        .get(*index as usize)
+                        .map_or(false, |block| block.end < file_len)
+                })
+                .collect()
         } else {
             HashSet::new()
         };
@@ -431,6 +511,7 @@ impl DownloadManager {
         let snapshot = DownloadSnapshot {
             id: id.clone(),
             status: DownloadStatus::Downloading,
+            phase: "starting".into(),
             url: request.url.clone(),
             file_name: probe.file_name.clone(),
             destination: file_path.display().to_string(),
@@ -444,6 +525,13 @@ impl DownloadManager {
             completed_at: None,
             extraction,
         };
+
+        let mut durable = BTreeMap::new();
+        for index in &completed {
+            if let Some(block) = blocks.get(*index as usize) {
+                merge_range(&mut durable, block.start, block.end + 1);
+            }
+        }
 
         let record = Arc::new(Record {
             probe,
@@ -467,6 +555,7 @@ impl DownloadManager {
             extract_root,
             prefix: Arc::new(AtomicU64::new(0)),
             ranges: Mutex::new(BTreeMap::new()),
+            durable: Mutex::new(durable),
             extracted: Mutex::new(HashSet::new()),
         });
 
@@ -511,18 +600,27 @@ impl DownloadManager {
             None if self.restored.lock().unwrap().contains_key(id) => return Ok(()),
             None => return Err(MajraError::Message("download not found".into())),
         };
-        if record.snapshot.lock().unwrap().status == DownloadStatus::Queued {
-            self.queue.lock().unwrap().retain(|queued| queued != id);
-            {
-                let mut snapshot = record.snapshot.lock().unwrap();
+        // The admission gate makes "is it still queued?" and "mark it paused" atomic with
+        // `fill_slots`, so a slot cannot start the row between the check and the pause.
+        let paused_queued = {
+            let _gate = self.admission.lock().unwrap();
+            let mut snapshot = record.snapshot.lock().unwrap();
+            if snapshot.status != DownloadStatus::Queued {
+                false
+            } else {
+                self.queue.lock().unwrap().retain(|queued| queued != id);
                 snapshot.status = DownloadStatus::Paused;
                 snapshot.error = None;
                 snapshot.speed_bytes_per_sec = 0.0;
                 snapshot.eta_seconds = None;
+                drop(snapshot);
+                self.catalog.upsert(saved_from(&record));
+                let snapshot = record.snapshot.lock().unwrap().clone();
+                let _ = self.events.send(DownloadEvent::Paused { snapshot });
+                true
             }
-            self.catalog.upsert(saved_from(&record));
-            let snapshot = record.snapshot.lock().unwrap().clone();
-            let _ = self.events.send(DownloadEvent::Paused { snapshot });
+        };
+        if paused_queued {
             return Ok(());
         }
         *record.cancel_kind.lock().unwrap() = CancelKind::Paused;
@@ -538,6 +636,12 @@ impl DownloadManager {
         let Some(record) = self.live(id) else {
             return self.resume_restored(id).await;
         };
+        // A worker that just turned Error can still own the handle for a moment. Wait for
+        // it before launching a second worker, or two workers would share one record.
+        let previous = record.task.lock().unwrap().take();
+        if let Some(previous) = previous {
+            let _ = previous.await;
+        }
         {
             let snapshot = record.snapshot.lock().unwrap();
             if !matches!(
@@ -623,11 +727,13 @@ impl DownloadManager {
     }
 
     /// True while at least one row is transferring or waiting for a free slot. Used by the
-    /// "shut down when finished" check.
+    /// "shut down when finished" check, which runs on every progress event, so this reads
+    /// the status under the lock instead of cloning a snapshot per row.
     pub fn has_pending(&self) -> bool {
-        self.list().iter().any(|snapshot| {
+        let records = self.records.lock().unwrap();
+        records.values().any(|record| {
             matches!(
-                snapshot.status,
+                record.snapshot.lock().unwrap().status,
                 DownloadStatus::Downloading | DownloadStatus::Queued
             )
         })
@@ -672,26 +778,41 @@ impl DownloadManager {
 
         // No worker is running: the download was queued, paused or failed. Mark it
         // cancelled and clear the partial file here, otherwise the row would stay queued.
-        self.queue.lock().unwrap().retain(|queued| queued != id);
-        let mut snapshot = record.snapshot.lock().unwrap().clone();
-        if !matches!(
-            snapshot.status,
-            DownloadStatus::Queued | DownloadStatus::Paused | DownloadStatus::Error
-        ) {
+        // The admission gate closes the window where `fill_slots` could start the row
+        // between the status check and the cancel.
+        let mut cancelled_snapshot = None;
+        {
+            let _gate = self.admission.lock().unwrap();
+            let mut snapshot = record.snapshot.lock().unwrap();
+            if matches!(
+                snapshot.status,
+                DownloadStatus::Queued | DownloadStatus::Paused | DownloadStatus::Error
+            ) {
+                self.queue.lock().unwrap().retain(|queued| queued != id);
+                snapshot.status = DownloadStatus::Cancelled;
+                snapshot.speed_bytes_per_sec = 0.0;
+                snapshot.eta_seconds = None;
+                snapshot.error = None;
+                if let Some(extraction) = snapshot.extraction.as_mut() {
+                    extraction.status = "cancelled".into();
+                    extraction.current = None;
+                }
+                for connection in &mut snapshot.connections {
+                    connection.status = "cancelled".into();
+                    connection.speed_bytes_per_sec = 0.0;
+                }
+                cancelled_snapshot = Some(snapshot.clone());
+            }
+        }
+        let Some(snapshot) = cancelled_snapshot else {
+            // `fill_slots` won the race and a worker is starting; stop it normally.
+            let task = record.task.lock().unwrap().take();
+            if let Some(task) = task {
+                let _ = task.await;
+            }
             return Ok(());
-        }
-        snapshot.status = DownloadStatus::Cancelled;
-        snapshot.speed_bytes_per_sec = 0.0;
-        snapshot.eta_seconds = None;
-        snapshot.error = None;
-        if let Some(extraction) = snapshot.extraction.as_mut() {
-            extraction.status = "cancelled".into();
-            extraction.current = None;
-        }
-        for connection in &mut snapshot.connections {
-            connection.status = "cancelled".into();
-            connection.speed_bytes_per_sec = 0.0;
-        }
+        };
+        let _ = record.task.lock().unwrap().take();
         *record.snapshot.lock().unwrap() = snapshot.clone();
         state::remove(&record.state_path).await;
         let _ = tokio::fs::remove_file(&record.file_path).await;
@@ -759,6 +880,7 @@ impl DownloadManager {
     /// Drop a finished or cancelled record so a long session does not keep every
     /// snapshot (and its connection stats) in memory. The catalog row goes too.
     pub fn forget(&self, id: &str) -> bool {
+        self.queue.lock().unwrap().retain(|queued| queued != id);
         let live = self.records.lock().unwrap().remove(id).is_some();
         let restored = self.restored.lock().unwrap().remove(id).is_some();
         if live || restored {
@@ -810,6 +932,7 @@ fn saved_snapshot(saved: &SavedDownload) -> DownloadSnapshot {
     DownloadSnapshot {
         id: saved.id.clone(),
         status,
+        phase: String::new(),
         url: saved.url.clone(),
         file_name: saved.file_name.clone(),
         destination: saved.destination.clone(),
@@ -918,6 +1041,7 @@ fn auto_interface() -> InterfaceInfo {
         is_default: true,
         usable: false,
         network: None,
+        link_speed_bps: None,
     }
 }
 
@@ -1030,10 +1154,70 @@ async fn run(
         None
     };
 
-    let mut result = run_inner(&record, &cancel, &downloaded).await;
-    if matches!(result, Err(MajraError::Cancelled)) {
-        result = Ok(outcome(&record));
-    }
+    // A dead socket can stay open without ever delivering another byte. Run each attempt
+    // under a watchdog; when nothing reaches the disk for a while, drop that attempt and
+    // ask for the missing blocks again. Completed blocks stay on disk, so this resumes
+    // instead of starting over.
+    let mut stall_retries = 0u32;
+    let result = loop {
+        let attempt_cancel = cancel.child_token();
+        let stalled = Arc::new(AtomicBool::new(false));
+        let watchdog = {
+            let downloaded = downloaded.clone();
+            let stalled = stalled.clone();
+            let token = attempt_cancel.clone();
+            tokio::spawn(async move {
+                let mut last = downloaded.load(Ordering::Relaxed);
+                let mut idle = Duration::ZERO;
+                loop {
+                    tokio::select! {
+                        _ = token.cancelled() => break,
+                        _ = tokio::time::sleep(Duration::from_secs(2)) => {}
+                    }
+                    let now = downloaded.load(Ordering::Relaxed);
+                    if now > last {
+                        last = now;
+                        idle = Duration::ZERO;
+                    } else {
+                        idle += Duration::from_secs(2);
+                    }
+                    // A transfer that has not produced its first byte yet is far more
+                    // likely to be dead than slow, so it gets the shorter window.
+                    let limit = if now == 0 {
+                        Duration::from_secs(FIRST_BYTE_SECONDS)
+                    } else {
+                        Duration::from_secs(STALL_SECONDS)
+                    };
+                    if idle >= limit {
+                        stalled.store(true, Ordering::SeqCst);
+                        token.cancel();
+                        break;
+                    }
+                }
+            })
+        };
+        let mut attempt = run_inner(&record, &attempt_cancel, &downloaded).await;
+        watchdog.abort();
+        if matches!(attempt, Err(MajraError::Cancelled)) {
+            attempt = Ok(outcome(&record));
+        }
+        let hung = stalled.load(Ordering::SeqCst)
+            && !cancel.is_cancelled()
+            && matches!(*record.cancel_kind.lock().unwrap(), CancelKind::None);
+        if hung && stall_retries < MAX_STALL_RETRIES {
+            stall_retries += 1;
+            set_phase(&record, "reconnecting");
+            continue;
+        }
+        if hung {
+            // The host answered the probe but stopped sending. Say so instead of leaving
+            // a row that looks busy at 0 %; Resume starts from the bytes already on disk.
+            attempt = Err(MajraError::Message(
+                "the server stopped sending data. Press Resume to try again.".into(),
+            ));
+        }
+        break attempt;
+    };
 
     extract_stop.cancel();
     if let Some(handle) = extractor {
@@ -1082,7 +1266,7 @@ async fn run(
                 connection.status = "paused".into();
                 connection.speed_bytes_per_sec = 0.0;
             }
-            let completed = record.completed.lock().unwrap().clone();
+            let completed = record.durable_blocks();
             let _ = state::save(
                 &record.state_path,
                 &record.probe,
@@ -1111,7 +1295,7 @@ async fn run(
                 connection.status = "error".into();
                 connection.speed_bytes_per_sec = 0.0;
             }
-            let completed = record.completed.lock().unwrap().clone();
+            let completed = record.durable_blocks();
             let _ = state::save(
                 &record.state_path,
                 &record.probe,
@@ -1146,6 +1330,13 @@ fn outcome(record: &Record) -> Outcome {
     match *record.cancel_kind.lock().unwrap() {
         CancelKind::Cancelled => Outcome::Cancelled,
         _ => Outcome::Paused,
+    }
+}
+
+fn set_phase(record: &Record, phase: &str) {
+    let mut snapshot = record.snapshot.lock().unwrap();
+    if snapshot.phase != phase {
+        snapshot.phase = phase.into();
     }
 }
 
@@ -1447,12 +1638,14 @@ async fn run_inner(
 
     let (tx, rx) = mpsc::channel::<WriteChunk>(CHANNEL_CHUNKS);
     let fatal: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
-    let writer = tokio::spawn(writer_task(
-        record.clone(),
-        rx,
-        downloaded.clone(),
-        fatal.clone(),
-    ));
+    let writer = {
+        let record = record.clone();
+        let downloaded = downloaded.clone();
+        let fatal = fatal.clone();
+        std::thread::Builder::new()
+            .name("majra-disk-writer".into())
+            .spawn(move || writer_task(record, rx, downloaded, fatal))?
+    };
 
     let queue = Arc::new(Mutex::new(record.pending_blocks()));
     let headers = Arc::new(base_headers(
@@ -1490,14 +1683,21 @@ async fn run_inner(
         }
     }
 
-    let writer_result = writer.await;
+    // Everything is in the channel now; the writer flushes the file before it exits, and
+    // that flush is what "finalizing" covers on a slow disk.
+    if !cancel.is_cancelled() {
+        set_phase(record, "finalizing");
+    }
+    let writer_result = writer
+        .join()
+        .map_err(|_| MajraError::Message("the disk writer stopped unexpectedly".into()))?;
     if let Some(error) = fatal.lock().unwrap().clone() {
         return Err(MajraError::Message(error));
     }
     if let Some(error) = worker_error {
         return Err(error);
     }
-    writer_result.map_err(|error| MajraError::Message(format!("writer stopped: {error}")))??;
+    writer_result.map_err(|error| MajraError::Message(format!("writer stopped: {error}")))?;
 
     if cancel.is_cancelled() {
         return Ok(outcome(record));
@@ -1506,6 +1706,27 @@ async fn run_inner(
         return Err(MajraError::ShortRead);
     }
     Ok(Outcome::Completed)
+}
+
+/// Transient failures are worth another request. A 403, 404 or 416 will answer the same
+/// way every time, so retrying it only wastes seconds before the real error is shown.
+fn retryable(error: &MajraError) -> bool {
+    match error {
+        MajraError::Network(_) | MajraError::ShortRead => true,
+        MajraError::Http(code) => matches!(*code, 408 | 425 | 429 | 500..=599),
+        _ => false,
+    }
+}
+
+/// Exponential backoff with a little jitter, so a burst of workers that fail together do
+/// not all come back at the same instant. Capped at eight seconds.
+fn retry_delay(attempt: u32, salt: u64) -> Duration {
+    let base = 300u64.saturating_mul(1u64 << attempt.min(5));
+    let jitter = salt
+        .wrapping_mul(6_364_136_223_846_793_005)
+        .wrapping_add(u64::from(attempt).wrapping_mul(1_442_695_040_888_963_407))
+        >> 33;
+    Duration::from_millis((base + jitter % 250).min(8_000))
 }
 
 /// The per-worker HTTP client and the headers every range request carries. Bundled so a
@@ -1572,11 +1793,16 @@ async fn worker(
                         *stat.status.lock().unwrap() = "fallback".into();
                         continue;
                     }
-                    if attempt >= MAX_RETRIES {
-                        *fatal.lock().unwrap() = Some(format!(
-                            "block {} failed after {} retries: {error}",
-                            block.index, MAX_RETRIES
-                        ));
+                    if !retryable(&error) || attempt >= MAX_RETRIES {
+                        *fatal.lock().unwrap() = Some(if attempt > 0 {
+                            format!(
+                                "block {} failed after {} attempts: {error}",
+                                block.index,
+                                attempt + 1
+                            )
+                        } else {
+                            format!("block {} failed: {error}", block.index)
+                        });
                         cancel.cancel();
                         return Ok(());
                     }
@@ -1584,7 +1810,7 @@ async fn worker(
                     *stat.status.lock().unwrap() = format!("retry {attempt}");
                     tokio::select! {
                         _ = cancel.cancelled() => return Ok(()),
-                        _ = tokio::time::sleep(Duration::from_millis(300 * 2u64.pow(attempt))) => {}
+                        _ = tokio::time::sleep(retry_delay(attempt, block.index)) => {}
                     }
                 }
             }
@@ -1664,45 +1890,85 @@ async fn download_block(
     Ok(())
 }
 
-async fn writer_task(
+/// Writes are handed to one operating-system thread that owns the file. Positioned writes
+/// mean no seek before every chunk, the async runtime never blocks on the disk, and a
+/// gigabit of traffic costs about a hundred syscalls a second instead of four hundred.
+fn writer_task(
     record: Arc<Record>,
     mut rx: mpsc::Receiver<WriteChunk>,
     downloaded: Arc<AtomicU64>,
     fatal: Arc<Mutex<Option<String>>>,
-) -> Result<()> {
-    let mut file = tokio::fs::OpenOptions::new()
-        .create(true)
-        .truncate(false)
-        .read(true)
-        .write(true)
-        .open(&record.file_path)
-        .await?;
+) -> std::io::Result<()> {
+    let file = open_partial(&record.file_path)?;
 
     // Drain every chunk that was already accepted, even after a pause: a block is only
     // marked complete once its bytes have left the channel, so discarding the tail here
     // would leave a hole in a block that resume then skips.
-    while let Some(chunk) = rx.recv().await {
-        let write = async {
-            file.seek(std::io::SeekFrom::Start(chunk.offset)).await?;
-            file.write_all(&chunk.data).await?;
-            Ok::<(), std::io::Error>(())
-        }
-        .await;
-        if let Err(error) = write {
+    while let Some(chunk) = rx.blocking_recv() {
+        if let Err(error) = write_at(&file, &chunk.data, chunk.offset) {
             *fatal.lock().unwrap() = Some(format!("could not write the file: {error}"));
             // Nothing on disk can be trusted after a write failure: force a full retry.
             record.completed.lock().unwrap().clear();
+            record.durable.lock().unwrap().clear();
             record.cancel.lock().unwrap().cancel();
-            return Err(error.into());
+            return Err(error);
         }
         let length = chunk.data.len() as u64;
+        merge_range(
+            &mut record.durable.lock().unwrap(),
+            chunk.offset,
+            chunk.offset + length,
+        );
         let added = note_written(&record, chunk.offset, length);
         downloaded.fetch_add(added, Ordering::Relaxed);
         if let Some(stat) = record.stats.get(chunk.connection_id as usize) {
             stat.downloaded.fetch_add(added, Ordering::Relaxed);
         }
     }
-    file.sync_all().await?;
+    file.sync_all()
+}
+
+/// Open the partial file for the writer. On Windows the sequential-scan hint tells the
+/// cache manager this file only grows forward, which keeps a multi-gigabyte transfer from
+/// pushing everything else out of the standby list.
+fn open_partial(path: &std::path::Path) -> std::io::Result<std::fs::File> {
+    let mut options = std::fs::OpenOptions::new();
+    options.create(true).truncate(false).read(true).write(true);
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::fs::OpenOptionsExt;
+        const FILE_FLAG_SEQUENTIAL_SCAN: u32 = 0x0800_0000;
+        options.custom_flags(FILE_FLAG_SEQUENTIAL_SCAN);
+    }
+    options.open(path)
+}
+
+/// One positioned write, repeated until the whole chunk is on disk. `seek_write`/`write_at`
+/// take the offset with the buffer, so parallel blocks do not need to move a shared cursor.
+fn write_at(file: &std::fs::File, data: &[u8], offset: u64) -> std::io::Result<()> {
+    #[cfg(target_os = "windows")]
+    use std::os::windows::fs::FileExt;
+    #[cfg(unix)]
+    use std::os::unix::fs::FileExt;
+
+    let mut written = 0usize;
+    while written < data.len() {
+        #[cfg(target_os = "windows")]
+        let count = file.seek_write(&data[written..], offset + written as u64)?;
+        #[cfg(unix)]
+        let count = file.write_at(&data[written..], offset + written as u64)?;
+        #[cfg(not(any(target_os = "windows", unix)))]
+        let count = {
+            use std::io::{Seek, SeekFrom, Write};
+            let mut handle = file.try_clone()?;
+            handle.seek(SeekFrom::Start(offset + written as u64))?;
+            handle.write(&data[written..])?
+        };
+        if count == 0 {
+            return Err(std::io::ErrorKind::WriteZero.into());
+        }
+        written += count;
+    }
     Ok(())
 }
 
@@ -1713,21 +1979,43 @@ async fn run_single(
 ) -> Result<Outcome> {
     let mut client = record.clients[0].clone();
     let mut used_fallback = false;
+    let mut attempt = 0u32;
     loop {
+        if cancel.is_cancelled() {
+            return Ok(outcome(record));
+        }
         match run_single_once(record, cancel, downloaded, &client).await {
             Err(MajraError::Network(_)) if !used_fallback && record.fallback_allowed => {
                 used_fallback = true;
                 client = record.auto_client.clone();
-                downloaded.store(0, Ordering::Relaxed);
-                for stat in &record.stats {
-                    stat.downloaded.store(0, Ordering::Relaxed);
+                reset_single(record, downloaded);
+            }
+            Err(error) if retryable(&error) && attempt < MAX_RETRIES => {
+                attempt += 1;
+                reset_single(record, downloaded);
+                if let Some(stat) = record.stats.first() {
+                    *stat.status.lock().unwrap() = format!("retry {attempt}");
                 }
-                record.ranges.lock().unwrap().clear();
-                record.prefix.store(0, Ordering::Relaxed);
+                tokio::select! {
+                    _ = cancel.cancelled() => return Ok(outcome(record)),
+                    _ = tokio::time::sleep(retry_delay(attempt, 0)) => {}
+                }
             }
             other => return other,
         }
     }
+}
+
+/// A non-range server cannot resume, so a retry starts the file over. Reset the counters
+/// that would otherwise show bytes from the abandoned attempt.
+fn reset_single(record: &Record, downloaded: &AtomicU64) {
+    downloaded.store(0, Ordering::Relaxed);
+    for stat in &record.stats {
+        stat.downloaded.store(0, Ordering::Relaxed);
+        *stat.status.lock().unwrap() = "downloading".into();
+    }
+    record.ranges.lock().unwrap().clear();
+    record.prefix.store(0, Ordering::Relaxed);
 }
 
 async fn run_single_once(
@@ -1833,6 +2121,7 @@ async fn reporter(
         .map(|stat| stat.downloaded.load(Ordering::Relaxed))
         .collect::<Vec<_>>();
     let mut last_checkpoint = Instant::now();
+    let mut saved_blocks: HashSet<u64> = HashSet::new();
 
     loop {
         tokio::select! {
@@ -1842,6 +2131,14 @@ async fn reporter(
 
         let now = Instant::now();
         let current = downloaded.load(Ordering::Relaxed);
+        // The first byte is the moment the row stops being a promise and starts being a
+        // transfer; until then the UI shows "connecting" instead of a dead 0 %.
+        if current > 0 {
+            let mut snapshot = record.snapshot.lock().unwrap();
+            if matches!(snapshot.phase.as_str(), "starting" | "reconnecting") {
+                snapshot.phase = "downloading".into();
+            }
+        }
         let elapsed = now.duration_since(previous_time).as_secs_f64().max(0.001);
         let instant = current.saturating_sub(previous) as f64 / elapsed;
         speed = if speed <= 0.0 {
@@ -1890,15 +2187,20 @@ async fn reporter(
         let _ = events.send(DownloadEvent::Progress { snapshot });
 
         if last_checkpoint.elapsed() >= Duration::from_secs(CHECKPOINT_SECONDS) {
-            let completed = record.completed.lock().unwrap().clone();
-            let _ = state::save(
-                &record.state_path,
-                &record.probe,
-                record.total_bytes,
-                record.block_size,
-                &completed,
-            )
-            .await;
+            let completed = record.durable_blocks();
+            // Only touch the disk when the safe-to-resume map actually grew. On a
+            // stalled host this used to rewrite the same file every two seconds.
+            if completed != saved_blocks {
+                let _ = state::save(
+                    &record.state_path,
+                    &record.probe,
+                    record.total_bytes,
+                    record.block_size,
+                    &completed,
+                )
+                .await;
+                saved_blocks = completed;
+            }
             catalog.touch(saved_from(&record));
             last_checkpoint = now;
         }
@@ -1954,6 +2256,7 @@ mod tests {
                 is_default: false,
                 usable: true,
                 network: Some("192.168.1.0/24".into()),
+                link_speed_bps: None,
             },
             InterfaceInfo {
                 id: "eth|10.0.0.4".into(),
@@ -1963,6 +2266,7 @@ mod tests {
                 is_default: false,
                 usable: true,
                 network: Some("10.0.0.0/8".into()),
+                link_speed_bps: None,
             },
             InterfaceInfo {
                 id: "usb|192.168.42.2".into(),
@@ -1972,6 +2276,7 @@ mod tests {
                 is_default: false,
                 usable: true,
                 network: Some("192.168.42.0/24".into()),
+                link_speed_bps: None,
             },
         ];
         let stats = make_stats(&interfaces, 9);
@@ -1997,6 +2302,7 @@ mod tests {
             is_default: false,
             usable,
             network: Some("192.0.2.0/24".into()),
+            link_speed_bps: None,
         }
     }
 
@@ -2084,6 +2390,7 @@ mod tests {
                 is_default: false,
                 usable: true,
                 network: None,
+                link_speed_bps: None,
             },
             InterfaceInfo {
                 id: "lo|127.0.0.2".into(),
@@ -2093,6 +2400,7 @@ mod tests {
                 is_default: false,
                 usable: true,
                 network: None,
+                link_speed_bps: None,
             },
         ];
 
@@ -2116,5 +2424,137 @@ mod tests {
             ],
             "a connection did not use its own interface address"
         );
+    }
+
+    #[test]
+    fn permanent_http_errors_are_not_retried() {
+        // A 403/404/416 answers the same way every time; retrying it only delays the
+        // message the user needs.
+        assert!(!retryable(&MajraError::Http(403)));
+        assert!(!retryable(&MajraError::Http(404)));
+        assert!(!retryable(&MajraError::Http(416)));
+        assert!(!retryable(&MajraError::RangeRejected));
+        assert!(!retryable(&MajraError::Cancelled));
+
+        // Transient answers and a dropped connection are worth another request.
+        assert!(retryable(&MajraError::Http(408)));
+        assert!(retryable(&MajraError::Http(429)));
+        assert!(retryable(&MajraError::Http(500)));
+        assert!(retryable(&MajraError::Http(503)));
+        assert!(retryable(&MajraError::ShortRead));
+    }
+
+    #[test]
+    fn retry_delay_grows_and_stays_capped() {
+        let first = retry_delay(1, 0);
+        let later = retry_delay(4, 0);
+        assert!(first >= Duration::from_millis(300), "{first:?}");
+        assert!(later > first, "{later:?} should exceed {first:?}");
+        // Jitter must never push the wait past the eight second ceiling.
+        for attempt in 1..=8 {
+            for salt in 0..64 {
+                assert!(retry_delay(attempt, salt) <= Duration::from_secs(8));
+            }
+        }
+    }
+
+    #[test]
+    fn merged_ranges_cover_only_what_was_written() {
+        let mut ranges = BTreeMap::new();
+        merge_range(&mut ranges, 100, 200);
+        merge_range(&mut ranges, 200, 300);
+        assert!(covers(&ranges, 100, 300));
+        assert!(!covers(&ranges, 100, 301));
+        assert!(!covers(&ranges, 99, 200));
+
+        // An overlapping range is absorbed instead of producing two entries.
+        merge_range(&mut ranges, 150, 250);
+        assert_eq!(ranges.len(), 1);
+        assert!(covers(&ranges, 100, 300));
+
+        // A gap stays a gap.
+        merge_range(&mut ranges, 400, 500);
+        assert!(!covers(&ranges, 100, 500));
+        assert!(covers(&ranges, 400, 500));
+        assert_eq!(ranges.len(), 2);
+    }
+
+    #[test]
+    fn durable_blocks_require_the_whole_block_on_disk() {
+        let blocks = vec![
+            Block {
+                index: 0,
+                start: 0,
+                end: 99,
+            },
+            Block {
+                index: 1,
+                start: 100,
+                end: 199,
+            },
+        ];
+        let mut durable = BTreeMap::new();
+        merge_range(&mut durable, 0, 100);
+
+        let record = Record {
+            probe: ProbeResult {
+                requested_url: "http://example.test/file".into(),
+                final_url: "http://example.test/file".into(),
+                supports_ranges: true,
+                total_bytes: Some(200),
+                file_name: "file.bin".into(),
+                content_type: None,
+                etag: None,
+                last_modified: None,
+            },
+            file_path: PathBuf::from("unused"),
+            state_path: PathBuf::from("unused.json"),
+            total_bytes: 200,
+            block_size: 100,
+            blocks,
+            completed: Mutex::new(HashSet::from([0])),
+            stats: Vec::new(),
+            clients: Vec::new(),
+            auto_client: client_builder().build().expect("client"),
+            fallback_allowed: false,
+            interface_ids: Vec::new(),
+            browser: None,
+            snapshot: Mutex::new(DownloadSnapshot {
+                id: "test".into(),
+                status: DownloadStatus::Queued,
+                phase: String::new(),
+                url: "http://example.test/file".into(),
+                file_name: "file.bin".into(),
+                destination: String::new(),
+                total_bytes: 200,
+                downloaded_bytes: 0,
+                speed_bytes_per_sec: 0.0,
+                eta_seconds: None,
+                connections: Vec::new(),
+                error: None,
+                started_at: 0,
+                completed_at: None,
+                extraction: None,
+            }),
+            cancel: Mutex::new(CancellationToken::new()),
+            cancel_kind: Mutex::new(CancelKind::None),
+            task: Mutex::new(None),
+            prefix: Arc::new(AtomicU64::new(0)),
+            ranges: Mutex::new(BTreeMap::new()),
+            durable: Mutex::new(durable),
+            extracted: Mutex::new(HashSet::new()),
+            extract: false,
+            extract_root: PathBuf::new(),
+        };
+
+        // Block 0 is fully written, block 1 has not been touched yet.
+        assert_eq!(record.durable_blocks(), HashSet::from([0]));
+
+        // Half of block 1 is not enough: a checkpoint must never claim it.
+        merge_range(&mut record.durable.lock().unwrap(), 100, 150);
+        assert_eq!(record.durable_blocks(), HashSet::from([0]));
+
+        merge_range(&mut record.durable.lock().unwrap(), 150, 200);
+        assert_eq!(record.durable_blocks(), HashSet::from([0, 1]));
     }
 }

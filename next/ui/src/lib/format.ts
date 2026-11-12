@@ -17,6 +17,16 @@ export function formatSpeed(bytesPerSecond: number): string {
   return bytesPerSecond > 512 ? `${formatBytes(bytesPerSecond)}/s` : '—';
 }
 
+/// The adapter's link rate, in the unit people recognise from Windows.
+export function formatLinkSpeed(bitsPerSecond: number | null | undefined): string {
+  if (!bitsPerSecond || !Number.isFinite(bitsPerSecond) || bitsPerSecond <= 0) return '—';
+  if (bitsPerSecond >= 1_000_000_000) {
+    const gbps = bitsPerSecond / 1_000_000_000;
+    return `${gbps.toFixed(gbps >= 10 ? 0 : 1)} Gbps`;
+  }
+  return `${Math.round(bitsPerSecond / 1_000_000)} Mbps`;
+}
+
 export function formatEta(seconds: number | null): string {
   if (seconds === null || !Number.isFinite(seconds) || seconds <= 0) return '—';
   const total = Math.round(seconds);

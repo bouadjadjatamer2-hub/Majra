@@ -121,16 +121,15 @@ impl Catalog {
         if let Some(parent) = self.path.parent() {
             let _ = fs::create_dir_all(parent);
         }
-        let Ok(json) = serde_json::to_vec_pretty(entries) else {
+        let Ok(json) = serde_json::to_vec(entries) else {
             return;
         };
         // Write beside the target and swap: a crash mid-write leaves the old list intact.
+        // `rename` replaces the target on Windows too, so there is no window where the
+        // list is missing — deleting first would lose every row if the swap failed.
         let temporary = self.path.with_extension("json.tmp");
-        if fs::write(&temporary, json).is_ok() {
-            let _ = fs::remove_file(&self.path);
-            if fs::rename(&temporary, &self.path).is_err() {
-                let _ = fs::remove_file(&temporary);
-            }
+        if fs::write(&temporary, json).is_ok() && fs::rename(&temporary, &self.path).is_err() {
+            let _ = fs::remove_file(&temporary);
         }
     }
 

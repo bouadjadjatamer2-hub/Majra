@@ -59,7 +59,7 @@ window.ASRAAB_I18N = {
     "app.majra.chip2": "من 1 إلى 32 اتصالاً",
     "app.majra.chip3": "استئناف وجدولة",
     "app.majra.page": "افتح صفحة مجرى",
-    "app.majra.download": "تحميل 2.0.0",
+    "app.majra.download": "تحميل 2.0.1",
     "app.droidcrate.category": "ورشة أندرويد · ويندوز",
     "app.droidcrate.tagline": "اعرف الهاتف قبل أن تلمسه.",
     "app.droidcrate.desc":
@@ -106,7 +106,7 @@ window.ASRAAB_I18N = {
     "cta.title": "ابدأ مع مجرى.",
     "cta.body":
       "مدير التحميل الذي يشغّل كل اتصال على جهازك على الملف نفسه. مجاني، مفتوح المصدر، وجاهز بمثبّت واحد.",
-    "cta.primary": "حمّل مجرى 2.0.0",
+    "cta.primary": "حمّل مجرى 2.0.1",
     "cta.secondary": "تعرّف على درويد كريت",
 
     // ---------- Majra ----------
@@ -205,7 +205,7 @@ window.ASRAAB_I18N = {
     "majra.install.s3t": "أضف رابطاً",
     "majra.install.s3b": "ألصق رابطاً، اختر مجلداً، واضغط Start. مجرى يتولى الباقي.",
     "majra.verify.kicker": "تحقّق من التنزيل",
-    "majra.verify.body": "احسب بصمة المثبّت قبل تشغيله. بصمة SHA-256 للإصدار 2.0.0 هي:",
+    "majra.verify.body": "احسب بصمة المثبّت قبل تشغيله. بصمة SHA-256 للإصدار 2.0.1 هي:",
     "majra.verify.copy": "نسخ",
     "majra.verify.note": "أي اختلاف يعني أن الملف ليس من الإصدار. توقّف ونزّله مرة أخرى.",
     "majra.ext.kicker": "إضافة المتصفح",
@@ -242,12 +242,12 @@ window.ASRAAB_I18N = {
     "majra.faq.a6":
       "إلى لا مكان. الإعدادات والسجل وقائمة الانتظار تبقى على جهازك. حركة الشبكة الوحيدة هي التنزيلات التي تطلبها.",
     "majra.dl.kicker": "خذه معك",
-    "majra.dl.title": "مجرى 2.0.0 لويندوز.",
+    "majra.dl.title": "مجرى 2.0.1 لويندوز.",
     "majra.dl.body": "مثبّت واحد، بلا حساب. ويندوز 10 أو 11، 64-بت. احتفظ ببصمة SHA-256 لتحققك.",
     "majra.dl.version": "الإصدار",
     "majra.dl.size": "حجم المثبّت",
     "majra.dl.sha": "SHA-256",
-    "majra.dl.primary": "حمّل مجرى 2.0.0",
+    "majra.dl.primary": "حمّل مجرى 2.0.1",
     "majra.dl.secondary": "إضافة المتصفح (.zip)",
     "majra.dl.note": "مثبّت غير موقّع. قد يطلب SmartScreen تأكيدك — تحقّق من البصمة أولاً.",
     "majra.cross.title": "تحتاج الجانب الآخر من الكابل؟",

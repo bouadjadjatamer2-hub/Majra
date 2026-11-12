@@ -6,6 +6,7 @@
   import { t } from './i18n';
   import type { AppSettings, InterfaceInfo } from './types';
   import Icon, { type IconName } from './Icon.svelte';
+  import { formatLinkSpeed } from './format';
 
   type Tab = 'general' | 'downloads' | 'network' | 'browser' | 'advanced';
 
@@ -37,6 +38,8 @@
     proxyUrl: '',
     proxyUsername: '',
     proxyPassword: '',
+    autoTune: true,
+    keepAwake: true,
   };
 
   let tab = $state<Tab>('general');
@@ -45,7 +48,6 @@
   let lang = $state<'en' | 'ar'>(app.lang);
   let lowRam = $state(app.lowRam);
   let saving = $state(false);
-  let saved = $state(false);
   let clearing = $state(false);
   let bridgeError = $state<string | null>(null);
 
@@ -89,14 +91,15 @@
 
   async function save(): Promise<void> {
     saving = true;
-    saved = false;
     const ok = await app.saveSettings(draft);
     if (ok) {
       app.setTheme(theme);
       app.setLang(lang);
       app.setLowRam(lowRam);
-      saved = true;
-      setTimeout(() => (saved = false), 2200);
+      // Saving is the end of the visit: close the window and confirm from a toast, so
+      // the user does not have to hunt for the X after every change.
+      app.toast('info', t('settingsSaved'));
+      app.showSettings = false;
     }
     saving = false;
   }
@@ -201,7 +204,7 @@
           </button>
         {/each}
         <span class="tab-spacer"></span>
-        <div class="version num">v{t('version')}</div>
+        <div class="version num">v{app.version}</div>
       </nav>
 
       <div class="content">
@@ -342,6 +345,27 @@
             </div>
             <div class="setting">
               <div class="setting-text">
+                <b>{t('autoTune')}</b>
+                <span class="hint">
+                  {t('autoTuneHint')}
+                  {#if app.systemProfile}
+                    · {t('recommended')}: <span class="num"
+                      >{app.systemProfile.recommendedConnections}</span
+                    >
+                  {/if}
+                </span>
+              </div>
+              <button
+                class="switch"
+                type="button"
+                role="switch"
+                aria-checked={draft.autoTune}
+                aria-label={t('autoTune')}
+                onclick={() => (draft.autoTune = !draft.autoTune)}
+              ></button>
+            </div>
+            <div class="setting">
+              <div class="setting-text">
                 <b>{t('settingsDefaultConnections')}</b>
                 <span class="hint">{t('connectionsHint')}</span>
               </div>
@@ -351,10 +375,33 @@
                   min="1"
                   max="32"
                   step="1"
-                  bind:value={draft.defaultConnections}
+                  disabled={draft.autoTune}
+                  value={draft.autoTune
+                    ? (app.systemProfile?.recommendedConnections ?? draft.defaultConnections)
+                    : draft.defaultConnections}
+                  oninput={(event) =>
+                    (draft.defaultConnections = Number(event.currentTarget.value))}
                 />
-                <span class="range-value num">{draft.defaultConnections}</span>
+                <span class="range-value num"
+                  >{draft.autoTune
+                    ? (app.systemProfile?.recommendedConnections ?? draft.defaultConnections)
+                    : draft.defaultConnections}</span
+                >
               </div>
+            </div>
+            <div class="setting">
+              <div class="setting-text">
+                <b>{t('keepAwake')}</b>
+                <span class="hint">{t('keepAwakeHint')}</span>
+              </div>
+              <button
+                class="switch"
+                type="button"
+                role="switch"
+                aria-checked={draft.keepAwake}
+                aria-label={t('keepAwake')}
+                onclick={() => (draft.keepAwake = !draft.keepAwake)}
+              ></button>
             </div>
             <div class="setting">
               <div class="setting-text">
@@ -513,7 +560,9 @@
                         <span class="chip" data-tone={toneOf(iface)}>{statusOf(iface)}</span>
                       </div>
                       <span class="iface-detail num">
-                        {iface.address}{iface.network ? ` · ${iface.network}` : ''}
+                        {iface.address}{iface.network ? ` · ${iface.network}` : ''}{iface.linkSpeedBps
+                          ? ` · ${formatLinkSpeed(iface.linkSpeedBps)}`
+                          : ''}
                       </span>
                     </div>
                     <button
@@ -707,7 +756,7 @@
             <div class="about">
               <div class="about-mark"><Icon name="download" size={22} /></div>
               <div class="about-text">
-                <b>Majra {t('version')}</b>
+                <b>Majra {app.version}</b>
                 <span class="hint">{t('aboutHint')}</span>
                 <span class="hint">{t('aboutEngine')}</span>
               </div>
@@ -718,9 +767,6 @@
     </div>
 
     <footer class="dialog-foot">
-      {#if saved}
-        <span class="saved"><Icon name="check" size={13} /> {t('settingsSaved')}</span>
-      {/if}
       <span class="flex"></span>
       <button class="btn btn-ghost" type="button" onclick={close}>{t('close')}</button>
       <button class="btn btn-primary" type="button" disabled={saving} onclick={save}>
@@ -1189,15 +1235,6 @@
     border-block-start: 1px solid var(--line);
     background: var(--bg-elev);
     flex: none;
-  }
-
-  .saved {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: var(--jade);
-    font-size: 11.5px;
-    font-weight: 700;
   }
 
   .flex {

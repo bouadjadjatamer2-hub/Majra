@@ -38,6 +38,9 @@ export interface ExtractionSnapshot {
 export interface DownloadSnapshot {
   id: string;
   status: DownloadStatus;
+  /// `starting` before the first byte, then `downloading`; `reconnecting` after a stall
+  /// restart and `finalizing` while the file is being flushed.
+  phase?: string;
   url: string;
   fileName: string;
   destination: string;
@@ -62,6 +65,15 @@ export interface InterfaceInfo {
   isDefault: boolean;
   usable: boolean;
   network: string | null;
+  /// The adapter's reported link rate in bits/s; null when Windows cannot say.
+  linkSpeedBps?: number | null;
+}
+
+export interface SystemProfile {
+  recommendedConnections: number;
+  cpuCores: number;
+  linkSpeedBps: number | null;
+  os: string;
 }
 
 export type ScheduleStopAction = 'pause' | 'exit' | 'shutdown';
@@ -87,6 +99,8 @@ export interface AppSettings {
   proxyUrl: string;
   proxyUsername: string;
   proxyPassword: string;
+  autoTune: boolean;
+  keepAwake: boolean;
 }
 
 export interface ScanResult {

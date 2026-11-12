@@ -75,6 +75,19 @@
     error: 'failed',
   };
 
+  // The label under the percentage while a transfer is still finding its feet.
+  const phaseLabel: Record<string, MessageKey> = {
+    starting: 'connecting',
+    reconnecting: 'reconnecting',
+    finalizing: 'finalizing',
+  };
+
+  let phase = $derived(
+    download && download.status === 'downloading'
+      ? phaseLabel[download.phase ?? '']
+      : undefined,
+  );
+
   const extractLabel: Record<string, MessageKey> = {
     pending: 'extraction',
     running: 'extracting',
@@ -148,7 +161,7 @@
         <div class="hero-top">
           <span class="chip" data-tone={tone}>
             <span class="dot" data-tone={tone}></span>
-            {t(statusLabel[download.status])}
+            {t(phase ?? statusLabel[download.status])}
           </span>
           <span class="hero-pct num">{Math.round(value)}%</span>
         </div>
@@ -196,9 +209,11 @@
           </span>
         </div>
         <div class="stat">
-          <span class="stat-label">{t('size')}</span>
+          <span class="stat-label">{t('sizeDownloaded')}</span>
           <span class="stat-value num">
-            {download.totalBytes > 0 ? formatBytes(download.totalBytes) : '—'}
+            {download.totalBytes > 0
+              ? `${formatBytes(download.downloadedBytes)} / ${formatBytes(download.totalBytes)}`
+              : formatBytes(download.downloadedBytes)}
           </span>
         </div>
         <div class="stat">
@@ -311,6 +326,11 @@
           <Icon name="play" size={14} />
           {t('resume')}
         </button>
+      {:else if download.status === 'completed'}
+        <button class="btn btn-primary" type="button" onclick={() => app.openDownload(download)}>
+          <Icon name="external" size={14} />
+          {t('open')}
+        </button>
       {/if}
       <button
         class="btn btn-ghost"
@@ -321,6 +341,17 @@
         {t('openFolder')}
       </button>
       <span class="flex"></span>
+      {#if download.status !== 'completed'}
+        <button
+          class="btn btn-ghost"
+          type="button"
+          title={t('cancelHint')}
+          onclick={() => app.cancel(download.id)}
+        >
+          <Icon name="close" size={14} />
+          {t('cancel')}
+        </button>
+      {/if}
       <button class="btn btn-danger" type="button" onclick={() => app.remove(download.id)}>
         <Icon name="trash" size={14} />
         {t('remove')}

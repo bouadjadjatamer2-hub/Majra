@@ -10,6 +10,7 @@
     { id: 'queued', icon: 'clock', label: 'queued' },
     { id: 'paused', icon: 'pause', label: 'paused' },
     { id: 'completed', icon: 'check', label: 'completed' },
+    { id: 'cancelled', icon: 'close', label: 'cancelled' },
     { id: 'error', icon: 'alert', label: 'failed' },
   ];
 

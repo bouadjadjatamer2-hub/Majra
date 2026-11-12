@@ -84,12 +84,22 @@
     }
     return [...seen];
   }
+
+  /// A downloading row that has nothing to show yet is not stuck: it is talking to the
+  /// server. Naming that phase is what keeps a big file's slow start from looking frozen.
+  function phaseOf(download: DownloadSnapshot): MessageKey | null {
+    if (download.status !== 'downloading') return null;
+    if (download.phase === 'starting') return 'connecting';
+    if (download.phase === 'reconnecting') return 'reconnecting';
+    if (download.phase === 'finalizing') return 'finalizing';
+    return null;
+  }
 </script>
 
 <section class="table" aria-label={t('all')}>
   <div class="head" role="row">
     <div class="col-file" role="columnheader">{t('file')}</div>
-    <div class="col-size" role="columnheader">{t('size')}</div>
+    <div class="col-size" role="columnheader">{t('sizeDownloaded')}</div>
     <div class="col-progress" role="columnheader">{t('progress')}</div>
     <div class="col-speed" role="columnheader">{t('speed')}</div>
     <div class="col-eta" role="columnheader">{t('eta')}</div>
@@ -114,6 +124,7 @@
           {@const tone = statusTone(download.status)}
           {@const value = percent(download)}
           {@const nets = interfacesOf(download)}
+          {@const phase = phaseOf(download)}
           <div
             class="row"
             class:selected={app.selectedId === download.id}
@@ -122,7 +133,10 @@
             style="transform: translateY({(start + index) * rowH}px)"
             onclick={() => select(download.id)}
             onkeydown={(event) => onRowKey(event, download.id)}
-            ondblclick={() => app.togglePause(download.id)}
+            ondblclick={() =>
+              download.status === 'completed'
+                ? app.openDownload(download)
+                : app.togglePause(download.id)}
             aria-selected={app.selectedId === download.id}
           >
             <div class="cell cell-file" role="cell">
@@ -135,8 +149,17 @@
               </span>
             </div>
 
-            <div class="cell num" role="cell">
-              {download.totalBytes > 0 ? formatBytes(download.totalBytes) : '—'}
+            <div
+              class="cell num size-cell"
+              role="cell"
+              title={`${formatBytes(download.downloadedBytes)} / ${
+                download.totalBytes > 0 ? formatBytes(download.totalBytes) : '?'
+              }`}
+            >
+              <span>{formatBytes(download.downloadedBytes)}</span>
+              {#if download.totalBytes > 0}
+                <span class="size-total">/ {formatBytes(download.totalBytes)}</span>
+              {/if}
             </div>
 
             <div class="cell progress-cell" role="cell">
@@ -157,7 +180,7 @@
             <div class="cell" role="cell">
               <span class="chip" data-tone={tone}>
                 <span class="dot" data-tone={tone}></span>
-                {t(statusLabel[download.status])}
+                {phase ? t(phase) : t(statusLabel[download.status])}
               </span>
             </div>
 
@@ -177,7 +200,7 @@
 
 <style>
   .table {
-    --cols: minmax(140px, 1fr) 70px 110px 74px 56px 90px 74px;
+    --cols: minmax(140px, 1fr) 116px 110px 74px 56px 90px 74px;
     display: flex;
     flex-direction: column;
     min-width: 0;
@@ -359,6 +382,18 @@
 
   .speed {
     color: var(--text-2);
+  }
+
+  /* Downloaded bytes stay bright; the file's full size is the quieter half. */
+  .size-cell {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .size-total {
+    color: var(--faint);
   }
 
   .cell .chip {

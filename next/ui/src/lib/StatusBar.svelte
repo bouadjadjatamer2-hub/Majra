@@ -42,7 +42,7 @@
       <Icon name="globe" size={13} />
       <span>{app.lang === 'en' ? 'العربية' : 'English'}</span>
     </button>
-    <span class="version num">{t('version')}</span>
+    <span class="version num">{app.version}</span>
   </div>
 </footer>
 

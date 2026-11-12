@@ -17,5 +17,7 @@ pub use engine::{
     DownloadStatus,
 };
 pub use error::{MajraError, Result};
-pub use net::{list_interfaces, test_interface, InterfaceInfo, InterfaceKind};
+pub use net::{
+    list_interfaces, recommended_connections, test_interface, InterfaceInfo, InterfaceKind,
+};
 pub use probe::{probe_url, probe_url_with, ProbeResult};

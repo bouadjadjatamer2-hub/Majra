@@ -11,6 +11,7 @@
   import { app } from './lib/state.svelte';
   import { api, isTauri } from './lib/api';
   import { t } from './lib/i18n';
+  import type { DownloadEvent } from './lib/types';
   import Icon from './lib/Icon.svelte';
 
   let rows = $derived(app.visible);
@@ -52,10 +53,27 @@
     if (params.get('add') === '1' || params.has('url')) app.showAdd = true;
     const disposers: (() => void)[] = [];
     if (isTauri) {
+      // Progress arrives up to four times a second for every active download. Applying
+      // each event the moment it lands repaints the list far more often than the screen
+      // can show; keep the newest snapshot per row and paint once a frame instead.
+      const pending = new Map<string, DownloadEvent>();
+      let frame = 0;
+      const flush = (): void => {
+        frame = 0;
+        const events = [...pending.values()];
+        pending.clear();
+        for (const event of events) app.applyEvent(event);
+      };
       api
-        .onDownloadEvent((event) => app.applyEvent(event))
+        .onDownloadEvent((event) => {
+          pending.set(event.snapshot.id, event);
+          if (!frame) frame = requestAnimationFrame(flush);
+        })
         .then((off) => disposers.push(off))
         .catch(() => {});
+      disposers.push(() => {
+        if (frame) cancelAnimationFrame(frame);
+      });
       api
         .onOffer((offer) => app.receiveOffer(offer))
         .then((off) => disposers.push(off))
@@ -155,7 +173,13 @@
 
     if (event.key === 'Delete' && app.selectedId) {
       event.preventDefault();
-      void app.remove(app.selectedId);
+      // Ctrl+Delete stops the transfer and clears its partial file; plain Delete only
+      // removes the row from the list.
+      if (event.ctrlKey || event.metaKey) void app.cancel(app.selectedId);
+      else void app.remove(app.selectedId);
+    } else if (event.key === 'Enter' && app.selected?.status === 'completed') {
+      event.preventDefault();
+      void app.openDownload(app.selected);
     } else if (event.key === ' ' && app.selectedId) {
       event.preventDefault();
       app.togglePause(app.selectedId);

@@ -15,13 +15,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.0-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.1/Majra_2.0.1_x64-setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.1-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="حالة CI" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="صفحة مجرى" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.0"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.0-24292F?style=flat-square&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.1"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.1-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="عدد التنزيلات" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="ويندوز 10 و11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
@@ -68,31 +68,39 @@
 
 ### ويندوز 10 / 11 · 64-bit
 
-1. نزّل **[Majra_2.0.0_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra_2.0.0_x64-setup.exe)**.
+1. نزّل **[Majra_2.0.1_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.1/Majra_2.0.1_x64-setup.exe)**.
 2. شغّل المثبّت. الملف غير موقّع، لذا قد يُنبّهك Windows SmartScreen — اختر **More info → Run anyway**، أو ابنِ من المصدر.
 3. افتح مجرى، الصق رابطاً، واضغط **Start**.
 
-الإصدار 2.0.0 هو إعادة الكتابة بـ Rust وTauri. يحتفظ بنفس هوية التطبيق، لذا تثبيته يستبدل نسخة Electron القديمة. إعداداته وقائمته في `%APPDATA%\app.majra.desktop`، منفصلة عن بيانات التطبيق القديم.
+الإصدار 2.0.1 هو إعادة الكتابة بـ Rust وTauri. يحتفظ بنفس هوية التطبيق، لذا تثبيته يستبدل نسخة Electron القديمة. إعداداته وقائمته في `%APPDATA%\app.majra.desktop`، منفصلة عن بيانات التطبيق القديم.
+
+### ما الجديد في 2.0.1
+
+- **مقاطع أكبر وطلبات أقل.** المقاطع تكبر حتى 64 ميغابايت في الملفات الكبيرة، فتنزيل بحجم 40 غيغابايت يصنع مئات الطلبات بدل آلاف.
+- **القرص لم يعد يعيق الشبكة.** خيط واحد مخصّص يملك الملف ويَكتب قطعاً بحجم 1 ميغابايت في مواضعها، فتبقى النافذة سلسة بالسرعة الكاملة.
+- **مراحل صادقة.** الصف يقول *جارٍ الاتصال* قبل أول بايت و*إنهاء الحفظ* أثناء تفريغ الملف، بدل البقاء على 0 % بلا تفسير.
+- **استرجاع التوقّف.** الخادم الذي يصمت يُكتشف في ثوانٍ، ويُعاد مرتين، ثم يُبلَّغ عنه مع تلميح للاستئناف بدل التظاهر بالتنزيل.
+- **إصلاحات صغيرة.** الإعدادات تُغلق عند الضغط على حفظ، والإلغاء يحذف الملف الجزئي وخريطة الاستئناف دفعة واحدة، والصفوف المكتملة تعرض فتح.
 
 ### إضافة المتصفح
 
 إضافة Chromium (Chrome وEdge وBrave وOpera) تلتقط التنزيلات من المتصفح وتُسلّمها لمجرى مع
 الكوكيز الصحيحة.
 
-1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.0/Majra-Browser-Extension.zip)**.
+1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.1/Majra-Browser-Extension.zip)**.
 2. فُكّ ضغطها في مكان ثابت.
 3. افتح `chrome://extensions`، فعّل **Developer mode**، اختر **Load unpacked**، ثم اختر المجلد.
 
 ### تحقّق من التنزيل
 
 ```powershell
-Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\Majra_2.0.1_x64-setup.exe -Algorithm SHA256
 ```
 
-بصمة SHA-256 للإصدار `v2.0.0`:
+بصمة SHA-256 للإصدار `v2.0.1`:
 
 ```text
-37D0B80ACAC3C0B67FD614DD2DA903505FB83604738CDA1BE6C08AAFD051E65C
+850E49DDD8D13277453F0B089C95726F295F5783BD10412D7D3DE85E7F8300E5
 ```
 
 ## كيف يعمل
@@ -118,11 +126,11 @@ Get-FileHash .\Majra_2.0.0_x64-setup.exe -Algorithm SHA256
 - **ليست كل الروابط قابلة للتقسيم.** الخوادم التي لا تدعم byte-range تعود إلى مسار واحد.
 - **المثبّت غير موقّع.** لا توجد شهادة توقيع بعد، لذا قد يطلب SmartScreen تأكيداً.
 - **هو مدير تنزيلات، لا VPN.** إعداد البروكسي يوجّه حركة مجرى وحدها عبر بروكسي تملكه أنت.
-- **بعض الميزات غير موجودة في 2.0.0 بعد.** التورنت والمغناطيس، وفك RAR، والتقاط الوسائط، وسحب المواقع، والاستيراد من مدير آخر، والتحديث التلقائي. النسخة القديمة 1.2.3 كانت تعلن بعضها؛ هذا الملف والموقع يصفان الآن ما يفعله الإصدار فعلاً.
+- **بعض الميزات غير موجودة في 2.0.1 بعد.** التورنت والمغناطيس، وفك RAR، والتقاط الوسائط، وسحب المواقع، والاستيراد من مدير آخر، والتحديث التلقائي. النسخة القديمة 1.2.3 كانت تعلن بعضها؛ هذا الملف والموقع يصفان الآن ما يفعله الإصدار فعلاً.
 
 ## البناء من المصدر
 
-الإصدار 2.0.0 في [`next/`](next/): نواة Rust، وغلاف Tauri، وواجهة Svelte. مصادر Electron
+الإصدار 2.0.1 في [`next/`](next/): نواة Rust، وغلاف Tauri، وواجهة Svelte. مصادر Electron
 للإصدار 1.2.3 ما زالت في جذر المستودع للمرجع.
 
 المتطلبات: **Rust 1.82+** و**Node.js 22+** و**npm 10+**، ومتطلبات Tauri على ويندوز
@@ -169,7 +177,7 @@ GitHub Pages من فرع `main`.
 
 <details>
 <summary><b>هل ينزّل من يوتيوب أو مواقع البث؟</b></summary>
-لا. ينزّل الملفات، لا بثّ الوسائط. لا توجد أداة التقاط وسائط ولا عميل تورنت في 2.0.0.
+لا. ينزّل الملفات، لا بثّ الوسائط. لا توجد أداة التقاط وسائط ولا عميل تورنت في 2.0.1.
 </details>
 
 <details>

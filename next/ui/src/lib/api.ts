@@ -1,4 +1,5 @@
 import { invoke } from '@tauri-apps/api/core';
+import { getVersion } from '@tauri-apps/api/app';
 import { listen } from '@tauri-apps/api/event';
 import type {
   AppSettings,
@@ -11,6 +12,7 @@ import type {
   ProbeResult,
   ScanResult,
   ScheduleEvent,
+  SystemProfile,
 } from './types';
 
 export const isTauri =
@@ -18,7 +20,7 @@ export const isTauri =
 
 export function demoInterfaces(): InterfaceInfo[] {
   return [
-    { id: 'auto', name: 'Auto', address: '', kind: 'other', isDefault: true, usable: false, network: null },
+    { id: 'auto', name: 'Auto', address: '', kind: 'other', isDefault: true, usable: false, network: null, linkSpeedBps: null },
     {
       id: 'wifi|192.168.1.24',
       name: 'Wi-Fi',
@@ -27,6 +29,7 @@ export function demoInterfaces(): InterfaceInfo[] {
       isDefault: true,
       usable: true,
       network: '192.168.1.0/24',
+      linkSpeedBps: 866_000_000,
     },
     {
       id: 'eth|10.0.0.7',
@@ -36,6 +39,7 @@ export function demoInterfaces(): InterfaceInfo[] {
       isDefault: false,
       usable: true,
       network: '10.0.0.0/8',
+      linkSpeedBps: 1_000_000_000,
     },
     {
       id: 'usb|192.168.42.2',
@@ -45,6 +49,7 @@ export function demoInterfaces(): InterfaceInfo[] {
       isDefault: false,
       usable: false,
       network: '192.168.42.0/24',
+      linkSpeedBps: 480_000_000,
     },
   ];
 }
@@ -70,6 +75,8 @@ export function demoSettings(): AppSettings {
     proxyUrl: '',
     proxyUsername: '',
     proxyPassword: '',
+    autoTune: true,
+    keepAwake: true,
   };
 }
 
@@ -119,6 +126,12 @@ export const api = {
       : Promise.resolve('%APPDATA%\\app.majra.desktop\\settings.json');
   },
 
+  /// The version the shell was built with. The window shows this, so a release never
+  /// displays a number that only exists in a translation file.
+  appVersion(): Promise<string> {
+    return isTauri ? getVersion() : Promise.resolve('');
+  },
+
   dataFolder(): Promise<string> {
     return isTauri
       ? invoke<string>('data_folder')
@@ -137,6 +150,16 @@ export const api = {
 
   revealPath(path: string): Promise<void> {
     return isTauri ? invoke<void>('reveal_path', { path }) : Promise.resolve();
+  },
+
+  openFile(path: string): Promise<void> {
+    return isTauri ? invoke<void>('open_file', { path }) : Promise.resolve();
+  },
+
+  systemProfile(): Promise<SystemProfile> {
+    return isTauri
+      ? invoke<SystemProfile>('system_profile')
+      : Promise.resolve({ recommendedConnections: 8, cpuCores: 8, linkSpeedBps: 1_000_000_000, os: 'windows' });
   },
 
   openUrl(url: string): Promise<void> {

@@ -188,6 +188,82 @@ pub fn reveal_path(path: String) -> Result<(), String> {
     open_path(&PathBuf::from(path), true)
 }
 
+/// Open a finished download with the program Windows associates with it. A folder (an
+/// extracted archive) opens in Explorer instead of being handed to a file handler.
+#[tauri::command]
+pub fn open_file(path: String) -> Result<(), String> {
+    let path = PathBuf::from(path);
+    if !path.exists() {
+        return Err(format!("path does not exist: {}", path.display()));
+    }
+    if path.is_dir() {
+        return open_path(&path, false);
+    }
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::ffi::OsStrExt;
+        use windows_sys::Win32::UI::Shell::ShellExecuteW;
+        use windows_sys::Win32::UI::WindowsAndMessaging::SW_SHOWNORMAL;
+
+        let verb: Vec<u16> = "open\0".encode_utf16().collect();
+        let file: Vec<u16> = path
+            .as_os_str()
+            .encode_wide()
+            .chain(std::iter::once(0))
+            .collect();
+        // ShellExecuteW returns a value greater than 32 on success.
+        let result = unsafe {
+            ShellExecuteW(
+                std::ptr::null_mut(),
+                verb.as_ptr(),
+                file.as_ptr(),
+                std::ptr::null(),
+                std::ptr::null(),
+                SW_SHOWNORMAL,
+            )
+        };
+        if result as isize > 32 {
+            Ok(())
+        } else {
+            Err(format!("no program is registered for {}", path.display()))
+        }
+    }
+    #[cfg(not(target_os = "windows"))]
+    {
+        open_path(&path, false)
+    }
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SystemProfile {
+    /// A connection count sized for the default adapter's link rate and the CPU.
+    pub recommended_connections: u32,
+    pub cpu_cores: u32,
+    /// The Windows-reported link rate of the adapter downloads would use, in bits/s.
+    pub link_speed_bps: Option<u64>,
+    pub os: String,
+}
+
+/// What the machine can do. The UI uses it to suggest a connection count instead of
+/// leaving a fresh install on a number that under-uses a fast line.
+#[tauri::command]
+pub fn system_profile() -> SystemProfile {
+    let interfaces = core_list_interfaces();
+    let default = interfaces
+        .iter()
+        .find(|interface| interface.is_default && interface.usable)
+        .or_else(|| interfaces.iter().find(|interface| interface.usable));
+    SystemProfile {
+        recommended_connections: majra_core::recommended_connections(),
+        cpu_cores: std::thread::available_parallelism()
+            .map(|count| count.get() as u32)
+            .unwrap_or(4),
+        link_speed_bps: default.and_then(|interface| interface.link_speed_bps),
+        os: std::env::consts::OS.to_string(),
+    }
+}
+
 #[tauri::command]
 pub fn open_url(url: String) -> Result<(), String> {
     let parsed = url::Url::parse(&url).map_err(|error| error.to_string())?;

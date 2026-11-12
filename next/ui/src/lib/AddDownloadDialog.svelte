@@ -14,7 +14,7 @@
         : ''),
   );
   let destination = $state(app.defaultDestination);
-  let connections = $state(app.defaultConnections);
+  let connections = $state(app.effectiveConnections);
   let auto = $state(true);
   let chosen = $state<string[]>([]);
   let extract = $state(app.extractByDefault);
@@ -256,7 +256,12 @@
             />
             <span class="num value">{connections}</span>
           </div>
-          <span class="hint">{t('connectionsHint')}</span>
+          <span class="hint">
+            {t('connectionsHint')}
+            {#if app.autoTune && app.systemProfile}
+              · {t('recommended')}: <span class="num">{app.systemProfile.recommendedConnections}</span>
+            {/if}
+          </span>
         </div>
       </div>
 

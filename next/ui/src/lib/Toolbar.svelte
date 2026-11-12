@@ -10,6 +10,10 @@
     app.selected?.status === 'paused' || app.selected?.status === 'error',
   );
   let canRemove = $derived(app.selected !== null);
+  let canCancel = $derived(
+    app.selected !== null &&
+      ['downloading', 'queued', 'paused', 'error'].includes(app.selected.status),
+  );
 </script>
 
 <div class="toolbar">
@@ -52,6 +56,17 @@
   >
     <Icon name="refresh" size={14} />
     <span class="label">{t('resumeAll')}</span>
+  </button>
+
+  <button
+    class="btn btn-ghost"
+    type="button"
+    disabled={!canCancel}
+    onclick={() => app.selected && app.cancel(app.selected.id)}
+    title={t('cancelHint')}
+  >
+    <Icon name="close" size={14} />
+    <span class="label">{t('cancel')}</span>
   </button>
 
   <button

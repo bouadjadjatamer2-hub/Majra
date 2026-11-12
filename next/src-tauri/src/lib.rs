@@ -104,6 +104,15 @@ pub fn run() {
                             };
                             let _ = handle.emit("majra://download", event);
 
+                            // Sleep is the one thing a long download cannot survive, so
+                            // hold the machine awake only while something is moving or
+                            // waiting to move.
+                            if event_settings.get().keep_awake {
+                                power::set_keep_awake(event_manager.has_pending());
+                            } else {
+                                power::set_keep_awake(false);
+                            }
+
                             let Some((id, path)) = finished else {
                                 continue;
                             };
@@ -235,7 +244,9 @@ pub fn run() {
             commands::bridge_status,
             commands::open_folder,
             commands::reveal_path,
+            commands::open_file,
             commands::open_url,
+            commands::system_profile,
             commands::probe_link,
             commands::start_download,
             commands::pause_download,

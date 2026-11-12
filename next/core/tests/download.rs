@@ -661,3 +661,65 @@ async fn extracts_zip_while_the_download_is_running() {
     );
     server.abort();
 }
+
+/// The list has to tell the truth about a slow start: the row exists and says
+/// "connecting" before any byte lands, then flips to "downloading" once data arrives.
+/// Without that, a big file from a slow host looks like a frozen app at 0 %.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn a_row_says_connecting_before_the_first_byte() {
+    let data = Arc::new(payload(8 * 1024 * 1024));
+    let (addr, server) = start_server(
+        data.clone(),
+        ServerConfig {
+            ranges: true,
+            throttle: Some((256 * 1024, Duration::from_millis(40))),
+        },
+    )
+    .await;
+    let dir = tempfile::tempdir().expect("tempdir");
+    let target = dir.path().join("slow.bin");
+
+    let manager = DownloadManager::with_catalog_path(dir.path().join("downloads.json"));
+    let mut rx = manager.subscribe();
+    let id = manager
+        .start(DownloadRequest {
+            url: format!("http://{addr}/slow.bin"),
+            destination: target.display().to_string(),
+            connections: 4,
+            interface_ids: Vec::new(),
+            block_size: None,
+            extract: false,
+            file_name: None,
+            browser: None,
+        })
+        .await
+        .expect("start");
+
+    // The row is published before the first worker runs, so the oldest event is its
+    // starting state: status downloading, no bytes, phase "starting".
+    let first = snapshot_of(rx.recv().await.expect("first event"));
+    assert_eq!(first.id, id);
+    assert_eq!(first.status, DownloadStatus::Downloading);
+    assert_eq!(first.phase, "starting");
+    assert_eq!(first.downloaded_bytes, 0);
+
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
+    let live = loop {
+        let event = tokio::time::timeout_at(deadline, rx.recv())
+            .await
+            .expect("timed out waiting for the first byte")
+            .expect("event stream closed");
+        let snapshot = snapshot_of(event);
+        if snapshot.id == id && snapshot.downloaded_bytes > 0 {
+            break snapshot;
+        }
+    };
+    assert_eq!(
+        live.phase, "downloading",
+        "a transfer with bytes on disk must not still say connecting"
+    );
+
+    wait_status(&mut rx, &id, DownloadStatus::Completed).await;
+    assert_eq!(std::fs::read(&target).expect("read file"), *data);
+    server.abort();
+}

@@ -30,6 +30,10 @@ pub struct InterfaceInfo {
     /// reach the same router, so spreading connections over them adds no bandwidth.
     #[serde(default)]
     pub network: Option<String>,
+    /// The adapter's reported link rate in bits per second. It is a ceiling, not the
+    /// internet speed, but it tells the UI whether more parallel connections can help.
+    #[serde(default)]
+    pub link_speed_bps: Option<u64>,
 }
 
 fn classify(name: &str) -> InterfaceKind {
@@ -97,6 +101,91 @@ fn has_route(address: Ipv4Addr) -> bool {
     socket.connect("1.1.1.1:53").is_ok()
 }
 
+/// Friendly name -> link rate, as reported by Windows. A missing entry (a virtual
+/// adapter, an old driver) only means the UI cannot show a rate; it changes no behavior.
+#[cfg(target_os = "windows")]
+fn link_speeds() -> std::collections::HashMap<String, u64> {
+    use windows_sys::Win32::Foundation::{ERROR_BUFFER_OVERFLOW, NO_ERROR};
+    use windows_sys::Win32::NetworkManagement::IpHelper::{
+        GetAdaptersAddresses, GAA_FLAG_SKIP_ANYCAST, GAA_FLAG_SKIP_DNS_SERVER,
+        GAA_FLAG_SKIP_MULTICAST, IP_ADAPTER_ADDRESSES_LH,
+    };
+
+    let mut size = 16 * 1024u32;
+    let mut buffer = Vec::<u8>::new();
+    loop {
+        buffer.resize(size as usize, 0);
+        let result = unsafe {
+            GetAdaptersAddresses(
+                0,
+                GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST | GAA_FLAG_SKIP_DNS_SERVER,
+                std::ptr::null(),
+                buffer.as_mut_ptr().cast::<IP_ADAPTER_ADDRESSES_LH>(),
+                &mut size,
+            )
+        };
+        if result == ERROR_BUFFER_OVERFLOW {
+            continue;
+        }
+        if result != NO_ERROR {
+            return std::collections::HashMap::new();
+        }
+        break;
+    }
+
+    let mut speeds = std::collections::HashMap::new();
+    let mut current = buffer.as_ptr().cast::<IP_ADAPTER_ADDRESSES_LH>();
+    while !current.is_null() {
+        let adapter = unsafe { &*current };
+        if !adapter.FriendlyName.is_null() && adapter.TransmitLinkSpeed > 0 {
+            let name = unsafe {
+                let mut length = 0usize;
+                while *adapter.FriendlyName.add(length) != 0 {
+                    length += 1;
+                }
+                String::from_utf16_lossy(std::slice::from_raw_parts(
+                    adapter.FriendlyName,
+                    length,
+                ))
+            };
+            speeds.insert(name, adapter.TransmitLinkSpeed);
+        }
+        current = adapter.Next;
+    }
+    speeds
+}
+
+#[cfg(not(target_os = "windows"))]
+fn link_speeds() -> std::collections::HashMap<String, u64> {
+    std::collections::HashMap::new()
+}
+
+/// A conservative starting point for a new link: enough connections to fill a fast line,
+/// never fewer than the long-standing default of eight, and bounded by the CPU. The user
+/// can still move the slider; this only keeps a fresh install from under-using the line.
+pub fn recommended_connections() -> u32 {
+    let interfaces = list_interfaces();
+    let default = interfaces
+        .iter()
+        .find(|interface| interface.is_default && interface.usable)
+        .or_else(|| interfaces.iter().find(|interface| interface.usable));
+    let mbps = default
+        .and_then(|interface| interface.link_speed_bps)
+        .map(|bits| bits as f64 / 1_000_000.0)
+        .unwrap_or(0.0);
+    let cores = std::thread::available_parallelism()
+        .map(|count| count.get() as u32)
+        .unwrap_or(4);
+    let by_link = if mbps >= 900.0 {
+        24
+    } else if mbps >= 350.0 {
+        16
+    } else {
+        8
+    };
+    by_link.min((cores * 2).max(8)).clamp(8, 32)
+}
+
 /// Every non-loopback IPv4 adapter, including ones Windows currently cannot route.
 /// The UI can show a dead adapter as "no route" instead of silently offering a path that
 /// would fail every block. Loopback is never a second path to the internet.
@@ -106,6 +195,7 @@ pub fn list_interfaces() -> Vec<InterfaceInfo> {
         return out;
     };
     let default = default_address();
+    let speeds = link_speeds();
 
     for interface in interfaces {
         if interface.is_loopback() {
@@ -122,6 +212,7 @@ pub fn list_interfaces() -> Vec<InterfaceInfo> {
         let name = interface.name;
         let kind = classify(&name);
         let network = network_of(address, v4.netmask);
+        let link_speed_bps = speeds.get(&name).copied();
         out.push(InterfaceInfo {
             id: format!("{name}|{address}"),
             name,
@@ -130,6 +221,7 @@ pub fn list_interfaces() -> Vec<InterfaceInfo> {
             is_default: default == Some(address),
             usable: has_route(address),
             network,
+            link_speed_bps,
         });
     }
 
