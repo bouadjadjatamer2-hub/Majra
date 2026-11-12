@@ -43,8 +43,8 @@ const STALL_SECONDS: u64 = 35;
 const FIRST_BYTE_SECONDS: u64 = 20;
 const MAX_STALL_RETRIES: u32 = 2;
 /// Downloads running at once by default; the rest wait in the queue.
-const DEFAULT_MAX_ACTIVE: usize = 3;
-const MAX_ACTIVE_LIMIT: usize = 8;
+const DEFAULT_MAX_ACTIVE: usize = 0;
+const MAX_ACTIVE_LIMIT: usize = 64;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
@@ -187,6 +187,9 @@ struct Record {
     /// handed to the writer, which can be a moment before they reach the disk.
     durable: Mutex<BTreeMap<u64, u64>>,
     extracted: Mutex<HashSet<String>>,
+    /// Set when a server advertised range support but answered a range request with
+    /// the whole file. `run_inner` then restarts the transfer as a single stream.
+    range_rejected: AtomicBool,
 }
 
 impl Record {
@@ -312,16 +315,24 @@ impl DownloadManager {
         }
     }
 
-    /// How many downloads run at the same time. Everything above the limit waits in the
-    /// queue, IDM style, and starts as soon as a slot frees up.
+    /// How many downloads run at the same time. Zero means no limit: every row starts
+    /// immediately, which is what the app is expected to do unless the user asks for a
+    /// queue. Any other value waits for a free slot, IDM style.
     pub fn set_max_active(&self, value: u32) {
-        let value = (value as usize).clamp(1, MAX_ACTIVE_LIMIT);
+        let value = (value as usize).min(MAX_ACTIVE_LIMIT);
         self.max_active.store(value, Ordering::Relaxed);
         self.fill_slots();
     }
 
     pub fn max_active(&self) -> usize {
         self.max_active.load(Ordering::Relaxed)
+    }
+
+    /// True when another row may start. Zero active limit means "as many as the user
+    /// starts".
+    fn has_free_slot(&self) -> bool {
+        let limit = self.max_active();
+        limit == 0 || self.active_count() < limit
     }
 
     /// Number of rows that are actually transferring right now.
@@ -356,7 +367,7 @@ impl DownloadManager {
     fn fill_slots(&self) {
         loop {
             let _gate = self.admission.lock().unwrap();
-            if self.active_count() >= self.max_active() {
+            if !self.has_free_slot() {
                 return;
             }
             let next = {
@@ -557,11 +568,12 @@ impl DownloadManager {
             ranges: Mutex::new(BTreeMap::new()),
             durable: Mutex::new(durable),
             extracted: Mutex::new(HashSet::new()),
+            range_rejected: AtomicBool::new(false),
         });
 
         let start_now = {
             let _gate = self.admission.lock().unwrap();
-            let free = self.active_count() < self.max_active();
+            let free = self.has_free_slot();
             if !free {
                 record.snapshot.lock().unwrap().status = DownloadStatus::Queued;
             }
@@ -670,7 +682,8 @@ impl DownloadManager {
         // back of the queue instead of starting a fourth transfer.
         let start_now = {
             let _gate = self.admission.lock().unwrap();
-            let free = self.active_count_except(id) < self.max_active();
+            let limit = self.max_active();
+            let free = limit == 0 || self.active_count_except(id) < limit;
             if !free {
                 record.snapshot.lock().unwrap().status = DownloadStatus::Queued;
                 self.queue.lock().unwrap().push_back(id.to_string());
@@ -1241,7 +1254,11 @@ async fn run(
     let record_id = snapshot.id.clone();
     snapshot.speed_bytes_per_sec = 0.0;
     snapshot.eta_seconds = None;
-    snapshot.downloaded_bytes = downloaded_now;
+    snapshot.downloaded_bytes = if record.total_bytes > 0 {
+        downloaded_now.min(record.total_bytes)
+    } else {
+        downloaded_now
+    };
 
     let cancelled = matches!(result, Ok(Outcome::Cancelled));
     let event = match result {
@@ -1640,11 +1657,10 @@ async fn run_inner(
     let fatal: Arc<Mutex<Option<String>>> = Arc::new(Mutex::new(None));
     let writer = {
         let record = record.clone();
-        let downloaded = downloaded.clone();
         let fatal = fatal.clone();
         std::thread::Builder::new()
             .name("majra-disk-writer".into())
-            .spawn(move || writer_task(record, rx, downloaded, fatal))?
+            .spawn(move || writer_task(record, rx, fatal))?
     };
 
     let queue = Arc::new(Mutex::new(record.pending_blocks()));
@@ -1659,6 +1675,7 @@ async fn run_inner(
             fallback: record.auto_client.clone(),
             can_fallback: record.fallback_allowed,
             headers: headers.clone(),
+            downloaded: downloaded.clone(),
         };
         let stat = record.stats[index].clone();
         let queue = queue.clone();
@@ -1699,6 +1716,15 @@ async fn run_inner(
     }
     writer_result.map_err(|error| MajraError::Message(format!("writer stopped: {error}")))?;
 
+    if record.range_rejected.load(Ordering::SeqCst) && !cancel.is_cancelled() {
+        // The server ignored the range header. The only correct answer is a single
+        // stream from byte zero, which is what a browser would do.
+        record.range_rejected.store(false, Ordering::SeqCst);
+        reset_single(record, downloaded);
+        set_phase(record, "downloading");
+        return run_single(record, cancel, downloaded).await;
+    }
+
     if cancel.is_cancelled() {
         return Ok(outcome(record));
     }
@@ -1736,6 +1762,7 @@ struct WorkerContext {
     fallback: reqwest::Client,
     can_fallback: bool,
     headers: Arc<Vec<(&'static str, String)>>,
+    downloaded: Arc<AtomicU64>,
 }
 
 async fn worker(
@@ -1776,6 +1803,7 @@ async fn worker(
                 &cancel,
                 stat.id,
                 &context.headers,
+                &context.downloaded,
             )
             .await
             {
@@ -1785,6 +1813,13 @@ async fn worker(
                     break;
                 }
                 Err(MajraError::Cancelled) => return Ok(()),
+                Err(MajraError::RangeRejected) => {
+                    // The probe saw "Accept-Ranges" but this host answers with the whole
+                    // file anyway. Stop this worker; `run_inner` restarts as one stream.
+                    record.range_rejected.store(true, Ordering::SeqCst);
+                    *stat.status.lock().unwrap() = "done".into();
+                    return Ok(());
+                }
                 Err(error) => {
                     if !used_fallback && context.can_fallback && matches!(error, MajraError::Network(_))
                     {
@@ -1826,6 +1861,7 @@ async fn download_block(
     cancel: &CancellationToken,
     connection_id: u32,
     headers: &[(&'static str, String)],
+    downloaded: &Arc<AtomicU64>,
 ) -> Result<()> {
     let mut request = client.get(url).header(
         reqwest::header::RANGE,
@@ -1842,19 +1878,38 @@ async fn download_block(
     let mut stream = response.bytes_stream();
     let mut offset = block.start;
     let mut buffer = Vec::with_capacity(WRITE_CHUNK);
+    // Progress counts bytes the moment they arrive, not when a whole 1 MB write lands.
+    // A slow host that trickles a kilobyte at a time is alive, and the window has to say
+    // so; otherwise a big file from a slow server looks dead and the watchdog agrees.
+    // A failed attempt rolls its bytes back, so a retry is never counted twice.
+    let mut seen = 0u64;
+    macro_rules! give_up {
+        ($error:expr) => {{
+            // Bytes already handed to the disk writer are still flushed when the
+            // channel closes, so only the un-sent tail is rolled back here.
+            let sent = offset.saturating_sub(block.start);
+            downloaded.fetch_sub(seen.saturating_sub(sent), Ordering::Relaxed);
+            return Err($error);
+        }};
+    }
     while let Some(item) = stream.next().await {
         if cancel.is_cancelled() {
-            return Err(MajraError::Cancelled);
+            give_up!(MajraError::Cancelled);
         }
-        let chunk = item?;
+        let chunk = match item {
+            Ok(chunk) => chunk,
+            Err(error) => give_up!(error.into()),
+        };
         if chunk.is_empty() {
             continue;
         }
         if offset + chunk.len() as u64 > block.end + 1 {
-            return Err(MajraError::Message(
+            give_up!(MajraError::Message(
                 "the server sent more bytes than the range asked for".into(),
             ));
         }
+        seen += chunk.len() as u64;
+        downloaded.fetch_add(chunk.len() as u64, Ordering::Relaxed);
         buffer.extend_from_slice(&chunk);
         if buffer.len() >= WRITE_CHUNK {
             let data = Bytes::from(std::mem::replace(
@@ -1862,30 +1917,38 @@ async fn download_block(
                 Vec::with_capacity(WRITE_CHUNK),
             ));
             let length = data.len() as u64;
-            tx.send(WriteChunk {
-                offset,
-                data,
-                connection_id,
-            })
-            .await
-            .map_err(|_| MajraError::Message("the disk writer stopped".into()))?;
+            if tx
+                .send(WriteChunk {
+                    offset,
+                    data,
+                    connection_id,
+                })
+                .await
+                .is_err()
+            {
+                give_up!(MajraError::Message("the disk writer stopped".into()));
+            }
             offset += length;
         }
     }
     if !buffer.is_empty() {
         let data = Bytes::from(buffer);
         let length = data.len() as u64;
-        tx.send(WriteChunk {
-            offset,
-            data,
-            connection_id,
-        })
-        .await
-        .map_err(|_| MajraError::Message("the disk writer stopped".into()))?;
+        if tx
+            .send(WriteChunk {
+                offset,
+                data,
+                connection_id,
+            })
+            .await
+            .is_err()
+        {
+            give_up!(MajraError::Message("the disk writer stopped".into()));
+        }
         offset += length;
     }
     if offset != block.end + 1 {
-        return Err(MajraError::ShortRead);
+        give_up!(MajraError::ShortRead);
     }
     Ok(())
 }
@@ -1896,7 +1959,6 @@ async fn download_block(
 fn writer_task(
     record: Arc<Record>,
     mut rx: mpsc::Receiver<WriteChunk>,
-    downloaded: Arc<AtomicU64>,
     fatal: Arc<Mutex<Option<String>>>,
 ) -> std::io::Result<()> {
     let file = open_partial(&record.file_path)?;
@@ -1919,8 +1981,9 @@ fn writer_task(
             chunk.offset,
             chunk.offset + length,
         );
+        // Progress was already counted when these bytes arrived; the writer only keeps
+        // the durable map and the per-connection totals in step with the disk.
         let added = note_written(&record, chunk.offset, length);
-        downloaded.fetch_add(added, Ordering::Relaxed);
         if let Some(stat) = record.stats.get(chunk.connection_id as usize) {
             stat.downloaded.fetch_add(added, Ordering::Relaxed);
         }
@@ -2063,20 +2126,27 @@ async fn run_single_once(
 
     while let Some(item) = stream.next().await {
         if cancel.is_cancelled() {
+            downloaded.fetch_sub(buffer.len() as u64, Ordering::Relaxed);
             file.sync_all().await?;
             return Ok(outcome(record));
         }
-        let chunk = item?;
+        let chunk = match item {
+            Ok(chunk) => chunk,
+            Err(error) => {
+                downloaded.fetch_sub(buffer.len() as u64, Ordering::Relaxed);
+                return Err(error.into());
+            }
+        };
+        downloaded.fetch_add(chunk.len() as u64, Ordering::Relaxed);
         buffer.extend_from_slice(&chunk);
         if buffer.len() >= WRITE_CHUNK {
             file.write_all(&buffer).await?;
             let length = buffer.len() as u64;
             let offset = written;
             written += length;
-            let added = note_written(record, offset, length);
-            downloaded.fetch_add(added, Ordering::Relaxed);
+            note_written(record, offset, length);
             if let Some(stat) = record.stats.first() {
-                stat.downloaded.fetch_add(added, Ordering::Relaxed);
+                stat.downloaded.fetch_add(length, Ordering::Relaxed);
             }
             buffer.clear();
         }
@@ -2086,10 +2156,9 @@ async fn run_single_once(
         let length = buffer.len() as u64;
         let offset = written;
         written += length;
-        let added = note_written(record, offset, length);
-        downloaded.fetch_add(added, Ordering::Relaxed);
+        note_written(record, offset, length);
         if let Some(stat) = record.stats.first() {
-            stat.downloaded.fetch_add(added, Ordering::Relaxed);
+            stat.downloaded.fetch_add(length, Ordering::Relaxed);
         }
     }
     file.sync_all().await?;
@@ -2130,7 +2199,16 @@ async fn reporter(
         }
 
         let now = Instant::now();
-        let current = downloaded.load(Ordering::Relaxed);
+        // Bytes are counted as they arrive, so a retried range can briefly overshoot the
+        // total. The UI never shows more than 100 %.
+        let current = {
+            let value = downloaded.load(Ordering::Relaxed);
+            if record.total_bytes > 0 {
+                value.min(record.total_bytes)
+            } else {
+                value
+            }
+        };
         // The first byte is the moment the row stops being a promise and starts being a
         // transfer; until then the UI shows "connecting" instead of a dead 0 %.
         if current > 0 {
@@ -2543,6 +2621,7 @@ mod tests {
             ranges: Mutex::new(BTreeMap::new()),
             durable: Mutex::new(durable),
             extracted: Mutex::new(HashSet::new()),
+            range_rejected: AtomicBool::new(false),
             extract: false,
             extract_root: PathBuf::new(),
         };

@@ -132,9 +132,9 @@
   .toolbar {
     display: flex;
     align-items: center;
-    gap: 4px;
-    height: 46px;
-    padding-inline: 10px;
+    gap: 3px;
+    height: 40px;
+    padding-inline: 8px;
     background: var(--surface);
     border-block-end: 1px solid var(--line);
   }
@@ -167,9 +167,9 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    width: 220px;
-    height: 30px;
-    margin-inline-start: 10px;
+    width: 210px;
+    height: 28px;
+    margin-inline-start: 8px;
     padding-inline: 8px;
     border: 1px solid var(--line);
     border-radius: var(--r-sm);

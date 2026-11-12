@@ -48,7 +48,7 @@ impl Default for Settings {
         Self {
             default_destination: String::new(),
             default_connections: 8,
-            max_active: 3,
+            max_active: 0,
             extract_by_default: false,
             close_to_tray: true,
             start_minimized: false,
@@ -94,7 +94,7 @@ impl Settings {
     pub fn sanitized(mut self) -> Self {
         self.default_destination = self.default_destination.trim().to_string();
         self.default_connections = self.default_connections.clamp(1, 32);
-        self.max_active = self.max_active.clamp(1, 8);
+        self.max_active = self.max_active.min(64);
         self.schedule_start =
             normalize_hhmm(&self.schedule_start).unwrap_or_else(|| "02:00".into());
         self.schedule_stop =
@@ -152,9 +152,10 @@ impl SettingsStore {
     }
 
     /// Keep the parallel-download limit in the same file as every other preference.
+    /// Zero means no limit.
     pub fn set_max_active(&self, value: u32) -> Result<Settings, String> {
         let mut next = self.get();
-        next.max_active = value.clamp(1, 8);
+        next.max_active = value.min(64);
         self.save(next)
     }
 
@@ -219,7 +220,7 @@ mod tests {
                 })
                 .expect("save");
             assert_eq!(saved.default_connections, 32);
-            assert_eq!(saved.max_active, 1);
+            assert_eq!(saved.max_active, 0);
             assert_eq!(saved.default_destination, "D:\\Media");
             assert_eq!(saved.schedule_start, "01:05");
             assert_eq!(saved.schedule_stop, "07:00");
@@ -253,6 +254,6 @@ mod tests {
         let path = dir.path().join("settings.json");
         fs::write(&path, b"{ nope").expect("write");
         let store = SettingsStore::open(path);
-        assert_eq!(store.get().max_active, 3);
+        assert_eq!(store.get().max_active, 0);
     }
 }

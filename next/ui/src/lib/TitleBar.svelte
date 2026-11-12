@@ -76,7 +76,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    height: 36px;
+    height: 34px;
     padding-inline: 10px 0;
     background: var(--bg-elev);
     border-block-end: 1px solid var(--line);

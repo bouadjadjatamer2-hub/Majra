@@ -32,13 +32,51 @@ async fn start_server(payload: Arc<Vec<u8>>, config: ServerConfig) -> (SocketAdd
                 break;
             };
             let payload = payload.clone();
-            tokio::spawn(async move { serve(stream, payload, config).await });
+            tokio::spawn(async move { serve(stream, payload, config, config.ranges).await });
         }
     });
     (addr, handle)
 }
 
-async fn serve(mut stream: TcpStream, payload: Arc<Vec<u8>>, config: ServerConfig) {
+/// A host that answers the probe with 206 and then ignores `Range` on every later
+/// request. Some CDNs do this once a session is established, and the engine has to
+/// notice instead of failing the transfer.
+async fn start_lying_server(payload: Arc<Vec<u8>>) -> (SocketAddr, JoinHandle<()>) {
+    let listener = TcpListener::bind("127.0.0.1:0").await.expect("bind");
+    let addr = listener.local_addr().expect("addr");
+    let served = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+    let handle = tokio::spawn(async move {
+        loop {
+            let Ok((stream, _)) = listener.accept().await else {
+                break;
+            };
+            let payload = payload.clone();
+            let grant = served
+                .fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+                == 0;
+            tokio::spawn(async move {
+                serve(
+                    stream,
+                    payload,
+                    ServerConfig {
+                        ranges: true,
+                        throttle: None,
+                    },
+                    grant,
+                )
+                .await
+            });
+        }
+    });
+    (addr, handle)
+}
+
+async fn serve(
+    mut stream: TcpStream,
+    payload: Arc<Vec<u8>>,
+    config: ServerConfig,
+    range_granted: bool,
+) {
     let mut head = Vec::new();
     let mut buf = [0u8; 2048];
     loop {
@@ -70,7 +108,7 @@ async fn serve(mut stream: TcpStream, payload: Arc<Vec<u8>>, config: ServerConfi
 
     let total = payload.len() as u64;
     let (start, end, partial) = match range {
-        Some((start, end)) if config.ranges && total > 0 => {
+        Some((start, end)) if range_granted && total > 0 => {
             (start.min(total - 1), end.min(total - 1), true)
         }
         _ => (0, total.saturating_sub(1), false),
@@ -361,7 +399,25 @@ async fn pause_then_resume_keeps_integrity() {
         .await
         .expect("start");
 
-    let progress = wait_progress(&mut rx, &id).await;
+    // Wait until at least one whole write chunk is on disk, so the paused snapshot has
+    // durable bytes to report: bytes still buffered in a worker are rolled back when the
+    // attempt is cancelled, because resume fetches them again.
+    let progress = {
+        let deadline = tokio::time::Instant::now() + Duration::from_secs(30);
+        loop {
+            let event = tokio::time::timeout_at(deadline, rx.recv())
+                .await
+                .expect("timed out waiting for progress")
+                .expect("event stream closed");
+            let snapshot = snapshot_of(event);
+            if snapshot.id == id
+                && snapshot.status == DownloadStatus::Downloading
+                && snapshot.downloaded_bytes >= 2 * 1024 * 1024
+            {
+                break snapshot;
+            }
+        }
+    };
     assert!(progress.downloaded_bytes < progress.total_bytes);
 
     manager.pause(&id).await.expect("pause");
@@ -464,6 +520,37 @@ async fn server_without_ranges_falls_back_to_one_stream() {
 
     let done = wait_status(&mut rx, &id, DownloadStatus::Completed).await;
     assert_eq!(done.downloaded_bytes, data.len() as u64);
+    let written = std::fs::read(&target).expect("read file");
+    assert_eq!(written, *data);
+    server.abort();
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn server_that_ignores_ranges_after_the_probe_still_finishes() {
+    let data = Arc::new(payload(2 * 1024 * 1024));
+    let (addr, server) = start_lying_server(data.clone()).await;
+    let dir = tempfile::tempdir().expect("tempdir");
+    let target = dir.path().join("lying.bin");
+
+    let manager = DownloadManager::with_catalog_path(dir.path().join("downloads.json"));
+    let mut rx = manager.subscribe();
+    let id = manager
+        .start(DownloadRequest {
+            url: format!("http://{addr}/lying.bin"),
+            destination: target.display().to_string(),
+            connections: 8,
+            interface_ids: Vec::new(),
+            block_size: None,
+            extract: false,
+            file_name: None,
+            browser: None,
+        })
+        .await
+        .expect("start");
+
+    let done = wait_status(&mut rx, &id, DownloadStatus::Completed).await;
+    assert_eq!(done.downloaded_bytes, data.len() as u64);
+    assert!(done.error.is_none());
     let written = std::fs::read(&target).expect("read file");
     assert_eq!(written, *data);
     server.abort();
@@ -660,6 +747,84 @@ async fn extracts_zip_while_the_download_is_running() {
         "zip-slip entry escaped the extraction folder"
     );
     server.abort();
+}
+
+/// Several archives must download and unpack at the same time. The app has no built-in
+/// cap: with the limit at 0 every row starts at once, and each row's extractor runs
+/// beside its transfer.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn three_archives_download_and_extract_together() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let manager = DownloadManager::with_catalog_path(dir.path().join("downloads.json"));
+    manager.set_max_active(0);
+    assert_eq!(manager.max_active(), 0, "zero means no limit");
+    let mut rx = manager.subscribe();
+
+    let mut ids = Vec::new();
+    let mut archives = Vec::new();
+    for index in 0..3 {
+        let body = payload(600 * 1024);
+        let name = format!("entry-{index}.bin");
+        let archive = Arc::new(stored_zip(&[(name.as_str(), body.as_slice())]));
+        let (addr, server) = start_server(
+            archive,
+            ServerConfig {
+                ranges: true,
+                throttle: Some((16 * 1024, Duration::from_millis(2))),
+            },
+        )
+        .await;
+        let id = manager
+            .start(DownloadRequest {
+                url: format!("http://{addr}/set-{index}.zip"),
+                destination: dir.path().join(format!("set-{index}.zip")).display().to_string(),
+                connections: 2,
+                interface_ids: Vec::new(),
+                block_size: None,
+                extract: true,
+                file_name: None,
+                browser: None,
+            })
+            .await
+            .expect("start");
+        ids.push(id);
+        archives.push((server, format!("set-{index}"), name, body));
+    }
+
+    assert_eq!(
+        manager.active_count(),
+        3,
+        "no cap means every archive starts at once"
+    );
+
+    let mut done = std::collections::HashSet::new();
+    let deadline = tokio::time::Instant::now() + Duration::from_secs(60);
+    while done.len() < 3 {
+        let event = tokio::time::timeout_at(deadline, rx.recv())
+            .await
+            .expect("timed out waiting for the three downloads")
+            .expect("event stream closed");
+        match event {
+            DownloadEvent::Done { snapshot } => {
+                assert_eq!(snapshot.downloaded_bytes, snapshot.total_bytes);
+                let extraction = snapshot.extraction.expect("extraction snapshot");
+                assert_eq!(extraction.status, "done", "{:?}", extraction.error);
+                done.insert(snapshot.id);
+            }
+            DownloadEvent::Error { snapshot } => {
+                panic!("download failed: {:?}", snapshot.error);
+            }
+            _ => {}
+        }
+    }
+    assert_eq!(done.len(), 3);
+
+    for (server, root, name, body) in archives {
+        let written =
+            std::fs::read(dir.path().join(&root).join(&name)).expect("extracted entry");
+        assert_eq!(written, body);
+        server.abort();
+    }
 }
 
 /// The list has to tell the truth about a slow start: the row exists and says

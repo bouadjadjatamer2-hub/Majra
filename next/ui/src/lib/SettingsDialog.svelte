@@ -21,7 +21,7 @@
   const defaults: AppSettings = {
     defaultDestination: '',
     defaultConnections: 8,
-    maxActive: 3,
+    maxActive: 0,
     extractByDefault: false,
     closeToTray: true,
     startMinimized: false,
@@ -409,8 +409,8 @@
                 <span class="hint">{t('parallelHint')}</span>
               </div>
               <div class="range-row">
-                <input type="range" min="1" max="8" step="1" bind:value={draft.maxActive} />
-                <span class="range-value num">{draft.maxActive}</span>
+                <input type="range" min="0" max="32" step="1" bind:value={draft.maxActive} />
+                <span class="range-value num">{draft.maxActive === 0 ? '∞' : draft.maxActive}</span>
               </div>
             </div>
             <div class="setting">

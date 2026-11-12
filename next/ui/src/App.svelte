@@ -192,7 +192,7 @@
 
 <svelte:window onkeydown={onKey} />
 
-<div class="app" class:low-ram={app.lowRam} style="--row-h: {app.lowRam ? 32 : 38}px">
+<div class="app" class:low-ram={app.lowRam} style="--row-h: {app.lowRam ? 28 : 34}px">
   <TitleBar />
   <Toolbar />
   <div class="workspace" class:no-details={!app.detailsOpen}>
@@ -245,19 +245,19 @@
 <style>
   .app {
     display: grid;
-    grid-template-rows: 36px 46px minmax(0, 1fr) 26px;
+    grid-template-rows: 34px 40px minmax(0, 1fr) 24px;
     height: 100vh;
     background: var(--bg);
   }
 
   .workspace {
     display: grid;
-    grid-template-columns: 208px minmax(0, 1fr) 304px;
+    grid-template-columns: 196px minmax(0, 1fr) 296px;
     min-height: 0;
   }
 
   .workspace.no-details {
-    grid-template-columns: 208px minmax(0, 1fr);
+    grid-template-columns: 196px minmax(0, 1fr);
   }
 
   .toasts {

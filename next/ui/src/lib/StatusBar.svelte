@@ -51,7 +51,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    height: 26px;
+    height: 24px;
     padding-inline: 10px;
     border-block-start: 1px solid var(--line);
     background: var(--bg-elev);

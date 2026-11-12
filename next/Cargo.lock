@@ -2237,7 +2237,7 @@ checksum = "5d15f86d12da44cd8d4ec3c73984537eb7f4cadcb9776a575a0a8a05ca11005c"
 
 [[package]]
 name = "majra-core"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "bytes",
  "crc32fast",
@@ -2265,7 +2265,7 @@ dependencies = [
 
 [[package]]
 name = "majra-desktop"
-version = "2.0.1"
+version = "2.0.2"
 dependencies = [
  "arboard",
  "chrono",

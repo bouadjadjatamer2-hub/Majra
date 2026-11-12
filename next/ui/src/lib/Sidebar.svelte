@@ -66,15 +66,15 @@
       <button
         type="button"
         aria-label={t('parallelFewer')}
-        disabled={app.maxActive <= 1}
-        onclick={() => app.setMaxActive(app.maxActive - 1)}>−</button>
+        disabled={app.maxActive <= 0}
+        onclick={() => app.setMaxActive(app.maxActive - 1)}>-</button>
 
-      <span class="num">{app.maxActive}</span>
+      <span class="num">{app.maxActive === 0 ? '∞' : app.maxActive}</span>
       <button
         type="button"
         aria-label={t('parallelMore')}
-        disabled={app.maxActive >= 8}
-        onclick={() => app.setMaxActive(app.maxActive + 1)}>+</button>
+        disabled={app.maxActive >= 64}
+        onclick={() => app.setMaxActive(app.maxActive === 0 ? 1 : app.maxActive + 1)}>+</button>
     </div>
   </div>
 
@@ -99,7 +99,7 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
-    padding: 8px 6px 10px;
+    padding: 6px 5px 8px;
     background: var(--bg-elev);
     border-inline-end: 1px solid var(--line);
     overflow-y: auto;
@@ -112,7 +112,7 @@
   }
 
   .group-title {
-    padding: 8px 10px 5px;
+    padding: 6px 9px 4px;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.09em;
@@ -129,9 +129,9 @@
   .item {
     display: flex;
     align-items: center;
-    gap: 9px;
-    height: 30px;
-    padding-inline: 10px;
+    gap: 8px;
+    height: 27px;
+    padding-inline: 9px;
     border: 0;
     border-radius: var(--r-sm);
     background: transparent;

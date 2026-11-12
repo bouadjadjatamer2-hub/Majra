@@ -21,7 +21,7 @@
   let viewportH = $state(560);
 
   const OVERSCAN = 6;
-  let rowH = $derived(app.lowRam ? 32 : 38);
+  let rowH = $derived(app.lowRam ? 28 : 34);
   let start = $derived(Math.max(0, Math.floor(scrollTop / rowH) - OVERSCAN));
   let end = $derived(
     Math.min(rows.length, Math.ceil((scrollTop + viewportH) / rowH) + OVERSCAN),
@@ -139,13 +139,12 @@
                 : app.togglePause(download.id)}
             aria-selected={app.selectedId === download.id}
           >
-            <div class="cell cell-file" role="cell">
+            <div class="cell cell-file" role="cell" title={`${download.fileName}\n${hostOf(download.url)}`}>
               <span class="file-icon" data-cat={categoryOf(download.fileName)}>
-                <Icon name={categoryIcon[categoryOf(download.fileName)]} size={14} />
+                <Icon name={categoryIcon[categoryOf(download.fileName)]} size={13} />
               </span>
               <span class="file-text">
-                <span class="file-name" title={download.fileName}>{download.fileName}</span>
-                <span class="row-sub">{hostOf(download.url)}</span>
+                <span class="file-name">{download.fileName}</span>
               </span>
             </div>
 
@@ -213,8 +212,8 @@
     grid-template-columns: var(--cols);
     gap: 10px;
     align-items: center;
-    height: 28px;
-    padding-inline: 12px 14px;
+    height: 26px;
+    padding-inline: 10px 12px;
     border-block-end: 1px solid var(--line);
     background: var(--surface-2);
     color: var(--faint);
@@ -250,8 +249,8 @@
     grid-template-columns: var(--cols);
     gap: 10px;
     align-items: center;
-    height: var(--row-h, 38px);
-    padding-inline: 12px 14px;
+    height: var(--row-h, 34px);
+    padding-inline: 10px 12px;
     border-block-end: 1px solid color-mix(in srgb, var(--line) 55%, transparent);
     border-inline-start: 2px solid transparent;
     color: var(--text-2);
@@ -287,10 +286,10 @@
   .file-icon {
     display: grid;
     place-items: center;
-    width: 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     flex: none;
-    border-radius: var(--r-sm);
+    border-radius: var(--r-xs);
     background: var(--surface-3);
     color: var(--muted);
   }
@@ -324,7 +323,7 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    line-height: 1.25;
+    line-height: 1.2;
   }
 
   .file-name {
@@ -340,24 +339,9 @@
     color: var(--text);
   }
 
-  .row-sub {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    margin-block-start: 2px;
-    color: var(--faint);
-    font-size: 10px;
-    font-family: var(--font-mono);
-  }
-
-  :global(html[lang='ar']) .row-sub {
-    font-family: var(--font-ar);
-  }
-
   /* Latin file names keep their own direction inside an RTL row, so the ellipsis
      falls on the readable end instead of reordering the path fragments. */
-  :global(html[dir='rtl']) .file-name,
-  :global(html[dir='rtl']) .row-sub {
+  :global(html[dir='rtl']) .file-name {
     unicode-bidi: plaintext;
     text-align: start;
   }

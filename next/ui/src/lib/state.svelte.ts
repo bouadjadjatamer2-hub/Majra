@@ -150,7 +150,7 @@ class AppState {
   offer = $state<BridgeOffer | null>(null);
   detailsOpen = $state(true);
   lowRam = $state(true);
-  maxActive = $state(3);
+  maxActive = $state(0);
   defaultDestination = $state('');
   defaultConnections = $state(8);
   extractByDefault = $state(false);
@@ -295,7 +295,7 @@ class AppState {
   applySettings(settings: AppSettings): void {
     this.defaultDestination = settings.defaultDestination ?? '';
     this.defaultConnections = clamp(settings.defaultConnections, 1, 32);
-    this.maxActive = clamp(settings.maxActive, 1, 8);
+    this.maxActive = clamp(settings.maxActive, 0, 64);
     this.extractByDefault = Boolean(settings.extractByDefault);
     this.closeToTray = settings.closeToTray !== false;
     this.startMinimized = Boolean(settings.startMinimized);
@@ -617,10 +617,10 @@ class AppState {
     this.setLowRam(!this.lowRam);
   }
 
-  /// How many downloads may run at once. Rows above the limit wait as Queued and the
-  /// core starts them as slots free up.
+  /// How many downloads may run at once. Zero means no limit: every row starts at
+  /// once. Any other value queues the extra rows until a slot frees up.
   setMaxActive(value: number): void {
-    const next = Math.max(1, Math.min(8, Math.round(value)));
+    const next = Math.max(0, Math.min(64, Math.round(value)));
     if (next === this.maxActive) return;
     this.maxActive = next;
     this.persist('majra.maxActive', String(next));
@@ -785,7 +785,7 @@ class AppState {
       const lowRam = localStorage.getItem('majra.lowRam');
       if (lowRam === '0' || lowRam === '1') this.lowRam = lowRam === '1';
       const maxActive = Number(localStorage.getItem('majra.maxActive'));
-      if (Number.isFinite(maxActive) && maxActive >= 1 && maxActive <= 8) {
+      if (Number.isFinite(maxActive) && maxActive >= 0 && maxActive <= 64) {
         this.maxActive = Math.round(maxActive);
       }
     }
