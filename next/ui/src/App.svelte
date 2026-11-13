@@ -79,6 +79,12 @@
         .then((off) => disposers.push(off))
         .catch(() => {});
       api
+        .onNewDownload(() => {
+          app.showAdd = true;
+        })
+        .then((off) => disposers.push(off))
+        .catch(() => {});
+      api
         .onScan((result) => {
           const text = `${result.fileName}: ${
             result.status === 'threat'

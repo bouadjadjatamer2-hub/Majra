@@ -22,6 +22,13 @@ fn show_main(app: &tauri::AppHandle) {
     }
 }
 
+/// The window opens hidden when the login entry asked for it (`--minimized`) or when the
+/// user chose to start in the background. A manual launch without the flag follows the
+/// setting only, so a shortcut still opens the window unless the user wants otherwise.
+fn should_start_hidden(setting: bool, args: impl IntoIterator<Item = String>) -> bool {
+    setting || args.into_iter().any(|arg| arg == "--minimized")
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let mut builder = tauri::Builder::default();
@@ -29,14 +36,21 @@ pub fn run() {
     // copy: it comes back to the front instead of starting a second tray icon and bridge.
     #[cfg(desktop)]
     {
-        builder = builder.plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
+        builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+            // The login entry starts Majra with `--minimized`; a second copy doing that must
+            // not pull a hidden window in front of the user.
+            if argv.iter().any(|arg| arg == "--minimized") {
+                return;
+            }
             show_main(app);
         }));
     }
     builder
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
-            None,
+            // The login entry is a background start: no window, just the tray and the
+            // browser bridge. A download request brings the window forward later.
+            Some(vec!["--minimized"]),
         ))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
@@ -45,15 +59,36 @@ pub fn run() {
             // first run. A failure (a locked registry, a managed machine) only means the
             // extension's wake button can't start Majra; everything else still works.
             #[cfg(any(windows, target_os = "linux"))]
-            {
+            let launched_from_link = {
                 use tauri_plugin_deep_link::DeepLinkExt;
                 if let Err(error) = app.deep_link().register_all() {
                     eprintln!("majra: could not register majra:// links: {error}");
                 }
-            }
+                // A cold start from `majra://open` arrives as a CLI argument, so read it
+                // before the window is shown. A running copy gets the event below.
+                let launched = app
+                    .deep_link()
+                    .get_current()
+                    .ok()
+                    .flatten()
+                    .is_some_and(|urls| !urls.is_empty());
+                let deep_handle = app.handle().clone();
+                app.deep_link().on_open_url(move |_event| {
+                    // The extension uses `majra://open` to wake the app; a download link
+                    // still travels over the bridge, so the window is all that is needed.
+                    show_main(&deep_handle);
+                });
+                launched
+            };
+            #[cfg(not(any(windows, target_os = "linux")))]
+            let launched_from_link = false;
 
             let preferences = Arc::new(SettingsStore::load());
             let initial = preferences.get();
+            // A login start passes `--minimized`; the setting covers manual launches. Either
+            // way the window is created hidden (see tauri.conf.json) and only shown below
+            // when the user actually asked for it.
+            let start_hidden = should_start_hidden(initial.start_minimized, std::env::args());
             settings::apply_proxy(&initial);
             let manager = Arc::new(DownloadManager::new());
             manager.set_max_active(initial.max_active);
@@ -189,14 +224,20 @@ pub fn run() {
 
             // The tray is the app's home once the window is closed: downloads and the
             // browser bridge keep running there.
+            let new_download =
+                MenuItem::with_id(app, "new", "New download", true, None::<&str>)?;
             let open = MenuItem::with_id(app, "open", "Open Majra", true, None::<&str>)?;
             let quit = MenuItem::with_id(app, "quit", "Quit Majra", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&open, &quit])?;
+            let menu = Menu::with_items(app, &[&new_download, &open, &quit])?;
             let _tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
                 .menu(&menu)
                 .show_menu_on_left_click(false)
                 .on_menu_event(|app, event| match event.id.as_ref() {
+                    "new" => {
+                        show_main(app);
+                        let _ = app.emit("majra://new-download", ());
+                    }
                     "open" => show_main(app),
                     "quit" => app.exit(0),
                     _ => {}
@@ -227,8 +268,11 @@ pub fn run() {
                         }
                     }
                 });
-                if initial.start_minimized {
+                if start_hidden && !launched_from_link {
                     let _ = window.hide();
+                } else {
+                    let _ = window.show();
+                    let _ = window.set_focus();
                 }
             }
 
@@ -262,4 +306,24 @@ pub fn run() {
         ])
         .run(tauri::generate_context!())
         .expect("Majra failed to start");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::should_start_hidden;
+
+    fn args(values: &[&str]) -> Vec<String> {
+        values.iter().map(|value| value.to_string()).collect()
+    }
+
+    #[test]
+    fn the_login_entry_starts_in_the_background() {
+        assert!(should_start_hidden(false, args(&["majra-desktop.exe", "--minimized"])));
+    }
+
+    #[test]
+    fn a_manual_launch_follows_the_setting() {
+        assert!(!should_start_hidden(false, args(&["majra-desktop.exe"])));
+        assert!(should_start_hidden(true, args(&["majra-desktop.exe"])));
+    }
 }

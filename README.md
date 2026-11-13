@@ -15,14 +15,14 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.2/Majra_2.0.2_x64-setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.2-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe"><img alt="Download Majra for Windows" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="CI status" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="Majra app page" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
   <a href="https://bouadjadjatamer2-hub.github.io/Majra/"><img alt="Asraab website" src="https://img.shields.io/badge/Website-Asraab-E8A35F?style=flat-square&logo=googlechrome&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.2"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.2-24292F?style=flat-square&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="Total downloads" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="Windows 10 and 11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
@@ -62,7 +62,7 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 | **Browser hand-off**           | The Chromium extension sends a download to Majra with the browser's cookies, then gets out of the way.  |
 | **Proxy and routes**           | System, direct or a manual HTTP/SOCKS proxy. Every probe and transfer follows the same choice.          |
 | **Resume and schedule**        | Pause, resume after a reboot, and run the queue inside a daily time window.                             |
-| **Closes to the tray**         | Keep downloading after the window closes. Start Majra with Windows and it is already there.             |
+| **Runs in the background**     | At sign-in it starts in the tray with no window, and opens only when a download needs you.              |
 | **Defender scan**              | Finished files can be scanned with Windows Defender before you open them.                               |
 | **Shut down when done**        | The PC can shut down after the last download, with a toast that lets you cancel.                        |
 | **Local by design**            | Settings, history and queue live on your PC. Nothing is sent to a server.                               |
@@ -71,39 +71,38 @@ connections that come and go. No account, no ads, no telemetry, no bundled toolb
 
 ### Windows 10 / 11 · 64-bit
 
-1. Download **[Majra_2.0.2_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.2/Majra_2.0.2_x64-setup.exe)**.
+1. Download **[Majra_2.0.3_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe)**.
 2. Run the installer. It is unsigned, so Windows SmartScreen may warn you — choose **More info → Run anyway**, or build from source.
 3. Launch Majra, paste a link, and press **Start**.
 
-Version 2.0.2 is the Rust/Tauri rewrite. It keeps the same app identity as 1.2.3, so installing it replaces the old Electron build. Its settings and queue live in `%APPDATA%\app.majra.desktop`, separate from the old app's data.
+Version 2.0.3 is the Rust/Tauri rewrite. It keeps the same app identity as 1.2.3, so installing it replaces the old Electron build. Its settings and queue live in `%APPDATA%\app.majra.desktop`, separate from the old app's data.
 
-### What changed in 2.0.2
+### What changed in 2.0.3
 
-- **Slow hosts stop failing.** Progress is counted the moment bytes arrive, not when a whole megabyte reaches disk. A CDN that trickles data now finishes instead of being mistaken for a dead server.
-- **Servers that lie about ranges are handled.** If a host advertises range support and then answers with the whole file, Majra switches to one stream instead of failing the row.
-- **No cap on parallel work.** The limit can be set to 0 (shown as ∞): every download and every extraction runs at the same time. Each archive is unpacked while it is still downloading.
-- **Compact, IDM-style layout.** Rows are single-line and shorter, and the toolbar, sidebar and status bar use less space.
-- **Smaller fixes.** Pause reports the bytes actually on disk, so a resume never double-counts a discarded buffer.
+- **Runs in the background.** The login entry starts Majra in the tray with no window: the queue and the browser bridge are ready, but the desktop stays clear until you need them.
+- **Opens when you ask for a download.** A link handed over by the browser extension, the tray's **New download** item, or a second launch brings the window forward. Otherwise it stays hidden.
+- **No startup flash.** The window is created hidden and only shown when it should be, instead of appearing and disappearing at sign-in.
+- **Smaller fixes.** The startup and tray labels now describe what actually happens, and a background start no longer steals focus when another copy is already running.
 
 ### Browser extension
 
 The Chromium extension (Chrome, Edge, Brave, Opera) captures downloads from the browser and hands
 them to Majra with the right cookies.
 
-1. Download **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.2/Majra-Browser-Extension.zip)**.
+1. Download **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra-Browser-Extension.zip)**.
 2. Unzip it somewhere permanent.
 3. Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked**, and select the folder.
 
 ### Verify the download
 
 ```powershell
-Get-FileHash .\Majra_2.0.2_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\Majra_2.0.3_x64-setup.exe -Algorithm SHA256
 ```
 
-The SHA-256 for `v2.0.2` is:
+The SHA-256 for `v2.0.3` is:
 
 ```text
-939A2B27FDAC22F2ABDD4CAB22CD8DC70D03291B194B04CF4299A10C2B6FE174
+BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F
 ```
 
 ## How it works
@@ -129,11 +128,11 @@ for that link. That is a server limit, not a bug.
 - **Not every link can be split.** Servers without byte-range support fall back to one stream.
 - **The installer is unsigned.** There is no code-signing certificate yet, so SmartScreen may ask you to confirm.
 - **It is a download manager, not a VPN.** The proxy setting only routes Majra's own traffic over a proxy you already have.
-- **Some features are not in 2.0.2 yet.** Torrents and magnets, RAR extraction, media sniffing, site grabbing, importing from another manager, and auto-update are still missing. The old 1.2.3 app advertised some of these; this README and the website now describe what the release actually does.
+- **Some features are not in 2.0.3 yet.** Torrents and magnets, RAR extraction, media sniffing, site grabbing, importing from another manager, and auto-update are still missing. The old 1.2.3 app advertised some of these; this README and the website now describe what the release actually does.
 
 ## Build from source
 
-Version 2.0.2 lives in [`next/`](next/): a Rust core, a Tauri shell and a Svelte UI. The
+Version 2.0.3 lives in [`next/`](next/): a Rust core, a Tauri shell and a Svelte UI. The
 1.2.3 Electron sources are still at the repository root for reference.
 
 Requirements: **Rust 1.82+**, **Node.js 22+**, **npm 10+**, the Tauri prerequisites for
@@ -180,7 +179,7 @@ The installer is not code-signed. Windows cannot verify the publisher, so it ask
 
 <details>
 <summary><b>Can Majra download from YouTube or other streaming sites?</b></summary>
-No. It downloads files, not media streams. There is no bundled media sniffer and no torrent client in 2.0.2.
+No. It downloads files, not media streams. There is no bundled media sniffer and no torrent client in 2.0.3.
 </details>
 
 <details>

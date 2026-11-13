@@ -212,6 +212,13 @@ export const api = {
     return listen<BridgeOffer>('majra://offer', (event) => handler(event.payload));
   },
 
+  /// The tray's "New download" item: the window is already visible, the UI only has to
+  /// open the add dialog.
+  onNewDownload(handler: () => void): Promise<() => void> {
+    if (!isTauri) return Promise.resolve(() => {});
+    return listen<null>('majra://new-download', () => handler());
+  },
+
   readClipboard(): Promise<string> {
     return isTauri ? invoke<string>('read_clipboard') : Promise.resolve('');
   },
