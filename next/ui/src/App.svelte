@@ -8,6 +8,7 @@
   import StatusBar from './lib/StatusBar.svelte';
   import AddDownloadDialog from './lib/AddDownloadDialog.svelte';
   import SettingsDialog from './lib/SettingsDialog.svelte';
+  import UpdateDialog from './lib/UpdateDialog.svelte';
   import { app } from './lib/state.svelte';
   import { api, isTauri } from './lib/api';
   import { t } from './lib/i18n';
@@ -27,6 +28,7 @@
       !app.clipboardWatch ||
       app.showAdd ||
       app.showSettings ||
+      app.showUpdate ||
       clipboardBusy ||
       (typeof document !== 'undefined' && !document.hasFocus())
     ) {
@@ -39,6 +41,7 @@
       lastClipboard = text;
       if (text.length > 4096 || !/^https?:\/\/\S+$/i.test(text)) return;
       app.prefillUrl = text;
+      app.showUpdate = false;
       app.showAdd = true;
     } catch {
       // An empty or locked clipboard is not an error worth a toast.
@@ -48,7 +51,18 @@
   }
 
   onMount(() => {
-    void app.init();
+    // The quiet check runs once the window has its own data, so a slow network never
+    // delays the list. It only opens the dialog when a release is actually waiting.
+    void app.init().then(() => {
+      if (app.checkUpdates) {
+        window.setTimeout(() => void app.checkForUpdates(), 2500);
+      }
+    });
+    const updateTimer = window.setInterval(() => {
+      if (app.checkUpdates && app.updateState !== 'available') {
+        void app.checkForUpdates();
+      }
+    }, 6 * 60 * 60 * 1000);
     const params = new URLSearchParams(location.search);
     if (params.get('add') === '1' || params.has('url')) app.showAdd = true;
     const disposers: (() => void)[] = [];
@@ -80,6 +94,7 @@
         .catch(() => {});
       api
         .onNewDownload(() => {
+          app.showUpdate = false;
           app.showAdd = true;
         })
         .then((off) => disposers.push(off))
@@ -132,6 +147,7 @@
     return () => {
       disposers.forEach((dispose) => dispose());
       window.clearInterval(timer);
+      window.clearInterval(updateTimer);
     };
   });
 
@@ -151,6 +167,10 @@
 
     // A dialog owns the keyboard while it is open, so a shortcut cannot stack a second
     // dialog on top of it.
+    if (app.showUpdate) {
+      if (event.key === 'Escape') app.dismissUpdate();
+      return;
+    }
     if (app.showSettings) {
       if (event.key === 'Escape') app.showSettings = false;
       return;
@@ -217,6 +237,10 @@
 
 {#if app.showSettings}
   <SettingsDialog />
+{/if}
+
+{#if app.showUpdate}
+  <UpdateDialog />
 {/if}
 
 <div class="toasts" aria-live="polite">

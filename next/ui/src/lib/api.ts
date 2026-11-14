@@ -77,6 +77,7 @@ export function demoSettings(): AppSettings {
     proxyPassword: '',
     autoTune: true,
     keepAwake: true,
+    checkUpdates: true,
   };
 }
 

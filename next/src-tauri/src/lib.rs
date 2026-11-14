@@ -54,6 +54,10 @@ pub fn run() {
         ))
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_dialog::init())
+        // Updates are fetched from the project's GitHub releases and verified against the
+        // public key in tauri.conf.json. Nothing installs until the window asks for it.
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             // A portable build has no installer to write the scheme, so register it on
             // first run. A failure (a locked registry, a managed machine) only means the

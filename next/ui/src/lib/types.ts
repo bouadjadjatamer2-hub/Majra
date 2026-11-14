@@ -101,6 +101,7 @@ export interface AppSettings {
   proxyPassword: string;
   autoTune: boolean;
   keepAwake: boolean;
+  checkUpdates: boolean;
 }
 
 export interface ScanResult {

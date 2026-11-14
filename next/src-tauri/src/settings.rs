@@ -41,6 +41,8 @@ pub struct Settings {
     pub auto_tune: bool,
     /// Keep Windows (and the disk) awake while a download is running.
     pub keep_awake: bool,
+    /// Look for a newer release when the app starts, and ask before installing it.
+    pub check_updates: bool,
 }
 
 impl Default for Settings {
@@ -67,6 +69,7 @@ impl Default for Settings {
             proxy_password: String::new(),
             auto_tune: true,
             keep_awake: true,
+            check_updates: true,
         }
     }
 }

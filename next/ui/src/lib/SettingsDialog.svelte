@@ -40,6 +40,7 @@
     proxyPassword: '',
     autoTune: true,
     keepAwake: true,
+    checkUpdates: true,
   };
 
   let tab = $state<Tab>('general');
@@ -161,6 +162,7 @@
 
 <svelte:window
   onkeydown={(event) => {
+    if (app.showUpdate) return;
     if (event.key === 'Escape') close();
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's') {
       event.preventDefault();
@@ -745,6 +747,50 @@
               <button class="btn btn-ghost" type="button" onclick={resetDraft}>
                 <Icon name="refresh" size={13} />
                 {t('reset')}
+              </button>
+            </div>
+          </section>
+
+          <section class="section">
+            <div class="section-head">
+              <h3>{t('updates')}</h3>
+              <span class="hint">{t('updatesHint')}</span>
+            </div>
+            <div class="setting">
+              <div class="setting-text">
+                <b>{t('settingsCheckUpdates')}</b>
+                <span class="hint">{t('settingsCheckUpdatesHint')}</span>
+              </div>
+              <button
+                class="switch"
+                type="button"
+                role="switch"
+                aria-checked={draft.checkUpdates}
+                aria-label={t('settingsCheckUpdates')}
+                onclick={() => (draft.checkUpdates = !draft.checkUpdates)}
+              ></button>
+            </div>
+            <div class="setting">
+              <div class="setting-text">
+                <b>Majra {app.version}</b>
+                <span class="hint">
+                  {#if app.updateState === 'available'}
+                    {t('updateWaiting').replace('{v}', app.updateVersion)}
+                  {:else if app.updateState === 'error'}
+                    {app.updateError}
+                  {:else}
+                    {t('updateCurrent').replace('{v}', app.version)}
+                  {/if}
+                </span>
+              </div>
+              <button
+                class="btn btn-ghost"
+                type="button"
+                disabled={app.updateState === 'checking'}
+                onclick={() => void app.checkForUpdates(true)}
+              >
+                <Icon name="refresh" size={13} />
+                {app.updateState === 'checking' ? t('updateChecking') : t('updateCheck')}
               </button>
             </div>
           </section>

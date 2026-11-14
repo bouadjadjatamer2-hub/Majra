@@ -15,13 +15,13 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.3-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra_2.0.4_x64-setup.exe"><img alt="نزّل مجرى لويندوز" src="https://img.shields.io/badge/Download%20for%20Windows%20v2.0.4-B45309?style=for-the-badge&logo=windows11&logoColor=white" /></a>
 </p>
 
 <p align="center">
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/actions/workflows/ci.yml"><img alt="حالة CI" src="https://img.shields.io/github/actions/workflow/status/bouadjadjatamer2-hub/Majra/ci.yml?style=flat-square&branch=main&label=CI" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra"><img alt="صفحة مجرى" src="https://img.shields.io/badge/App_page-Majra-1F7D5C?style=flat-square&logo=github&logoColor=white" /></a>
-  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.3"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.3-24292F?style=flat-square&logo=git&logoColor=white" /></a>
+  <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases/tag/v2.0.4"><img alt="GitHub Release" src="https://img.shields.io/badge/Release-v2.0.4-24292F?style=flat-square&logo=git&logoColor=white" /></a>
   <a href="LICENSE"><img alt="رخصة MIT" src="https://img.shields.io/badge/license-MIT-4CC38A?style=flat-square" /></a>
   <a href="https://github.com/bouadjadjatamer2-hub/Majra/releases"><img alt="عدد التنزيلات" src="https://img.shields.io/github/downloads/bouadjadjatamer2-hub/Majra/total?style=flat-square&label=downloads&color=1F7D5C" /></a>
   <img alt="ويندوز 10 و11" src="https://img.shields.io/badge/Windows-10%20%7C%2011-0078D4?style=flat-square&logo=windows11&logoColor=white" />
@@ -60,6 +60,7 @@
 | **بروكسي ومسارات**               | بروكسي النظام أو مباشر أو يدوي HTTP/SOCKS. كل فحص وكل تنزيل يتبع نفس الاختيار.           |
 | **استئناف وجدولة**               | أوقف مؤقتاً، استأنف بعد إعادة التشغيل، وشغّل القائمة داخل نافذة يومية.                    |
 | **يعمل في الخلفية**              | عند تسجيل الدخول يبدأ في شريط النظام بلا نافذة، ويُفتح فقط عندما يحتاجك تحميل.            |
+| **تحديث داخل التطبيق**           | يُعرض الإصدار الجديد مع ما الجديد فيه؛ وأنت تقرر وقت التثبيت.                            |
 | **فحص Defender**                 | يمكن فحص الملفات المنتهية بـ Windows Defender قبل فتحها.                                 |
 | **إغلاق الجهاز عند الانتهاء**    | يُغلق الجهاز بعد آخر تنزيل، مع تنبيه يتيح لك الإلغاء.                                    |
 | **محلي بالتصميم**                | الإعدادات والسجل وقائمة الانتظار على جهازك. لا شيء يُرسل إلى أي خادم.                    |
@@ -68,38 +69,40 @@
 
 ### ويندوز 10 / 11 · 64-bit
 
-1. نزّل **[Majra_2.0.3_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe)**.
+1. نزّل **[Majra_2.0.4_x64-setup.exe](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra_2.0.4_x64-setup.exe)**.
 2. شغّل المثبّت. الملف غير موقّع، لذا قد يُنبّهك Windows SmartScreen — اختر **More info → Run anyway**، أو ابنِ من المصدر.
 3. افتح مجرى، الصق رابطاً، واضغط **Start**.
 
-الإصدار 2.0.3 هو إعادة الكتابة بـ Rust وTauri. يحتفظ بنفس هوية التطبيق، لذا تثبيته يستبدل نسخة Electron القديمة. إعداداته وقائمته في `%APPDATA%\app.majra.desktop`، منفصلة عن بيانات التطبيق القديم.
+الإصدار 2.0.4 هو إعادة الكتابة بـ Rust وTauri. يحتفظ بنفس هوية التطبيق، لذا تثبيته يستبدل نسخة Electron القديمة. إعداداته وقائمته في `%APPDATA%\app.majra.desktop`، منفصلة عن بيانات التطبيق القديم.
 
-### ما الجديد في 2.0.3
+### ما الجديد في 2.0.4
 
-- **يعمل في الخلفية.** إدخال بدء التشغيل يفتح مجرى في شريط النظام بلا نافذة: قائمة التحميل وجسر المتصفح جاهزان، وسطح المكتب يبقى فارغاً حتى تحتاجه.
-- **تُفتح النافذة عندما تطلب تحميلاً.** رابط من إضافة المتصفح، أو **تحميل جديد** من شريط النظام، أو تشغيل ثانٍ، يقدّم النافذة. غير ذلك تبقى مخفية.
-- **بلا وميض عند البدء.** النافذة تُنشأ مخفية وتُظهر فقط عند الحاجة، بدل أن تظهر وتختفي عند تسجيل الدخول.
-- **إصلاحات صغيرة.** نصوص البدء وشريط النظام تصف ما يحدث فعلاً، والبدء في الخلفية لا يسرق التركيز إذا كانت نسخة أخرى تعمل.
+- **مجرى يحدّث نفسه.** عندما يوجد إصدار أحدث، يعرض التطبيق رقمه وما الجديد فيه ويسألك هل تريد تثبيته. لا يُنزّل ولا يثبّت شيئاً حتى تضغط **حدّث الآن**.
+- **القرار بيدك.** **لاحقاً** يُبقي النسخة الحالية؛ ينتظر التحديث في **الإعدادات ← متقدم** بضغطة واحدة، ويعود السؤال في التشغيل التالي.
+- **كل تحديث موقّع.** يتحقق مجرى من المثبّت بمفتاح التحديث الخاص بالمشروع قبل تشغيله، فيُرفض أي تنزيل مُتلاعب به.
+- **البدء في الخلفية كما هو.** سلوك 2.0.3 لم يتغيّر: تسجيل الدخول يبدأ في شريط النظام بلا نافذة، وطلب التحميل يقدّمها.
+
+هذا آخر تثبيت يدوي: النسخة 2.0.3 لا تحتوي على محدّث، فلا تستطيع أن تعرض 2.0.4 بنفسها. كل إصدار بعد هذا يصل عبر التطبيق.
 
 ### إضافة المتصفح
 
 إضافة Chromium (Chrome وEdge وBrave وOpera) تلتقط التنزيلات من المتصفح وتُسلّمها لمجرى مع
 الكوكيز الصحيحة.
 
-1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra-Browser-Extension.zip)**.
+1. نزّل **[Majra-Browser-Extension.zip](https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra-Browser-Extension.zip)**.
 2. فُكّ ضغطها في مكان ثابت.
 3. افتح `chrome://extensions`، فعّل **Developer mode**، اختر **Load unpacked**، ثم اختر المجلد.
 
 ### تحقّق من التنزيل
 
 ```powershell
-Get-FileHash .\Majra_2.0.3_x64-setup.exe -Algorithm SHA256
+Get-FileHash .\Majra_2.0.4_x64-setup.exe -Algorithm SHA256
 ```
 
-بصمة SHA-256 للإصدار `v2.0.3`:
+بصمة SHA-256 للإصدار `v2.0.4`:
 
 ```text
-BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F
+9F3985A1879201D5EEE933DE72BC1B91ED52242370D1AE9546105A70E9F472A9
 ```
 
 ## كيف يعمل
@@ -125,11 +128,11 @@ BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F
 - **ليست كل الروابط قابلة للتقسيم.** الخوادم التي لا تدعم byte-range تعود إلى مسار واحد.
 - **المثبّت غير موقّع.** لا توجد شهادة توقيع بعد، لذا قد يطلب SmartScreen تأكيداً.
 - **هو مدير تنزيلات، لا VPN.** إعداد البروكسي يوجّه حركة مجرى وحدها عبر بروكسي تملكه أنت.
-- **بعض الميزات غير موجودة في 2.0.3 بعد.** التورنت والمغناطيس، وفك RAR، والتقاط الوسائط، وسحب المواقع، والاستيراد من مدير آخر، والتحديث التلقائي. النسخة القديمة 1.2.3 كانت تعلن بعضها؛ هذا الملف والموقع يصفان الآن ما يفعله الإصدار فعلاً.
+- **بعض الميزات غير موجودة في 2.0.4 بعد.** التورنت والمغناطيس، وفك RAR، والتقاط الوسائط، وسحب المواقع، والاستيراد من مدير آخر. النسخة القديمة 1.2.3 كانت تعلن بعضها؛ هذا الملف والموقع يصفان الآن ما يفعله الإصدار فعلاً.
 
 ## البناء من المصدر
 
-الإصدار 2.0.3 في [`next/`](next/): نواة Rust، وغلاف Tauri، وواجهة Svelte. مصادر Electron
+الإصدار 2.0.4 في [`next/`](next/): نواة Rust، وغلاف Tauri، وواجهة Svelte. مصادر Electron
 للإصدار 1.2.3 ما زالت في جذر المستودع للمرجع.
 
 المتطلبات: **Rust 1.82+** و**Node.js 22+** و**npm 10+**، ومتطلبات Tauri على ويندوز
@@ -176,7 +179,7 @@ GitHub Pages من فرع `main`.
 
 <details>
 <summary><b>هل ينزّل من يوتيوب أو مواقع البث؟</b></summary>
-لا. ينزّل الملفات، لا بثّ الوسائط. لا توجد أداة التقاط وسائط ولا عميل تورنت في 2.0.3.
+لا. ينزّل الملفات، لا بثّ الوسائط. لا توجد أداة التقاط وسائط ولا عميل تورنت في 2.0.4.
 </details>
 
 <details>

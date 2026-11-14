@@ -1,4 +1,5 @@
 import { api, demoInterfaces, demoSettings, errorText, isTauri } from './api';
+import type { Update } from '@tauri-apps/plugin-updater';
 import { categoryOf } from './format';
 import { t } from './i18n';
 import type {
@@ -171,6 +172,20 @@ class AppState {
   proxyPassword = $state('');
   autoTune = $state(true);
   keepAwake = $state(true);
+  checkUpdates = $state(true);
+  /// The update dialog and everything it shows: the version found, the release notes,
+  /// and how far the download got.
+  showUpdate = $state(false);
+  updateState = $state<'idle' | 'checking' | 'available' | 'downloading' | 'installing' | 'error'>(
+    'idle',
+  );
+  updateVersion = $state('');
+  updateNotes = $state('');
+  updateProgress = $state(0);
+  updateError = $state<string | null>(null);
+  /// Set when the user picks "Later": the same release is not pushed again this run,
+  /// but the button in settings can still reopen it.
+  updateDismissed = $state(false);
   /// What this machine can do, from the Rust side: a suggested connection count sized
   /// for the default adapter's link rate and the CPU.
   systemProfile = $state<SystemProfile | null>(null);
@@ -189,6 +204,7 @@ class AppState {
 
   private toastSeq = 0;
   private demoTimer: number | null = null;
+  private pendingUpdate: Update | null = null;
 
   get selected(): DownloadSnapshot | null {
     return this.downloads.find((download) => download.id === this.selectedId) ?? null;
@@ -314,6 +330,7 @@ class AppState {
     this.proxyPassword = settings.proxyPassword ?? '';
     this.autoTune = settings.autoTune !== false;
     this.keepAwake = settings.keepAwake !== false;
+    this.checkUpdates = settings.checkUpdates !== false;
   }
 
   currentSettings(): AppSettings {
@@ -339,6 +356,7 @@ class AppState {
       proxyPassword: this.proxyPassword,
       autoTune: this.autoTune,
       keepAwake: this.keepAwake,
+      checkUpdates: this.checkUpdates,
     };
   }
 
@@ -352,6 +370,99 @@ class AppState {
       this.toast('error', errorText(error));
       return false;
     }
+  }
+
+  /// Ask GitHub for the newest release. A manual check always reports its result; the
+  /// quiet startup check only opens the dialog when there is something to install.
+  async checkForUpdates(manual = false): Promise<void> {
+    if (!isTauri) {
+      if (manual) this.toast('info', t('updateUnsupported'));
+      return;
+    }
+    if (
+      this.updateState === 'checking' ||
+      this.updateState === 'downloading' ||
+      this.updateState === 'installing'
+    ) {
+      return;
+    }
+    this.updateState = 'checking';
+    this.updateError = null;
+    try {
+      const { check } = await import('@tauri-apps/plugin-updater');
+      const found = await check();
+      if (!found) {
+        this.updateState = 'idle';
+        if (manual) this.toast('info', t('updateLatest'));
+        return;
+      }
+      this.pendingUpdate = found;
+      this.updateVersion = found.version;
+      this.updateNotes = (found.body ?? '').trim();
+      this.updateState = 'available';
+      if (manual) this.updateDismissed = false;
+      if (!this.updateDismissed) this.showUpdate = true;
+    } catch (error) {
+      // Offline is normal for the startup check, so it stays silent. A manual check
+      // has to say why nothing happened.
+      this.updateState = 'error';
+      this.updateError = errorText(error);
+      if (manual) this.toast('error', `${t('updateFailed')} ${this.updateError}`);
+    }
+  }
+
+  async installUpdate(): Promise<void> {
+    if (
+      !this.pendingUpdate ||
+      this.updateState === 'downloading' ||
+      this.updateState === 'installing'
+    ) {
+      return;
+    }
+    this.updateState = 'downloading';
+    this.updateProgress = 0;
+    this.updateError = null;
+    try {
+      let total = 0;
+      let done = 0;
+      await this.pendingUpdate.downloadAndInstall((event) => {
+        if (event.event === 'Started') {
+          total = event.data.contentLength ?? 0;
+          done = 0;
+          this.updateProgress = 0;
+        } else if (event.event === 'Progress') {
+          done += event.data.chunkLength;
+          if (total > 0) {
+            this.updateProgress = Math.min(100, Math.round((done / total) * 100));
+          }
+        } else {
+          this.updateState = 'installing';
+          this.updateProgress = 100;
+        }
+      });
+      // The installer has replaced the files; a restart is what actually switches over.
+      const { relaunch } = await import('@tauri-apps/plugin-process');
+      await relaunch();
+    } catch (error) {
+      this.updateState = 'error';
+      this.updateError = errorText(error);
+    }
+  }
+
+  /// "Later" closes the dialog but keeps the release around: the settings screen and a
+  /// toast action can bring it back without another network request.
+  dismissUpdate(): void {
+    if (!this.showUpdate) return;
+    if (this.updateState === 'downloading' || this.updateState === 'installing') return;
+    this.showUpdate = false;
+    if (this.updateState !== 'available') return;
+    this.updateDismissed = true;
+    this.toast('info', t('updateWaiting').replace('{v}', this.updateVersion), {
+      label: t('updateNow'),
+      run: () => {
+        this.showUpdate = true;
+      },
+    });
   }
 
   async refreshInterfaces(): Promise<void> {
@@ -424,6 +535,9 @@ class AppState {
   /// The extension confirmed that its own copy is gone: show the link it handed over.
   receiveOffer(offer: BridgeOffer): void {
     this.offer = offer;
+    // A download hand-off is the user asking for something now; the update prompt can
+    // wait for the next launch or the settings button instead of covering the dialog.
+    this.showUpdate = false;
     this.showAdd = true;
   }
 

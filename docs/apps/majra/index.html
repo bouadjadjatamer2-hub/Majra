@@ -66,7 +66,7 @@
           <div class="hero-copy">
             <img class="hero-icon" src="../../assets/img/majra-icon.png" alt="Majra app icon" width="58" height="58" />
             <div class="badge-row reveal">
-              <span class="badge gold"><span class="dot"></span>v2.0.3</span>
+              <span class="badge gold"><span class="dot"></span>v2.0.4</span>
               <span class="badge" data-i18n="majra.badgePlatform">Windows 10 / 11 · 64-bit</span>
               <span class="badge" data-i18n="majra.badgeFree">Free &amp; open source</span>
             </div>
@@ -80,7 +80,7 @@
               connection, at the same time.
             </p>
             <div class="hero-actions reveal" style="--d: 180ms">
-              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe">
+              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra_2.0.4_x64-setup.exe">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
                 <span data-i18n="majra.download">Download for Windows</span>
               </a>
@@ -90,7 +90,7 @@
               </a>
             </div>
             <div class="hero-meta reveal" style="--d: 240ms">
-              <span>2.3 MB</span><span class="sep"></span>
+              <span>2.9 MB</span><span class="sep"></span>
               <span data-i18n="majra.meta1">SHA-256 published</span><span class="sep"></span>
               <span data-i18n="majra.meta2">MIT license</span>
             </div>
@@ -320,7 +320,7 @@
             <div class="steps" style="margin-top: 2.4rem">
               <article class="step">
                 <h3 data-i18n="majra.install.s1t">Download</h3>
-                <p data-i18n="majra.install.s1b">Get the 2.3 MB installer from the latest GitHub release.</p>
+                <p data-i18n="majra.install.s1b">Get the 2.9 MB installer from the latest GitHub release.</p>
               </article>
               <article class="step">
                 <h3 data-i18n="majra.install.s2t">Run it</h3>
@@ -335,13 +335,13 @@
           <div class="panel reveal" style="--d: 100ms">
             <span class="kicker" style="margin-bottom: 0.6rem" data-i18n="majra.verify.kicker">Verify the download</span>
             <p style="color: var(--muted); font-size: 0.88rem; line-height: 1.65" data-i18n="majra.verify.body">
-              Hash the installer before you run it. The SHA-256 for v2.0.3 is:
+              Hash the installer before you run it. The SHA-256 for v2.0.4 is:
             </p>
             <div class="code-block">
               <button class="copy-btn" type="button" data-copy="#sha-majra" data-i18n="majra.verify.copy">Copy</button>
-              <code id="sha-majra">Get-FileHash .\Majra_2.0.3_x64-setup.exe -Algorithm SHA256
+              <code id="sha-majra">Get-FileHash .\Majra_2.0.4_x64-setup.exe -Algorithm SHA256
 
-BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F</code>
+9F3985A1879201D5EEE933DE72BC1B91ED52242370D1AE9546105A70E9F472A9</code>
             </div>
             <p class="mono" style="margin-top: 0.8rem; color: var(--muted-dim); font-size: 0.7rem" data-i18n="majra.verify.note">
               A mismatch means the file is not the release. Stop and download it again.
@@ -380,7 +380,7 @@ BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F</code>
             </article>
           </div>
           <div class="btn-row" style="margin-top: 2rem">
-            <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra-Browser-Extension.zip">
+            <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra-Browser-Extension.zip">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
               <span data-i18n="majra.ext.download">Download the extension</span>
             </a>
@@ -419,7 +419,11 @@ BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F</code>
             </details>
             <details>
               <summary data-i18n="majra.faq.q6">Where does my data go?</summary>
-              <div class="faq-a" data-i18n="majra.faq.a6">Nowhere. Settings, history and the queue stay on your PC. The only network traffic is the downloads you ask for.</div>
+              <div class="faq-a" data-i18n="majra.faq.a6">Nowhere. Settings, history and the queue stay on your PC. Apart from the downloads you ask for, Majra only contacts GitHub to look for a new release.</div>
+            </details>
+            <details>
+              <summary data-i18n="majra.faq.q7">Do I have to download the installer again for every update?</summary>
+              <div class="faq-a" data-i18n="majra.faq.a7">No. From 2.0.4 on, Majra checks for updates and offers them inside the app: you choose whether to install now or later. Versions before 2.0.4 have no updater, so 2.0.4 is the last manual install.</div>
             </details>
           </div>
         </div>
@@ -431,20 +435,20 @@ BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F</code>
           <div class="download reveal">
             <div>
               <span class="kicker" data-i18n="majra.dl.kicker">Take it with you</span>
-              <h2 data-i18n="majra.dl.title">Majra 2.0.3 for Windows.</h2>
+              <h2 data-i18n="majra.dl.title">Majra 2.0.4 for Windows.</h2>
               <p data-i18n="majra.dl.body">One installer, no account. Windows 10 or 11, 64-bit. Keep the SHA-256 for your own check.</p>
               <div class="download-meta">
-                <div><span data-i18n="majra.dl.version">Version</span><span>2.0.3</span></div>
-                <div><span data-i18n="majra.dl.size">Installer size</span><span>2.3 MB</span></div>
-                <div><span data-i18n="majra.dl.sha">SHA-256</span><span>BBD08A35BCA7E11D57F894FFB1ECD3CC45AFC6EC1B5AEB3B657E3B420289465F</span></div>
+                <div><span data-i18n="majra.dl.version">Version</span><span>2.0.4</span></div>
+                <div><span data-i18n="majra.dl.size">Installer size</span><span>2.9 MB</span></div>
+                <div><span data-i18n="majra.dl.sha">SHA-256</span><span>9F3985A1879201D5EEE933DE72BC1B91ED52242370D1AE9546105A70E9F472A9</span></div>
               </div>
             </div>
             <div class="download-side">
-              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra_2.0.3_x64-setup.exe">
+              <a class="btn btn-primary" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra_2.0.4_x64-setup.exe">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 4v12m0 0 5-5m-5 5-5-5M5 20h14" stroke-linecap="round" stroke-linejoin="round" /></svg>
-                <span data-i18n="majra.dl.primary">Download Majra 2.0.3</span>
+                <span data-i18n="majra.dl.primary">Download Majra 2.0.4</span>
               </a>
-              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.3/Majra-Browser-Extension.zip" data-i18n="majra.dl.secondary">Browser extension (.zip)</a>
+              <a class="btn btn-ghost" href="https://github.com/bouadjadjatamer2-hub/Majra/releases/download/v2.0.4/Majra-Browser-Extension.zip" data-i18n="majra.dl.secondary">Browser extension (.zip)</a>
               <p class="note" data-i18n="majra.dl.note">Unsigned installer. SmartScreen may ask you to confirm — verify the hash first.</p>
             </div>
           </div>
