@@ -29,7 +29,7 @@ What Majra 1.0 has, and what comes next. Ordered by value for the next release, 
 ## 1.3 — distribution
 
 - **Code signing** (EV certificate) so SmartScreen stops warning.
-- **Auto-update**: GitHub Releases feed, `latest.yml`, signature check.
+- **Auto-update**: shipped in 2.0.4. GitHub Releases serves `latest.json`, and every payload is checked against the project's update key before it runs.
 - **Portable build** (no installer) and a winget manifest.
 
 ## 2.0 — power features
