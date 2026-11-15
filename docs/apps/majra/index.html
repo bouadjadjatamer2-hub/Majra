@@ -96,10 +96,12 @@
             </div>
           </div>
 
-          <div class="scene-frame reveal-scale" style="--d: 140ms">
-            <div class="scene" data-scene="majra" data-fallback="../../assets/img/majra-icon.png" role="img" aria-label="Three glowing data streams labelled Wi-Fi, USB and Ethernet feeding blocks into a rotating core" data-i18n-aria="majra.sceneAria"></div>
-            <span class="scene-tag"><i></i><span data-i18n="majra.sceneTag">Live WebGL · three networks, one file</span></span>
-            <span class="scene-badge" data-i18n="majra.sceneBadge">Block scheduler</span>
+          <div class="hero-visual reveal-scale" style="--d: 140ms">
+            <div class="scene-frame" data-depth-scene data-app="majra">
+              <div class="scene" data-scene="majra" data-fallback="../../assets/img/majra-icon.png" role="img" aria-label="Three glowing data streams labelled Wi-Fi, USB and Ethernet feeding blocks into a rotating core" data-i18n-aria="majra.sceneAria"></div>
+              <span class="scene-tag"><i></i><span data-i18n="majra.sceneTag">Live WebGL · three networks, one file</span></span>
+              <span class="scene-badge" data-i18n="majra.sceneBadge">Block scheduler</span>
+            </div>
           </div>
         </div>
       </section>
@@ -138,7 +140,7 @@
             </p>
           </div>
 
-          <div class="feature-grid">
+          <div class="feature-grid" data-parallax="0.32">
             <article class="feature reveal">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="2.2" /><path d="M7.8 7.8a6 6 0 0 0 0 8.4M16.2 16.2a6 6 0 0 0 0-8.4M4.9 4.9a10 10 0 0 0 0 14.2M19.1 19.1a10 10 0 0 0 0-14.2" stroke-linecap="round" /></svg></span>
               <h3 data-i18n="majra.f1t">Every connection, together</h3>
@@ -193,7 +195,7 @@
               Majra asks Windows for the active interfaces, splits the file into blocks, and keeps every stream
               busy. Arrived blocks are written in order; a missing block is re-requested from another stream.
             </p>
-            <div class="steps" style="margin-top: 2.4rem">
+            <div class="steps" style="margin-top: 2.4rem" data-parallax="0.28">
               <article class="step">
                 <h3 data-i18n="majra.how.s1t">Ask Windows</h3>
                 <p data-i18n="majra.how.s1b">Read the active network interfaces and their addresses.</p>
@@ -237,7 +239,7 @@
               Every connection shows its own speed and state, while the file is written once, in order.
             </p>
           </div>
-          <div class="showcase">
+          <div class="showcase" data-parallax="0.4">
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/majra-app-detail.png" data-full="../../assets/img/majra-app-detail.png" data-caption="Majra downloading a ZIP over Wi-Fi, USB tethering and Ethernet at the same time">
                 <img src="../../assets/img/majra-app-detail.png" alt="Majra downloading a ZIP over Wi-Fi, USB tethering and Ethernet at the same time" width="1600" height="1000" loading="lazy" />
@@ -282,7 +284,7 @@
               real boundaries.
             </p>
           </div>
-          <div class="limits">
+          <div class="limits" data-parallax="0.24">
             <div class="limit reveal">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M12 8v5M12 16.5h.01" stroke-linecap="round" /><path d="M10.3 3.9 2.6 17.2A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.8L13.7 3.9a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" /></svg>
               <p data-i18n-html="majra.limit1"><strong>It cannot create bandwidth.</strong> Two connections behind the same router often share one uplink; the combined speed will not double.</p>
@@ -317,7 +319,7 @@
               The installer is an assisted setup: choose the folder and the drive, and it creates a desktop
               shortcut.
             </p>
-            <div class="steps" style="margin-top: 2.4rem">
+            <div class="steps" style="margin-top: 2.4rem" data-parallax="0.28">
               <article class="step">
                 <h3 data-i18n="majra.install.s1t">Download</h3>
                 <p data-i18n="majra.install.s1b">Get the 2.9 MB installer from the latest GitHub release.</p>
@@ -361,7 +363,7 @@
               right cookies. No copy-paste, no lost login.
             </p>
           </div>
-          <div class="steps four">
+          <div class="steps four" data-parallax="0.24">
             <article class="step reveal">
               <h3 data-i18n="majra.ext.s1t">Download and unzip</h3>
               <p data-i18n="majra.ext.s1b">Get Majra-Browser-Extension.zip and unpack it somewhere permanent.</p>
@@ -456,16 +458,35 @@
       </section>
 
       <!-- ================= CROSS ================= -->
-      <section class="cta-band">
-        <div class="wrap">
-          <h2 class="reveal" data-i18n="majra.cross.title">Need the other side of the cable?</h2>
-          <p class="reveal" style="--d: 70ms" data-i18n="majra.cross.body">
-            DroidCrate is the Android workbench: six tools, real device specs, verified Platform Tools and
-            checklists before the risky parts.
-          </p>
-          <div class="btn-row reveal" style="--d: 130ms">
-            <a class="btn btn-jade" href="../droidcrate/" data-i18n="majra.cross.cta">Open DroidCrate</a>
-            <a class="btn btn-ghost" href="../../index.html" data-i18n="majra.cross.home">Back to Asraab</a>
+      <section class="cross-band">
+        <div class="wrap cross-band__inner">
+          <div class="cross-band__copy reveal" data-reveal="3d">
+            <span class="kicker" data-i18n="cross.kicker">The other app</span>
+            <h2 class="h2" data-i18n="majra.cross.title">Need the other side of the cable?</h2>
+            <p class="section-lede" data-i18n="majra.cross.body">
+              DroidCrate is the Android workbench: six tools, real device specs, verified Platform Tools and
+              checklists before the risky parts.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-jade" href="../droidcrate/" data-i18n="majra.cross.cta">Open DroidCrate</a>
+              <a class="btn btn-ghost" href="../../index.html" data-i18n="majra.cross.home">Back to Asraab</a>
+            </div>
+          </div>
+          <div class="cross-card-wrap reveal" data-reveal="3d" style="--d: 90ms">
+            <a class="cross-card jade" href="../droidcrate/" data-tilt aria-label="DroidCrate — Android workbench">
+              <span class="cross-card__top">
+                <img class="cross-card__icon" src="../../assets/img/droidcrate-icon.png" alt="" width="72" height="72" />
+                <span class="cross-card__index">02 / D</span>
+              </span>
+              <span class="cross-card__name">DroidCrate</span>
+              <span class="cross-card__meta" data-i18n="app.droidcrate.category">Android workbench · Windows</span>
+              <span class="cross-card__tagline" data-i18n="app.droidcrate.tagline">Know the phone before you touch it.</span>
+              <span class="cross-card__arrow">
+                <span data-i18n="cross.openDroid">Open DroidCrate</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+              <span class="cross-card__glow" aria-hidden="true"></span>
+            </a>
           </div>
         </div>
       </section>
@@ -515,6 +536,10 @@
 
     <script src="../../assets/js/i18n.js"></script>
     <script src="../../assets/js/site.js"></script>
+    <script src="../../assets/vendor/gsap.min.js"></script>
+    <script src="../../assets/vendor/ScrollTrigger.min.js"></script>
+    <script src="../../assets/vendor/lenis.min.js"></script>
+    <script src="../../assets/js/motion.js"></script>
     <script type="module" src="../../assets/js/scene-majra.js"></script>
   </body>
 </html>

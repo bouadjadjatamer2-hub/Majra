@@ -2097,6 +2097,383 @@ html[dir="rtl"] .scene-badge {
   }
 }
 
+/* ---------- Motion layer ---------- */
+/* Smooth scroll, scroll progress, cursor light, 3D entrances and page
+   transitions. Everything degrades to the plain layout above when JS or
+   motion is unavailable. */
+
+html.lenis {
+  scroll-behavior: auto;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.scroll-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 130;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.045);
+  pointer-events: none;
+}
+.scroll-progress span {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  background: linear-gradient(90deg, var(--jade), var(--gold) 70%, #f8d3a4);
+  box-shadow: 0 0 14px rgba(242, 180, 109, 0.55);
+  will-change: transform;
+}
+html[dir="rtl"] .scroll-progress span {
+  transform-origin: 100% 50%;
+}
+
+.cursor-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(
+    circle,
+    rgba(242, 180, 109, 0.11),
+    rgba(84, 179, 156, 0.07) 45%,
+    transparent 70%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.5s ease, transform 0.12s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+.cursor-glow.is-on {
+  opacity: 1;
+}
+
+/* --- Hero visual: a real 3D plane around the WebGL frame --- */
+.hero-visual {
+  perspective: 1500px;
+  transform-style: preserve-3d;
+}
+.hero-visual .scene-frame {
+  transform-style: preserve-3d;
+  transform-origin: 50% 62%;
+  will-change: transform;
+}
+html.motion-ready .hero-visual.reveal-scale {
+  transition: opacity 0.85s ease, transform 1.05s cubic-bezier(0.16, 1, 0.3, 1), filter 0.9s ease;
+  transition-delay: var(--d, 0ms);
+}
+html.motion-ready .hero-visual.reveal-scale:not(.is-in) {
+  opacity: 0;
+  transform: perspective(1500px) rotateY(-7deg) translateY(34px) scale(0.955);
+  filter: blur(4px);
+}
+html.motion-ready .hero-visual.reveal-scale.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* --- Deeper reveals --- */
+html.motion-ready .reveal[data-reveal="3d"] {
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s ease;
+  transition-delay: var(--d, 0ms);
+  will-change: transform, opacity;
+}
+html.motion-ready .reveal[data-reveal="3d"]:not(.is-in) {
+  opacity: 0;
+  transform: perspective(1200px) translate3d(0, 46px, -70px) rotateX(9deg);
+  transform-origin: 50% 100%;
+  filter: blur(6px);
+}
+html.motion-ready .reveal[data-reveal="3d"].is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+/* App cards keep their pointer tilt, so their entrance is handled here. */
+html.motion-ready .app-card.reveal {
+  transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.9s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  transition-delay: var(--d, 0ms);
+}
+html.motion-ready .app-card.reveal:not(.is-in) {
+  opacity: 0;
+  transform: perspective(1400px) translate3d(0, 48px, -60px) rotateX(8deg);
+  transform-origin: 50% 100%;
+  filter: blur(5px);
+}
+
+/* --- Spotlight sheen for tilted cards --- */
+.app-card::after,
+.cross-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.1),
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.app-card.is-tilting::after,
+.cross-card.is-tilting::after {
+  opacity: 1;
+}
+
+/* --- Cross-app band --- */
+.cross-band {
+  position: relative;
+  padding: clamp(3.5rem, 8vw, 6rem) 0;
+  border-top: 1px solid var(--line);
+  overflow: clip;
+}
+.cross-band::before {
+  content: "";
+  position: absolute;
+  inset: auto -10% -55% -10%;
+  height: 115%;
+  pointer-events: none;
+  background:
+    radial-gradient(40% 55% at 22% 70%, rgba(84, 179, 156, 0.14), transparent 70%),
+    radial-gradient(38% 50% at 78% 80%, rgba(242, 180, 109, 0.13), transparent 72%);
+}
+.cross-band__inner {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  perspective: 1400px;
+}
+.cross-band__copy .section-lede {
+  max-width: 34rem;
+}
+.cross-band__copy .btn-row {
+  margin-top: 1.6rem;
+}
+.cross-card-wrap {
+  perspective: 1200px;
+}
+.cross-card {
+  --accent: var(--gold);
+  --accent-soft: rgba(242, 180, 109, 0.16);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 310px;
+  padding: clamp(1.6rem, 3vw, 2.3rem);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-xl);
+  background:
+    radial-gradient(120% 100% at 100% 0%, var(--accent-soft), transparent 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.012));
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transform-style: preserve-3d;
+  transition: transform 0.18s ease-out, border-color 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform;
+}
+.cross-card.jade {
+  --accent: var(--jade);
+  --accent-soft: rgba(84, 179, 156, 0.16);
+}
+.cross-card:hover {
+  border-color: color-mix(in srgb, var(--accent) 42%, transparent);
+  box-shadow: 0 44px 96px -46px color-mix(in srgb, var(--accent) 60%, transparent);
+}
+.cross-card__top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  transform: translateZ(34px);
+}
+.cross-card__icon {
+  width: 72px;
+  height: 72px;
+  flex: none;
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    0 22px 44px -20px color-mix(in srgb, var(--accent) 62%, transparent);
+}
+.cross-card__index {
+  margin-inline-start: auto;
+  color: var(--muted-dim);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+}
+.cross-card__name {
+  margin-top: 1.5rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+  transform: translateZ(26px);
+}
+.cross-card__meta {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.8rem;
+  transform: translateZ(18px);
+}
+.cross-card__tagline {
+  margin-top: 1rem;
+  max-width: 22rem;
+  color: var(--ink-soft);
+  font-size: 1rem;
+  line-height: 1.55;
+  transform: translateZ(14px);
+}
+.cross-card__arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: auto;
+  padding-top: 1.8rem;
+  color: var(--accent);
+  font-size: 0.86rem;
+  font-weight: 700;
+  transform: translateZ(24px);
+}
+.cross-card__arrow svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+.cross-card:hover .cross-card__arrow svg {
+  transform: translateX(4px);
+}
+html[dir="rtl"] .cross-card__arrow svg {
+  transform: scaleX(-1);
+}
+html[dir="rtl"] .cross-card:hover .cross-card__arrow svg {
+  transform: scaleX(-1) translateX(4px);
+}
+.cross-card__glow {
+  position: absolute;
+  inset: auto -25% -50% -25%;
+  height: 75%;
+  pointer-events: none;
+  background: radial-gradient(50% 60% at 50% 50%, var(--accent-soft), transparent 70%);
+  filter: blur(18px);
+}
+html[lang="ar"] .cross-card__name,
+html[lang="ar"] .cross-card__tagline {
+  font-family: "IBM Plex Sans Arabic", var(--font-display);
+  letter-spacing: 0;
+}
+
+/* --- Cross-document page transitions --- */
+@view-transition {
+  navigation: auto;
+}
+::view-transition-old(root) {
+  animation: asraab-vt-out 0.34s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+::view-transition-new(root) {
+  animation: asraab-vt-in 0.44s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes asraab-vt-out {
+  to {
+    opacity: 0;
+    transform: scale(0.992);
+    filter: blur(4px);
+  }
+}
+@keyframes asraab-vt-in {
+  from {
+    opacity: 0;
+    transform: scale(1.008);
+    filter: blur(6px);
+  }
+}
+.app-card[data-app="majra"],
+.page-hero .scene-frame[data-app="majra"] {
+  view-transition-name: app-majra;
+}
+.app-card[data-app="droidcrate"],
+.page-hero .scene-frame[data-app="droidcrate"] {
+  view-transition-name: app-droidcrate;
+}
+::view-transition-group(app-majra),
+::view-transition-group(app-droidcrate) {
+  animation-duration: 0.55s;
+  animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (max-width: 900px) {
+  .cross-band__inner {
+    grid-template-columns: 1fr;
+  }
+  .cross-card-wrap {
+    width: 100%;
+    max-width: 430px;
+    margin-inline: auto;
+  }
+  .cross-card {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 700px) {
+  html.motion-ready .reveal[data-reveal="3d"]:not(.is-in) {
+    transform: translate3d(0, 26px, -30px);
+    filter: blur(3px);
+  }
+  html.motion-ready .app-card.reveal:not(.is-in) {
+    transform: translate3d(0, 30px, -30px);
+    filter: blur(3px);
+  }
+  .cursor-glow {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-progress,
+  .cursor-glow {
+    display: none;
+  }
+  html.motion-ready .reveal[data-reveal="3d"],
+  html.motion-ready .reveal[data-reveal="3d"].is-in,
+  html.motion-ready .app-card.reveal:not(.is-in),
+  html.motion-ready .hero-visual.reveal-scale:not(.is-in) {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+  ::view-transition-old(root),
+  ::view-transition-new(root),
+  ::view-transition-group(app-majra),
+  ::view-transition-group(app-droidcrate) {
+    animation: none !important;
+  }
+}
+
 /* ---------- Print ---------- */
 @media print {
   body::before,

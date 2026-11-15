@@ -258,6 +258,9 @@ window.ASRAAB_I18N = {
       "درويد كريت ورشة أندرويد: ست أدوات، مواصفات جهاز حقيقية، Platform Tools موثّقة، وقوائم تحقّق قبل الخطوات الخطرة.",
     "majra.cross.cta": "افتح درويد كريت",
     "majra.cross.home": "عودة إلى أسراب",
+    "cross.kicker": "التطبيق الآخر",
+    "cross.openDroid": "افتح درويد كريت",
+    "cross.openMajra": "افتح مجرى",
 
     // ---------- DroidCrate ----------
     "meta.droidcrate.title": "درويد كريت — اعرف الهاتف قبل أن تلمسه · أسراب",

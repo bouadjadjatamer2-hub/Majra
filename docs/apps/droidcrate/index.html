@@ -96,10 +96,12 @@
             </div>
           </div>
 
-          <div class="scene-frame jade reveal-scale" style="--d: 140ms">
-            <div class="scene" data-scene="droidcrate" data-fallback="../../assets/img/droidcrate-icon.png" role="img" aria-label="A rotating 3D phone showing a live DroidCrate workbench screen inside two orbit rings" data-i18n-aria="dc.sceneAria"></div>
-            <span class="scene-tag"><i></i><span data-i18n="dc.sceneTag">Live WebGL · device workbench</span></span>
-            <span class="scene-badge" data-i18n="dc.sceneBadge">ADB connected</span>
+          <div class="hero-visual reveal-scale" style="--d: 140ms">
+            <div class="scene-frame jade" data-depth-scene data-app="droidcrate">
+              <div class="scene" data-scene="droidcrate" data-fallback="../../assets/img/droidcrate-icon.png" role="img" aria-label="A rotating 3D phone showing a live DroidCrate workbench screen inside two orbit rings" data-i18n-aria="dc.sceneAria"></div>
+              <span class="scene-tag"><i></i><span data-i18n="dc.sceneTag">Live WebGL · device workbench</span></span>
+              <span class="scene-badge" data-i18n="dc.sceneBadge">ADB connected</span>
+            </div>
           </div>
         </div>
       </section>
@@ -137,7 +139,7 @@
               command lines. DroidCrate reads the phone over USB and does the job with one verified toolchain.
             </p>
           </div>
-          <div class="feature-grid three">
+          <div class="feature-grid three" data-parallax="0.32">
             <article class="feature jade reveal">
               <span class="feature-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10 5.5h4M11 18.5h2" stroke-linecap="round" /></svg></span>
               <h3 data-i18n="dc.f1t">Real device facts</h3>
@@ -183,7 +185,7 @@
               Platform Tools.
             </p>
           </div>
-          <div class="tabs-grid">
+          <div class="tabs-grid" data-parallax="0.3">
             <article class="tab-card reveal">
               <span class="tab-card__num">01</span>
               <h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="2.5" width="12" height="19" rx="2.5" /><path d="M10 5.5h4M11 18.5h2" stroke-linecap="round" /></svg><span data-i18n="dc.work.t1">Overview</span></h3>
@@ -228,7 +230,7 @@
               Every view below is the app itself, connected to a real phone. Click any shot to open it full size.
             </p>
           </div>
-          <div class="gallery">
+          <div class="gallery" data-parallax="0.38">
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-overview-en.png" data-full="../../assets/img/droidcrate/workbench-overview-en.png" data-caption="Overview tab with a connected phone and its real specs">
                 <img src="../../assets/img/droidcrate/workbench-overview-en.png" alt="DroidCrate Overview tab showing a connected phone, Android version, chipset and restart actions" loading="lazy" />
@@ -327,7 +329,7 @@
               does — and when to stop.
             </p>
           </div>
-          <div class="showcase">
+          <div class="showcase" data-parallax="0.38">
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/droidcrate/stage-3-checklists.png" data-full="../../assets/img/droidcrate/stage-3-checklists.png" data-caption="Five pre-flight checklists with risk levels">
                 <img src="../../assets/img/droidcrate/stage-3-checklists.png" alt="Five DroidCrate pre-flight checklists with risk levels" loading="lazy" />
@@ -363,7 +365,7 @@
               DroidCrate installs the verified Platform Tools once, then works offline. You choose every file from
               your own PC.
             </p>
-            <div class="steps" style="margin-top: 2.4rem">
+            <div class="steps" style="margin-top: 2.4rem" data-parallax="0.26">
               <article class="step">
                 <h3 data-i18n="dc.install.s1t">Install the workbench</h3>
                 <p data-i18n="dc.install.s1b">Run the 117.6 MB installer on Windows 10 or 11, 64-bit.</p>
@@ -459,16 +461,35 @@ AB714C54412CC396F3D4F5154FE3817D0099049350754565346A1B24EC08123A</code>
       </section>
 
       <!-- ================= CROSS ================= -->
-      <section class="cta-band">
-        <div class="wrap">
-          <h2 class="reveal" data-i18n="dc.cross.title">Back to the download side.</h2>
-          <p class="reveal" style="--d: 70ms" data-i18n="dc.cross.body">
-            Majra splits one file across every connection on your PC: Wi-Fi, Ethernet and USB tethering at the same
-            time.
-          </p>
-          <div class="btn-row reveal" style="--d: 130ms">
-            <a class="btn btn-primary" href="../majra/" data-i18n="dc.cross.cta">Open Majra</a>
-            <a class="btn btn-ghost" href="../../index.html" data-i18n="dc.cross.home">Back to Asraab</a>
+      <section class="cross-band">
+        <div class="wrap cross-band__inner">
+          <div class="cross-band__copy reveal" data-reveal="3d">
+            <span class="kicker" data-i18n="cross.kicker">The other app</span>
+            <h2 class="h2" data-i18n="dc.cross.title">Back to the download side.</h2>
+            <p class="section-lede" data-i18n="dc.cross.body">
+              Majra splits one file across every connection on your PC: Wi-Fi, Ethernet and USB tethering at the same
+              time.
+            </p>
+            <div class="btn-row">
+              <a class="btn btn-primary" href="../majra/" data-i18n="dc.cross.cta">Open Majra</a>
+              <a class="btn btn-ghost" href="../../index.html" data-i18n="dc.cross.home">Back to Asraab</a>
+            </div>
+          </div>
+          <div class="cross-card-wrap reveal" data-reveal="3d" style="--d: 90ms">
+            <a class="cross-card" href="../majra/" data-tilt aria-label="Majra — download manager">
+              <span class="cross-card__top">
+                <img class="cross-card__icon" src="../../assets/img/majra-icon.png" alt="" width="72" height="72" />
+                <span class="cross-card__index">01 / M</span>
+              </span>
+              <span class="cross-card__name">Majra</span>
+              <span class="cross-card__meta" data-i18n="app.majra.category">Download manager · Windows</span>
+              <span class="cross-card__tagline" data-i18n="app.majra.tagline">Every link lands here.</span>
+              <span class="cross-card__arrow">
+                <span data-i18n="cross.openMajra">Open Majra</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </span>
+              <span class="cross-card__glow" aria-hidden="true"></span>
+            </a>
           </div>
         </div>
       </section>
@@ -518,6 +539,10 @@ AB714C54412CC396F3D4F5154FE3817D0099049350754565346A1B24EC08123A</code>
 
     <script src="../../assets/js/i18n.js"></script>
     <script src="../../assets/js/site.js"></script>
+    <script src="../../assets/vendor/gsap.min.js"></script>
+    <script src="../../assets/vendor/ScrollTrigger.min.js"></script>
+    <script src="../../assets/vendor/lenis.min.js"></script>
+    <script src="../../assets/js/motion.js"></script>
     <script type="module" src="../../assets/js/scene-droidcrate.js"></script>
   </body>
 </html>

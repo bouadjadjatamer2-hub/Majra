@@ -175,10 +175,14 @@ if (container) {
       let pulseCursor = 0;
 
       return {
-        update(t, dt, pointer) {
-          root.rotation.y = pointer.x * 0.18;
-          root.rotation.x = pointer.y * 0.06;
-          root.position.y = Math.sin(t * 0.4) * 0.06;
+        update(t, dt, pointer, scroll = 0) {
+          const depth = scroll - 0.5;
+          root.position.z = -depth * 1.6;
+          root.rotation.y = pointer.x * 0.18 + depth * 0.5;
+          root.rotation.x = pointer.y * 0.06 + depth * 0.12;
+          root.position.y = Math.sin(t * 0.4) * 0.06 + depth * 0.2;
+          grid.position.z = -depth * 0.8;
+          grid.position.y = -3.1 + depth * 0.25;
 
           // Packets.
           packetGroups.forEach((packet) => {
@@ -203,7 +207,7 @@ if (container) {
 
           // Core.
           energy = Math.max(0, energy - dt * 1.6);
-          const beat = 1 + energy * 0.16 + Math.sin(t * 1.8) * 0.025;
+          const beat = 1 + energy * 0.16 + Math.sin(t * 1.8) * 0.025 + depth * 0.04;
           core.scale.setScalar(beat);
           coreGlow.scale.setScalar(3.4 + energy * 1.2);
           coreGlow.material.opacity = 0.34 + energy * 0.3;

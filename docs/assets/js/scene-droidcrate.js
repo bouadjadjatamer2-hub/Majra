@@ -427,14 +427,18 @@ if (container) {
 
       let lastPaint = 0;
       return {
-        update(t, dt, pointer) {
+        update(t, dt, pointer, scroll = 0) {
+          const depth = scroll - 0.5;
+          root.position.z = -depth * 1.4;
+          root.rotation.y = depth * 0.35;
           // Phone motion.
-          phone.rotation.y = -0.16 + Math.sin(t * 0.38) * 0.12 + pointer.x * 0.1;
-          phone.rotation.x = 0.04 + pointer.y * 0.07;
+          phone.rotation.y = -0.16 + Math.sin(t * 0.38) * 0.12 + pointer.x * 0.1 + depth * 0.6;
+          phone.rotation.x = 0.04 + pointer.y * 0.07 + depth * 0.1;
           phone.rotation.z = -0.025 + Math.sin(t * 0.5) * 0.012;
-          phone.position.y = Math.sin(t * 0.6) * 0.09;
+          phone.position.y = Math.sin(t * 0.6) * 0.09 + depth * 0.2;
 
           ringGroup.rotation.z = t * 0.06;
+          ringGroup.rotation.x = depth * 0.3;
           ringGroup.children.forEach((ring, index) => {
             ring.rotation.z = t * ring.userData.speed + index;
           });

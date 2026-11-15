@@ -121,6 +121,17 @@ export function createStage(container, factory, options = {}) {
   let running = false;
   let last = 0;
   let elapsed = 0;
+  let scroll = 0;
+
+  // 0 when the frame enters from the bottom, 1 when it leaves at the top.
+  // Scenes can lean the camera or separate their parts without owning a
+  // second scroll listener of their own.
+  const readScroll = () => {
+    const rect = container.getBoundingClientRect();
+    const viewport = window.innerHeight || 1;
+    const span = rect.height + viewport;
+    scroll = Math.min(1, Math.max(0, (viewport - rect.top) / span));
+  };
 
   const resize = () => {
     const rect = container.getBoundingClientRect();
@@ -148,7 +159,7 @@ export function createStage(container, factory, options = {}) {
     elapsed += dt;
     pointer.x += (pointer.tx - pointer.x) * 0.05;
     pointer.y += (pointer.ty - pointer.y) * 0.05;
-    if (api && api.update) api.update(elapsed, dt, pointer);
+    if (api && api.update) api.update(elapsed, dt, pointer, scroll);
     renderer.render(scene, camera);
     raf = requestAnimationFrame(frame);
   };
@@ -172,13 +183,16 @@ export function createStage(container, factory, options = {}) {
 
   const onVisibility = () => (document.hidden ? stop() : start());
 
+  readScroll();
   resize();
-  if (api && api.update) api.update(0, 0, pointer);
+  if (api && api.update) api.update(0, 0, pointer, scroll);
   renderer.render(scene, camera);
 
   // Keep the drawing buffer correct at every width, even in reduced-motion mode.
   const ro = new ResizeObserver(resize);
   ro.observe(container);
+  window.addEventListener("scroll", readScroll, { passive: true });
+  window.addEventListener("resize", readScroll, { passive: true });
 
   if (!reduced) {
     container.addEventListener("pointermove", onPointer, { passive: true });
@@ -213,6 +227,9 @@ export function createStage(container, factory, options = {}) {
     resize,
     dispose() {
       stop();
+      ro.disconnect();
+      window.removeEventListener("scroll", readScroll);
+      window.removeEventListener("resize", readScroll);
       if (api && api.dispose) api.dispose();
       renderer.dispose();
       renderer.domElement.remove();

@@ -146,16 +146,24 @@ if (container) {
       });
 
       return {
-        update(t, dt, pointer) {
-          root.rotation.y = t * 0.055 + pointer.x * 0.16;
-          root.rotation.x = 0.24 + pointer.y * 0.08 + Math.sin(t * 0.18) * 0.02;
+        update(t, dt, pointer, scroll = 0) {
+          const depth = scroll - 0.5;
+          root.position.z = -depth * 1.8;
+          root.position.y = depth * 0.25;
+          root.rotation.y = t * 0.055 + pointer.x * 0.16 + depth * 0.55;
+          root.rotation.x = 0.24 + pointer.y * 0.08 + Math.sin(t * 0.18) * 0.02 + depth * 0.16;
           flock.rotation.y = t * 0.02;
           dust.rotation.y = -t * 0.012;
           rings.rotation.y = t * 0.04;
           rings.rotation.x = Math.sin(t * 0.22) * 0.08;
 
           const a1 = t * 0.24;
-          majra.group.position.set(Math.cos(a1) * 2.55, Math.sin(a1 * 1.3) * 0.55, Math.sin(a1) * 1.35);
+          const spread = 1 + depth * 0.24;
+          majra.group.position.set(
+            Math.cos(a1) * 2.55 * spread,
+            Math.sin(a1 * 1.3) * 0.55,
+            Math.sin(a1) * 1.35 * spread
+          );
           majra.shell.rotation.x = t * 0.5;
           majra.shell.rotation.y = t * 0.62;
           labelMajra.position.set(
@@ -166,9 +174,9 @@ if (container) {
 
           const a2 = -t * 0.31 + 2.1;
           droidcrate.group.position.set(
-            Math.cos(a2) * 3.3,
+            Math.cos(a2) * 3.3 * spread,
             Math.sin(a2 * 1.1) * 0.75,
-            Math.sin(a2) * 1.6
+            Math.sin(a2) * 1.6 * spread
           );
           droidcrate.shell.rotation.x = -t * 0.7;
           droidcrate.shell.rotation.z = t * 0.5;
