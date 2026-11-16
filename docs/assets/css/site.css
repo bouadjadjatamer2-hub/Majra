@@ -2474,6 +2474,359 @@ html[lang="ar"] .cross-card__tagline {
   }
 }
 
+/* ---------- Depth system ---------- */
+/* A second 3D layer over the motion layer: a WebGL backdrop, floating HUD
+   chips, layered cards, a fanned gallery deck and 3D headings. Transform-only
+   work, switched off for small screens and reduced motion. */
+
+.ambient-scene {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 1;
+}
+.ambient-scene canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* --- Hero HUD chips --- */
+.orbit-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+.orbit-chip {
+  position: absolute;
+  left: var(--ox, 10%);
+  top: var(--oy, 20%);
+  padding: 0.32rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(7, 8, 12, 0.6);
+  backdrop-filter: blur(8px);
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.95), inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transform: translate3d(0, 0, var(--oz, 40px));
+  animation: orbit-float 7.5s ease-in-out infinite;
+  will-change: transform;
+}
+.orbit-chip:nth-child(2) {
+  animation-delay: -2.5s;
+}
+.orbit-chip:nth-child(3) {
+  animation-delay: -5s;
+}
+@keyframes orbit-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -7px;
+  }
+}
+
+/* --- Layered cards --- */
+.depth-card {
+  position: relative;
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.depth-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    240px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(255, 255, 255, 0.1),
+    transparent 62%
+  );
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+.depth-card.is-tilting::after {
+  opacity: 1;
+}
+
+.feature.depth-card .feature-icon {
+  transform: translateZ(34px);
+  box-shadow: 0 16px 28px -16px rgba(0, 0, 0, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.feature.depth-card h3 {
+  transform: translateZ(20px);
+}
+.feature.depth-card p {
+  transform: translateZ(8px);
+}
+
+.step.depth-card::before {
+  z-index: 3;
+}
+.step.depth-card h3 {
+  transform: translateZ(22px);
+}
+.step.depth-card p {
+  transform: translateZ(8px);
+}
+
+.tab-card.depth-card .tab-card__num {
+  display: inline-block;
+  transform: translateZ(24px);
+}
+.tab-card.depth-card h3 {
+  transform: translateZ(18px);
+}
+.tab-card.depth-card p {
+  transform: translateZ(8px);
+}
+
+.limits.depth-card .limit {
+  transform: translateZ(14px);
+}
+.facts.depth-card .fact {
+  transform: translateZ(16px);
+}
+.facts.depth-card .fact dd {
+  text-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
+.panel.depth-card .facts {
+  transform: translateZ(18px);
+}
+.download.depth-card > * {
+  transform: translateZ(16px);
+}
+.faq details.depth-card summary {
+  transform: translateZ(14px);
+}
+.callout.depth-card > * {
+  transform: translateZ(12px);
+}
+
+/* --- 3D headings --- */
+html.motion-ready .h2,
+html.motion-ready .cta-band h2,
+html.motion-ready .download h2 {
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 2px 0 rgba(0, 0, 0, 0.32),
+    0 18px 42px rgba(0, 0, 0, 0.5);
+}
+html.motion-ready .display .line:not(.grad-text) {
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.28), 0 20px 46px rgba(0, 0, 0, 0.45);
+}
+
+/* --- Gallery deck --- */
+/* The reveal classes also own `transform`, so the deck keeps its own
+   declaration important and only swaps the custom properties on hover. */
+.gallery {
+  perspective: 1600px;
+  transform-style: preserve-3d;
+}
+html.has-js .gallery .shot {
+  transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) translateZ(var(--tz, 0px)) !important;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.gallery .shot:nth-child(3n + 1) {
+  --ry: 6deg;
+  --tz: -26px;
+}
+.gallery .shot:nth-child(3n + 2) {
+  --ry: 0deg;
+  --tz: 18px;
+}
+.gallery .shot:nth-child(3n) {
+  --ry: -6deg;
+  --tz: -26px;
+}
+.gallery .shot:hover {
+  --ry: 0deg;
+  --rx: 0deg;
+  --tz: 42px;
+  border-color: var(--line-strong);
+  box-shadow: 0 46px 90px -46px rgba(0, 0, 0, 0.95);
+}
+.showcase {
+  perspective: 1600px;
+}
+html.has-js .showcase > .shot {
+  transform: rotateY(var(--ry, 3deg)) translateZ(var(--tz, -18px)) !important;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.showcase > .shot:hover {
+  --ry: 0deg;
+  --tz: 26px;
+}
+
+/* --- Floating app icons behind the closing CTA --- */
+.cta-orbit {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+.cta-band .wrap {
+  position: relative;
+  z-index: 1;
+}
+.cta-float {
+  position: absolute;
+  left: var(--fx, 10%);
+  top: var(--fy, 20%);
+  width: var(--fs, 56px);
+  height: var(--fs, 56px);
+  border-radius: 16px;
+  opacity: 0.5;
+  filter: saturate(0.85);
+  box-shadow: 0 24px 50px -22px rgba(0, 0, 0, 0.95);
+  transform: translate3d(0, 0, var(--fz, 30px)) rotateY(var(--fr, 0deg));
+  animation: cta-float 9s ease-in-out infinite;
+  will-change: transform;
+}
+.cta-float:nth-child(2) {
+  animation-delay: -4.5s;
+}
+@keyframes cta-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -14px;
+  }
+}
+
+/* --- Floating app icon on the app pages --- */
+html.motion-ready .page-hero .hero-copy {
+  perspective: 900px;
+}
+html.motion-ready .page-hero .hero-icon {
+  transform: translateZ(46px) rotateX(7deg) rotateY(-9deg);
+  box-shadow: 0 0 0 1px var(--line), 0 34px 64px -24px rgba(0, 0, 0, 0.95);
+  animation: icon-float 8s ease-in-out infinite;
+}
+html[dir="rtl"].motion-ready .page-hero .hero-icon {
+  transform: translateZ(46px) rotateX(7deg) rotateY(9deg);
+}
+@keyframes icon-float {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 -10px;
+  }
+}
+
+/* --- Screenshot lightbox opens out of the page plane --- */
+.lightbox img {
+  opacity: 0;
+  transform: perspective(1400px) rotateX(7deg) translateZ(-60px) scale(0.95);
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+}
+.lightbox.is-open img {
+  opacity: 1;
+  transform: none;
+}
+
+/* --- Brand mark leans in --- */
+html.motion-ready .brand img {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+html.motion-ready .brand:hover img {
+  transform: perspective(400px) rotateY(20deg) rotateX(-8deg);
+}
+
+/* --- Footer depth --- */
+html.motion-ready .footer-grid > * {
+  transform-style: preserve-3d;
+}
+
+@media (max-width: 900px) {
+  .ambient-scene {
+    display: none;
+  }
+  .orbit-layer {
+    display: none;
+  }
+  .gallery .shot,
+  .showcase > .shot {
+    --ry: 0deg;
+    --rx: 0deg;
+    --tz: 0px;
+  }
+  .cta-float {
+    transform: none;
+  }
+  .depth-card,
+  .depth-card * {
+    transform-style: flat;
+  }
+  html.motion-ready .page-hero .hero-icon {
+    transform: none;
+    animation: none;
+  }
+  .feature.depth-card .feature-icon,
+  .feature.depth-card h3,
+  .feature.depth-card p,
+  .step.depth-card h3,
+  .step.depth-card p,
+  .tab-card.depth-card .tab-card__num,
+  .tab-card.depth-card h3,
+  .tab-card.depth-card p,
+  .limits.depth-card .limit,
+  .facts.depth-card .fact,
+  .panel.depth-card .facts,
+  .download.depth-card > *,
+  .faq details.depth-card summary,
+  .callout.depth-card > * {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ambient-scene,
+  .orbit-layer,
+  .cta-orbit {
+    display: none;
+  }
+  .gallery .shot,
+  .showcase > .shot {
+    --ry: 0deg;
+    --rx: 0deg;
+    --tz: 0px;
+  }
+  .depth-card {
+    transform: none !important;
+  }
+  .depth-card::after {
+    display: none;
+  }
+  html.motion-ready .page-hero .hero-icon,
+  .lightbox img {
+    transform: none;
+    animation: none;
+  }
+}
+
 /* ---------- Print ---------- */
 @media print {
   body::before,

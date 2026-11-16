@@ -187,9 +187,25 @@
     }, 4000);
   }
 
-  /* ---------- 3D tilt on app cards ---------- */
+  /* ---------- 3D tilt on cards ---------- */
+  const depthTargets = document.querySelectorAll(
+    ".feature, .step, .tab-card, .download, .panel, .limits, .facts, .callout, .faq details"
+  );
+  depthTargets.forEach((el) => el.classList.add("depth-card"));
+
   if (finePointer && !reducedMotion) {
-    document.querySelectorAll("[data-tilt]").forEach((card) => {
+    // Large containers are animated by ScrollTrigger instead, so they are not
+    // tilted here to avoid two owners of the same transform.
+    const tiltTargets = Array.from(
+      document.querySelectorAll("[data-tilt], .feature, .step, .tab-card, .panel, .callout, .faq details")
+    );
+
+    tiltTargets.forEach((card) => {
+      if (!card.hasAttribute("data-tilt")) {
+        card.setAttribute("data-tilt", card.matches(".faq details") ? "2.4" : "4");
+      }
+
+      const max = parseFloat(card.dataset.tilt) || 7;
       let raf = 0;
       let targetX = 0;
       let targetY = 0;
@@ -202,8 +218,8 @@
 
       card.addEventListener("pointermove", (event) => {
         const rect = card.getBoundingClientRect();
-        targetX = ((event.clientX - rect.left) / rect.width - 0.5) * 7;
-        targetY = -((event.clientY - rect.top) / rect.height - 0.5) * 7;
+        targetX = ((event.clientX - rect.left) / rect.width - 0.5) * max;
+        targetY = -((event.clientY - rect.top) / rect.height - 0.5) * max;
         if (!raf) raf = requestAnimationFrame(render);
       });
       card.addEventListener("pointerleave", () => {

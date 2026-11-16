@@ -188,7 +188,7 @@ if (container) {
           packetGroups.forEach((packet) => {
             const data = packet.userData;
             const next = (data.offset + t * data.speed) % 1.15;
-            const clamped = Math.min(next, 1);
+            const clamped = Math.min(1, Math.max(0, next));
             packet.position.copy(data.curve.getPointAt(clamped));
             packet.rotation.x = t * 1.6;
             packet.rotation.y = t * 1.2;

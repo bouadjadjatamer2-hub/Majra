@@ -35,6 +35,7 @@
     </script>
   </head>
   <body>
+    <div class="ambient-scene" data-ambient="droidcrate" aria-hidden="true"></div>
     <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
 
     <header class="site-header" id="top">
@@ -101,6 +102,11 @@
               <div class="scene" data-scene="droidcrate" data-fallback="../../assets/img/droidcrate-icon.png" role="img" aria-label="A rotating 3D phone showing a live DroidCrate workbench screen inside two orbit rings" data-i18n-aria="dc.sceneAria"></div>
               <span class="scene-tag"><i></i><span data-i18n="dc.sceneTag">Live WebGL · device workbench</span></span>
               <span class="scene-badge" data-i18n="dc.sceneBadge">ADB connected</span>
+              <span class="orbit-layer" aria-hidden="true">
+                <span class="orbit-chip" style="--ox: 7%; --oy: 26%; --oz: 60px">ADB</span>
+                <span class="orbit-chip" style="--ox: 69%; --oy: 18%; --oz: 38px">fastboot</span>
+                <span class="orbit-chip" style="--ox: 71%; --oy: 77%; --oz: 76px">64-bit</span>
+              </span>
             </div>
           </div>
         </div>
@@ -544,5 +550,6 @@ AB714C54412CC396F3D4F5154FE3817D0099049350754565346A1B24EC08123A</code>
     <script src="../../assets/vendor/lenis.min.js"></script>
     <script src="../../assets/js/motion.js"></script>
     <script type="module" src="../../assets/js/scene-droidcrate.js"></script>
+    <script type="module" src="../../assets/js/scene-ambient.js"></script>
   </body>
 </html>

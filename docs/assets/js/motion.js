@@ -186,6 +186,101 @@
     }
   }
 
+  // HUD chips around the hero frame sit at different depths and lean apart
+  // with the pointer. They are decorative, so this is skipped on touch.
+  const orbit = document.querySelector(".orbit-layer");
+  if (orbit && finePointer) {
+    const chips = Array.from(orbit.querySelectorAll(".orbit-chip"));
+    const depth = [16, 10, 22];
+    let orbitVisible = true;
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(
+        (entries) => {
+          orbitVisible = entries[0].isIntersecting;
+        },
+        { threshold: 0.05 }
+      ).observe(orbit);
+    }
+
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!orbitVisible) return;
+        const nx = event.clientX / window.innerWidth - 0.5;
+        const ny = event.clientY / window.innerHeight - 0.5;
+        chips.forEach((chip, index) => {
+          const z = chip.style.getPropertyValue("--oz") || "40px";
+          chip.style.transform =
+            "translate3d(" +
+            (nx * depth[index]).toFixed(2) +
+            "px," +
+            (ny * depth[index]).toFixed(2) +
+            "px," +
+            z +
+            ")";
+        });
+      },
+      { passive: true }
+    );
+  }
+
+  // Magnetic buttons: the surface leans toward the pointer, then settles back.
+  if (finePointer) {
+    document.querySelectorAll(".btn").forEach((btn) => {
+      btn.addEventListener(
+        "pointermove",
+        (event) => {
+          const rect = btn.getBoundingClientRect();
+          const dx = (event.clientX - rect.left - rect.width / 2) * 0.14;
+          const dy = (event.clientY - rect.top - rect.height / 2) * 0.22 - 2;
+          btn.style.transform = "translate3d(" + dx.toFixed(2) + "px," + dy.toFixed(2) + "px,0)";
+        },
+        { passive: true }
+      );
+      btn.addEventListener("pointerleave", () => {
+        btn.style.transform = "";
+      });
+    });
+  }
+
+  // Grids and galleries rise out of the page as they scroll in.
+  if (!compact) {
+    document
+      .querySelectorAll(
+        ".app-grid, .feature-grid, .steps, .tabs-grid, .limits, .gallery, .showcase, .faq, .download, .split"
+      )
+      .forEach((group) => {
+        gsap.fromTo(
+          group,
+          { rotateX: 7, z: -50, transformPerspective: 1200, transformOrigin: "50% 100%" },
+          {
+            rotateX: 0,
+            z: 0,
+            ease: "none",
+            scrollTrigger: { trigger: group, start: "top 96%", end: "top 52%", scrub: 0.6 },
+          }
+        );
+      });
+
+    // Footer columns arrive as a small 3D shelf.
+    const footerGrid = document.querySelector(".footer-grid");
+    if (footerGrid) {
+      gsap.from(footerGrid.children, {
+        y: 34,
+        z: -60,
+        rotateX: 9,
+        opacity: 0,
+        transformPerspective: 900,
+        transformOrigin: "50% 100%",
+        duration: 0.9,
+        ease: "power3.out",
+        stagger: 0.08,
+        scrollTrigger: { trigger: footerGrid, start: "top 94%" },
+      });
+    }
+  }
+
   // Grids and galleries drift against the page a little. Transforms stay on
   // the container so the reveal and tilt transforms on the children are safe.
   document.querySelectorAll("[data-parallax]").forEach((el) => {

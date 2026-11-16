@@ -36,6 +36,7 @@
     </script>
   </head>
   <body>
+    <div class="ambient-scene" data-ambient="home" aria-hidden="true"></div>
     <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
 
     <header class="site-header" id="top">
@@ -98,6 +99,11 @@
               <div class="scene" data-scene="home" data-fallback="assets/img/asraab-mark.svg" role="img" aria-label="A three-dimensional flock of amber and jade particles orbiting two glowing app cores" data-i18n-aria="home.sceneAria"></div>
               <span class="scene-tag"><i></i><span data-i18n="home.sceneTag">Live WebGL · particle flock</span></span>
               <span class="scene-badge" data-i18n="home.sceneBadge">Two apps</span>
+              <span class="orbit-layer" aria-hidden="true">
+                <span class="orbit-chip" style="--ox: 7%; --oy: 22%; --oz: 56px">MIT</span>
+                <span class="orbit-chip" style="--ox: 70%; --oy: 14%; --oz: 34px">64-bit</span>
+                <span class="orbit-chip" style="--ox: 72%; --oy: 78%; --oz: 72px">v2.0.4</span>
+              </span>
             </div>
           </div>
         </div>
@@ -280,6 +286,10 @@
 
       <!-- ================= CTA ================= -->
       <section class="cta-band">
+        <div class="cta-orbit" aria-hidden="true">
+          <img class="cta-float" src="assets/img/majra-icon.png" alt="" width="56" height="56" style="--fx: 9%; --fy: 20%; --fs: 54px; --fz: 40px; --fr: 9deg" />
+          <img class="cta-float" src="assets/img/droidcrate-icon.png" alt="" width="56" height="56" style="--fx: 84%; --fy: 62%; --fs: 62px; --fz: 84px; --fr: -11deg" />
+        </div>
         <div class="wrap" data-parallax="0.18">
           <h2 class="reveal" data-i18n="cta.title">Start with Majra.</h2>
           <p class="reveal" style="--d: 70ms" data-i18n="cta.body">
@@ -346,5 +356,6 @@
     <script src="assets/vendor/lenis.min.js"></script>
     <script src="assets/js/motion.js"></script>
     <script type="module" src="assets/js/scene-home.js"></script>
+    <script type="module" src="assets/js/scene-ambient.js"></script>
   </body>
 </html>

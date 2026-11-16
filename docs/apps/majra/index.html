@@ -35,6 +35,7 @@
     </script>
   </head>
   <body>
+    <div class="ambient-scene" data-ambient="majra" aria-hidden="true"></div>
     <a class="skip-link" href="#main" data-i18n="a11y.skip">Skip to content</a>
 
     <header class="site-header" id="top">
@@ -101,6 +102,11 @@
               <div class="scene" data-scene="majra" data-fallback="../../assets/img/majra-icon.png" role="img" aria-label="Three glowing data streams labelled Wi-Fi, USB and Ethernet feeding blocks into a rotating core" data-i18n-aria="majra.sceneAria"></div>
               <span class="scene-tag"><i></i><span data-i18n="majra.sceneTag">Live WebGL · three networks, one file</span></span>
               <span class="scene-badge" data-i18n="majra.sceneBadge">Block scheduler</span>
+              <span class="orbit-layer" aria-hidden="true">
+                <span class="orbit-chip" style="--ox: 6%; --oy: 30%; --oz: 58px">Wi-Fi</span>
+                <span class="orbit-chip" style="--ox: 68%; --oy: 20%; --oz: 36px">USB</span>
+                <span class="orbit-chip" style="--ox: 70%; --oy: 76%; --oz: 74px">Ethernet</span>
+              </span>
             </div>
           </div>
         </div>
@@ -541,5 +547,6 @@
     <script src="../../assets/vendor/lenis.min.js"></script>
     <script src="../../assets/js/motion.js"></script>
     <script type="module" src="../../assets/js/scene-majra.js"></script>
+    <script type="module" src="../../assets/js/scene-ambient.js"></script>
   </body>
 </html>

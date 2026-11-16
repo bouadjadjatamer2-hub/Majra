@@ -102,17 +102,18 @@ export function createStage(container, factory, options = {}) {
   }
 
   const reduced = REDUCED();
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, options.dpr || 2));
   renderer.setClearColor(0x000000, 0);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.domElement.setAttribute("aria-hidden", "true");
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
+  const camera = new THREE.PerspectiveCamera(options.fov || 42, 1, 0.1, options.far || 100);
   camera.position.set(0, 0, options.cameraZ || 9);
   camera.lookAt(0, 0, 0);
 
+  const pointerEl = options.pointerTarget || container;
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
   const size = { width: 1, height: 1 };
   let api = null;
@@ -125,8 +126,14 @@ export function createStage(container, factory, options = {}) {
 
   // 0 when the frame enters from the bottom, 1 when it leaves at the top.
   // Scenes can lean the camera or separate their parts without owning a
-  // second scroll listener of their own.
+  // second scroll listener of their own. "page" mode follows the whole
+  // document instead, which is what a fixed backdrop needs.
   const readScroll = () => {
+    if (options.scrollMode === "page") {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      scroll = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+      return;
+    }
     const rect = container.getBoundingClientRect();
     const viewport = window.innerHeight || 1;
     const span = rect.height + viewport;
@@ -154,7 +161,10 @@ export function createStage(container, factory, options = {}) {
 
   const frame = (now) => {
     if (!running) return;
-    const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+    // Guard against clock jumps and paused tabs: a negative step would push
+    // curve lookups behind their first point.
+    const raw = (now - last) / 1000;
+    const dt = raw > 0 ? Math.min(0.05, raw) : 0.016;
     last = now;
     elapsed += dt;
     pointer.x += (pointer.tx - pointer.x) * 0.05;
@@ -176,6 +186,11 @@ export function createStage(container, factory, options = {}) {
   };
 
   const onPointer = (event) => {
+    if (pointerEl === window) {
+      pointer.tx = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.ty = (event.clientY / window.innerHeight) * 2 - 1;
+      return;
+    }
     const rect = container.getBoundingClientRect();
     pointer.tx = ((event.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.ty = ((event.clientY - rect.top) / rect.height) * 2 - 1;
@@ -195,8 +210,8 @@ export function createStage(container, factory, options = {}) {
   window.addEventListener("resize", readScroll, { passive: true });
 
   if (!reduced) {
-    container.addEventListener("pointermove", onPointer, { passive: true });
-    container.addEventListener("pointerleave", () => {
+    pointerEl.addEventListener("pointermove", onPointer, { passive: true });
+    pointerEl.addEventListener("pointerleave", () => {
       pointer.tx = 0;
       pointer.ty = 0;
     });
