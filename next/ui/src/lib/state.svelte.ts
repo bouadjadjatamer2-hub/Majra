@@ -465,12 +465,14 @@ class AppState {
     });
   }
 
-  async refreshInterfaces(): Promise<void> {
+  /// `quiet` is for the background poll in the new-download dialog: a transient
+  /// failure there should not stack a toast every few seconds.
+  async refreshInterfaces(quiet = false): Promise<void> {
     try {
       this.interfaces = await api.listInterfaces();
       this.interfaceTests = {};
     } catch (error) {
-      this.toast('error', errorText(error));
+      if (!quiet) this.toast('error', errorText(error));
     }
   }
 

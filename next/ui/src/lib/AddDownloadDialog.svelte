@@ -51,6 +51,12 @@
     // does not silently repeat an old copy.
     app.prefillUrl = null;
     textarea?.focus();
+    // Adapters appear and disappear while Majra stays open: a cable is plugged in, a
+    // phone starts USB tethering, a VPN comes up. The list read at startup can be hours
+    // old by now, so read it again when the dialog opens and while it stays open.
+    void app.refreshInterfaces();
+    const timer = window.setInterval(() => void app.refreshInterfaces(true), 4000);
+    return () => window.clearInterval(timer);
   });
 
   // The extension already probed the link with the browser's own sign-in. Adopt that
