@@ -1019,6 +1019,9 @@ body.nav-open .menu-btn span::after {
   background: linear-gradient(180deg, #0d0f17, #090a10);
   box-shadow: var(--shadow-card);
   overflow: hidden;
+  /* The peek keeps its perspective on the frame itself, so the tilt is a few
+     degrees on one card and the page never turns into a wall. */
+  perspective: 1100px;
   transition: border-color 0.25s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
     box-shadow 0.4s ease;
 }
@@ -1026,7 +1029,11 @@ body.nav-open .menu-btn span::after {
   border-color: var(--line-strong);
   transform: translateY(-4px);
 }
+.shot.is-peeking {
+  transition: border-color 0.25s ease, transform 0.14s ease-out, box-shadow 0.4s ease;
+}
 .shot .shot-open {
+  position: relative;
   display: block;
   flex: 1 1 auto;
   min-height: 0;
@@ -1042,8 +1049,50 @@ body.nav-open .menu-btn span::after {
   object-position: top center;
   transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.shot:hover img {
-  transform: scale(1.015);
+.shot.is-peeking img {
+  transform: scale(1.035);
+}
+/* A glare that follows the pointer makes the tilt read as a lit surface. */
+.shot .shot-open::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 10px;
+  pointer-events: none;
+  background: radial-gradient(
+    42% 46% at var(--glare-x, 50%) var(--glare-y, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05) 46%,
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.shot:hover .shot-open::after {
+  opacity: 1;
+}
+/* One quiet hint that the frame opens the full-size view. */
+.shot .shot-open::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  inset-inline-end: 15px;
+  z-index: 2;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(7, 8, 12, 0.66)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff4e4' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 4H4v5M15 20h5v-5M20 9V4h-5M4 15v5h5'/%3E%3C/svg%3E")
+    center / 13px no-repeat;
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.shot:hover .shot-open::before {
+  opacity: 1;
+  transform: none;
 }
 .shot::after {
   content: "";
@@ -1086,6 +1135,10 @@ body.nav-open .menu-btn span::after {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
+}
+.gallery.duo {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: clamp(1rem, 2vw, 1.6rem);
 }
 .gallery .shot figcaption {
   font-size: 0.76rem;
@@ -1794,8 +1847,11 @@ html.has-js .reveal-scale.is-in {
   position: fixed;
   inset: 0;
   z-index: 300;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
   padding: clamp(1rem, 4vw, 2.5rem);
   background: rgba(4, 5, 8, 0.9);
   backdrop-filter: blur(14px);
@@ -1808,16 +1864,48 @@ html.has-js .reveal-scale.is-in {
   visibility: visible;
 }
 .lightbox img {
-  max-width: 100%;
-  max-height: 86svh;
+  max-width: min(100%, 1400px);
+  max-height: 74svh;
   border: 1px solid var(--line-strong);
   border-radius: 14px;
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8);
 }
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  max-width: min(92vw, 78ch);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease 0.08s, transform 0.3s ease 0.08s;
+}
+.lightbox.is-open .lightbox-bar {
+  opacity: 1;
+  transform: none;
+}
+.lightbox-caption {
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+  line-height: 1.4;
+  text-align: center;
+}
+.lightbox-count {
+  flex: none;
+  padding: 0.16rem 0.52rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+}
+.lightbox-count:empty {
+  display: none;
+}
 .lightbox-close {
   position: absolute;
   top: 1.1rem;
-  right: 1.1rem;
+  inset-inline-end: 1.1rem;
   display: grid;
   place-items: center;
   width: 42px;
@@ -1829,6 +1917,32 @@ html.has-js .reveal-scale.is-in {
 }
 .lightbox-close:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+.lightbox-nav {
+  position: absolute;
+  top: 50%;
+  margin-top: -22px;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--ink);
+  transition: background 0.2s ease;
+}
+.lightbox-nav:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+.lightbox-prev {
+  inset-inline-start: clamp(0.4rem, 2vw, 1.4rem);
+}
+.lightbox-next {
+  inset-inline-end: clamp(0.4rem, 2vw, 1.4rem);
+}
+.lightbox-nav[hidden] {
+  display: none;
 }
 
 /* ---------- Arabic / RTL ---------- */
@@ -2708,6 +2822,12 @@ html.has-js .showcase > .shot:hover {
   border-color: var(--line-strong);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 90px -40px rgba(0, 0, 0, 0.95);
 }
+/* While the pointer is inside, the tilt has to follow it without lag. */
+html.has-js .gallery .shot.is-peeking,
+html.has-js .showcase > .shot.is-peeking {
+  transition: opacity 0.6s ease, transform 0.13s ease-out, border-color 0.25s ease,
+    box-shadow 0.4s ease;
+}
 html[data-page="majra"] .showcase > .shot {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 40px 110px -58px rgba(242, 180, 109, 0.45);
 }
@@ -2808,6 +2928,9 @@ html.motion-ready .footer-grid > * {
   .orbit-layer {
     display: none;
   }
+  .gallery.duo {
+    grid-template-columns: 1fr;
+  }
   .cta-float {
     transform: none;
   }
@@ -2846,8 +2969,13 @@ html.motion-ready .footer-grid > * {
     transform: none !important;
   }
   .shot:hover,
-  .shot:hover img {
-    transform: none;
+  .shot:hover img,
+  .shot .shot-open,
+  .shot.is-peeking .shot-open {
+    transform: none !important;
+  }
+  .shot .shot-open::after {
+    opacity: 0 !important;
   }
   .depth-card::after {
     display: none;

@@ -230,12 +230,82 @@
     });
   }
 
+  /* ---------- Screenshot peek ---------- */
+  // The frame leans a few degrees toward the pointer and the shot inside grows
+  // a little, so the picture feels three-dimensional without ever leaving its
+  // cell. Clamped on purpose: nothing jumps over the page or the viewport.
+  if (finePointer && !reducedMotion) {
+    document.querySelectorAll(".shot").forEach((card) => {
+      if (!card.querySelector(".shot-open")) return;
+
+      let raf = 0;
+      let tiltX = 0;
+      let tiltY = 0;
+      let glareX = 50;
+      let glareY = 50;
+
+      const ready = () =>
+        !card.classList.contains("reveal-scale") || card.classList.contains("is-in");
+
+      const render = () => {
+        raf = 0;
+        card.style.transform =
+          "perspective(1100px) translateY(-5px) rotateX(" +
+          tiltY.toFixed(2) +
+          "deg) rotateY(" +
+          tiltX.toFixed(2) +
+          "deg)";
+        card.style.setProperty("--glare-x", glareX.toFixed(1) + "%");
+        card.style.setProperty("--glare-y", glareY.toFixed(1) + "%");
+      };
+
+      card.addEventListener("pointerenter", () => {
+        if (!ready()) return;
+        card.classList.add("is-peeking");
+      });
+
+      card.addEventListener("pointermove", (event) => {
+        if (!ready()) return;
+        const rect = card.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const px = (event.clientX - rect.left) / rect.width;
+        const py = (event.clientY - rect.top) / rect.height;
+        // Face the pointer: the edge under the cursor comes toward the reader.
+        tiltX = (0.5 - px) * 7;
+        tiltY = (py - 0.5) * 6;
+        glareX = px * 100;
+        glareY = py * 100;
+        if (!raf) raf = requestAnimationFrame(render);
+      });
+
+      card.addEventListener("pointerleave", () => {
+        card.classList.remove("is-peeking");
+        card.style.transform = "";
+        card.style.removeProperty("--glare-x");
+        card.style.removeProperty("--glare-y");
+      });
+    });
+  }
+
   /* ---------- Lightbox ---------- */
+  // One viewer for every screenshot on the page: arrows, arrow keys, a swipe,
+  // the caption from the shot itself and a counter for the group it belongs to.
   const shotLinks = Array.from(document.querySelectorAll(".shot-open"));
+  const ICON = (paths) =>
+    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+    paths +
+    "</svg>";
+
   let lightbox = null;
   let lightboxImg = null;
   let lightboxClose = null;
+  let lightboxCaption = null;
+  let lightboxCount = null;
+  let lightboxPrev = null;
+  let lightboxNext = null;
   let lastFocus = null;
+  let group = [];
+  let index = 0;
 
   function ensureLightbox() {
     if (lightbox) return;
@@ -244,34 +314,130 @@
     lightbox.setAttribute("role", "dialog");
     lightbox.setAttribute("aria-modal", "true");
     lightbox.innerHTML =
-      '<button class="lightbox-close" type="button" aria-label="Close">' +
-      '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/></svg>' +
-      "</button>";
-    lightboxImg = document.createElement("img");
-    lightboxImg.alt = "";
-    lightbox.appendChild(lightboxImg);
+      '<button class="lightbox-close" type="button">' +
+      ICON('<path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/>') +
+      "</button>" +
+      '<button class="lightbox-nav lightbox-prev" type="button">' +
+      ICON('<path d="M15 5l-7 7 7 7" stroke-linecap="round" stroke-linejoin="round"/>') +
+      "</button>" +
+      '<button class="lightbox-nav lightbox-next" type="button">' +
+      ICON('<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>') +
+      "</button>" +
+      '<img alt="" />' +
+      '<div class="lightbox-bar"><span class="lightbox-caption"></span>' +
+      '<span class="lightbox-count"></span></div>';
     document.body.appendChild(lightbox);
+
+    lightboxImg = lightbox.querySelector("img");
     lightboxClose = lightbox.querySelector(".lightbox-close");
+    lightboxCaption = lightbox.querySelector(".lightbox-caption");
+    lightboxCount = lightbox.querySelector(".lightbox-count");
+    lightboxPrev = lightbox.querySelector(".lightbox-prev");
+    lightboxNext = lightbox.querySelector(".lightbox-next");
 
     lightboxClose.addEventListener("click", closeLightbox);
+    lightboxPrev.addEventListener("click", () => step(-1));
+    lightboxNext.addEventListener("click", () => step(1));
     lightbox.addEventListener("click", (event) => {
       if (event.target === lightbox) closeLightbox();
     });
+
     document.addEventListener("keydown", (event) => {
-      if (event.key === "Escape" && lightbox.classList.contains("is-open")) closeLightbox();
+      if (!lightbox.classList.contains("is-open")) return;
+      const rtl = document.documentElement.dir === "rtl";
+      if (event.key === "Escape") {
+        closeLightbox();
+      } else if (event.key === "ArrowRight") {
+        step(rtl ? -1 : 1);
+      } else if (event.key === "ArrowLeft") {
+        step(rtl ? 1 : -1);
+      } else if (event.key === "Tab") {
+        const stops = [lightboxClose, lightboxPrev, lightboxNext].filter((el) => !el.hidden);
+        const first = stops[0];
+        const last = stops[stops.length - 1];
+        if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        } else if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        }
+      }
     });
+
+    // A short horizontal swipe moves to the next shot on touch screens.
+    let startX = 0;
+    let startY = 0;
+    lightbox.addEventListener(
+      "touchstart",
+      (event) => {
+        if (event.touches.length !== 1) return;
+        startX = event.touches[0].clientX;
+        startY = event.touches[0].clientY;
+      },
+      { passive: true }
+    );
+    lightbox.addEventListener(
+      "touchend",
+      (event) => {
+        if (!startX || !event.changedTouches.length) return;
+        const dx = event.changedTouches[0].clientX - startX;
+        const dy = event.changedTouches[0].clientY - startY;
+        startX = 0;
+        if (Math.abs(dx) > 46 && Math.abs(dx) > Math.abs(dy)) step(dx < 0 ? 1 : -1);
+      },
+      { passive: true }
+    );
+  }
+
+  function groupFor(link) {
+    const root = link.closest(".gallery, .showcase");
+    const links = root ? Array.from(root.querySelectorAll(".shot-open")) : [link];
+    return links.length ? links : [link];
+  }
+
+  function showSlide(next) {
+    if (!group.length) return;
+    index = (next + group.length) % group.length;
+    const link = group[index];
+    const full = link.getAttribute("data-full") || link.getAttribute("href");
+    const img = link.querySelector("img");
+    const caption = link.getAttribute("data-caption") || (img ? img.alt : "");
+
+    lightboxImg.src = full;
+    lightboxImg.alt = caption;
+    lightboxCaption.textContent = caption;
+    lightboxCount.textContent = group.length > 1 ? index + 1 + " / " + group.length : "";
+
+    const many = group.length > 1;
+    lightboxPrev.hidden = !many;
+    lightboxNext.hidden = !many;
+
+    // Warm the neighbours so the next arrow is instant.
+    if (many) {
+      [index + 1, index - 1].forEach((n) => {
+        const link2 = group[(n + group.length) % group.length];
+        const src = link2 && (link2.getAttribute("data-full") || link2.getAttribute("href"));
+        if (src) new Image().src = src;
+      });
+    }
+  }
+
+  function step(delta) {
+    showSlide(index + delta);
   }
 
   function openLightbox(link) {
     ensureLightbox();
     lastFocus = document.activeElement;
-    const full = link.getAttribute("data-full") || link.getAttribute("href");
-    const img = link.querySelector("img");
-    lightboxImg.src = full;
-    lightboxImg.alt = img ? img.alt : "";
+    group = groupFor(link);
+    index = Math.max(0, group.indexOf(link));
     lightbox.classList.add("is-open");
     document.body.style.overflow = "hidden";
     lightboxClose.setAttribute("aria-label", lang === "ar" ? "إغلاق" : "Close");
+    lightboxPrev.setAttribute("aria-label", lang === "ar" ? "الصورة السابقة" : "Previous screenshot");
+    lightboxNext.setAttribute("aria-label", lang === "ar" ? "الصورة التالية" : "Next screenshot");
+    showSlide(index);
     lightboxClose.focus();
   }
 
