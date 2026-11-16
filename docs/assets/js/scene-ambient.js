@@ -16,8 +16,10 @@ const JADE = 0x54b39c;
 const WHITE = 0xfff4e4;
 
 const container = document.querySelector("[data-ambient]");
-const wide = window.matchMedia("(min-width: 901px)").matches;
 const page = (container && container.dataset.ambient) || "home";
+// Phones get a lighter cut of the same backdrop: fewer motes, a smaller
+// drawing buffer and a 30 fps cap, but the same motifs.
+const small = window.matchMedia("(max-width: 900px)").matches;
 
 const DUST = {
   home: { count: 1200, colors: [AMBER, JADE, WHITE], weights: [0.46, 0.3, 0.24] },
@@ -42,7 +44,7 @@ const ring = (radius, color, opacity, tube = 0.022) =>
 /* ---------- Dust ---------- */
 function buildDust(key) {
   const config = DUST[key] || DUST.home;
-  const { count } = config;
+  const count = Math.max(320, Math.round(config.count * (small ? 0.42 : 1)));
   const positions = new Float32Array(count * 3);
   const colors = new Float32Array(count * 3);
   const palette = config.colors.map((c) => new THREE.Color(c));
@@ -370,7 +372,7 @@ function buildMotif(key) {
   return { group, tickers };
 }
 
-if (container && wide) {
+if (container) {
   createStage(
     container,
     ({ scene, camera }) => {
@@ -394,14 +396,26 @@ if (container && wide) {
         root.add(grid);
       }
 
+      // A portrait phone has a narrow field of view, so the whole world is
+      // pulled in to keep the motif on screen.
+      const fit = () => {
+        const rect = container.getBoundingClientRect();
+        const portrait = rect.height > rect.width;
+        motif.group.scale.setScalar(portrait ? 0.66 : 1);
+        dust.scale.setScalar(portrait ? 0.7 : 1);
+      };
+      fit();
+
       return {
+        resize: fit,
         update(t, dt, pointer, scroll = 0) {
           const p = scroll;
+          const portrait = camera.aspect < 1;
 
           // The camera drops and pushes forward as the page is read.
           camera.position.x = pointer.x * 1.6;
-          camera.position.y = 2.6 - p * 10 - pointer.y * 1.1;
-          camera.position.z = 23 - p * 4;
+          camera.position.y = (portrait ? 1.4 : 2.6) - p * 10 - pointer.y * 1.1;
+          camera.position.z = 23 * (portrait ? 1.34 : 1) - p * 4;
           camera.lookAt(0, 1.4 - p * 4.5, -11);
 
           dust.rotation.y = t * 0.013 + p * 0.55;
@@ -425,7 +439,8 @@ if (container && wide) {
       far: 140,
       scrollMode: "page",
       pointerTarget: window,
-      dpr: 1.5,
+      dpr: small ? 1.15 : 1.5,
+      maxFps: small ? 30 : 0,
     }
   );
 }

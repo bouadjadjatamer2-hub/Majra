@@ -341,4 +341,16 @@
       frame.appendChild(fallback);
     });
   }, 3200);
+
+  /* ---------- Ambient fallback ---------- */
+  // If the WebGL backdrop never arrives (old browser, blocked GPU, slow asset)
+  // the CSS version paints the same room instead of leaving a flat page.
+  const ambient = document.querySelector("[data-ambient]");
+  if (ambient) {
+    const syncAmbient = () => {
+      ambient.classList.toggle("is-fallback", !ambient.querySelector("canvas"));
+    };
+    window.setTimeout(syncAmbient, 2600);
+    window.addEventListener("load", () => window.setTimeout(syncAmbient, 1200), { once: true });
+  }
 })();

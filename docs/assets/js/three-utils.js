@@ -123,6 +123,7 @@ export function createStage(container, factory, options = {}) {
   let last = 0;
   let elapsed = 0;
   let scroll = 0;
+  let sinceRender = 0;
 
   // 0 when the frame enters from the bottom, 1 when it leaves at the top.
   // Scenes can lean the camera or separate their parts without owning a
@@ -167,6 +168,18 @@ export function createStage(container, factory, options = {}) {
     const dt = raw > 0 ? Math.min(0.05, raw) : 0.016;
     last = now;
     elapsed += dt;
+
+    // A backdrop does not need 60 fps on a phone, so a scene can ask for a
+    // lower cap and skip the extra renders while keeping the clock running.
+    if (options.maxFps) {
+      sinceRender += dt;
+      if (sinceRender < 1 / options.maxFps) {
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+      sinceRender = 0;
+    }
+
     pointer.x += (pointer.tx - pointer.x) * 0.05;
     pointer.y += (pointer.ty - pointer.y) * 0.05;
     if (api && api.update) api.update(elapsed, dt, pointer, scroll);
@@ -253,6 +266,11 @@ export function createStage(container, factory, options = {}) {
 }
 
 function showFallback(container) {
+  // The ambient layer has no artwork to fall back to; CSS paints it instead.
+  if (container.hasAttribute("data-ambient")) {
+    container.classList.add("is-fallback");
+    return;
+  }
   const frame = container.closest(".scene-frame") || container;
   if (frame.querySelector(".scene-fallback")) return;
   frame.classList.add("is-fallback");

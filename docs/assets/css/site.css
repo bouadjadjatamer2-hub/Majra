@@ -2476,8 +2476,9 @@ html[lang="ar"] .cross-card__tagline {
 
 /* ---------- Depth system ---------- */
 /* A second 3D layer over the motion layer: a WebGL backdrop, floating HUD
-   chips, layered cards, a fanned gallery deck and 3D headings. Transform-only
-   work, switched off for small screens and reduced motion. */
+   chips, layered cards, a fanned gallery deck and 3D headings. The backdrop
+   runs everywhere (lighter on phones, one static frame for reduced motion);
+   the tilt and deck work is switched off on small screens and reduced motion. */
 
 .ambient-scene {
   position: fixed;
@@ -2490,6 +2491,26 @@ html[lang="ar"] .cross-card__tagline {
   width: 100% !important;
   height: 100% !important;
   display: block;
+}
+
+/* No WebGL? The same room is painted with gradients and a CSS floor. */
+.ambient-scene.is-fallback {
+  background:
+    radial-gradient(62rem 40rem at 80% -8%, rgba(242, 180, 109, 0.1), transparent 62%),
+    radial-gradient(54rem 36rem at 6% 18%, rgba(84, 179, 156, 0.09), transparent 64%);
+}
+.ambient-scene.is-fallback::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.085) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.085) 1px, transparent 1px);
+  background-size: 62px 62px;
+  transform: perspective(620px) rotateX(58deg) scale(2.4);
+  transform-origin: 50% 100%;
+  mask-image: linear-gradient(to top, #000 0%, transparent 72%);
+  -webkit-mask-image: linear-gradient(to top, #000 0%, transparent 72%);
+  opacity: 0.75;
 }
 
 /* --- Hero HUD chips --- */
@@ -2761,9 +2782,6 @@ html.motion-ready .footer-grid > * {
 }
 
 @media (max-width: 900px) {
-  .ambient-scene {
-    display: none;
-  }
   .orbit-layer {
     display: none;
   }
@@ -2803,7 +2821,6 @@ html.motion-ready .footer-grid > * {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ambient-scene,
   .orbit-layer,
   .cta-orbit {
     display: none;
