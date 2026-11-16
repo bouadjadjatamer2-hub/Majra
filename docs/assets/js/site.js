@@ -231,9 +231,10 @@
   }
 
   /* ---------- Screenshot peek ---------- */
-  // The frame leans a few degrees toward the pointer and the shot inside grows
-  // a little, so the picture feels three-dimensional without ever leaving its
-  // cell. Clamped on purpose: nothing jumps over the page or the viewport.
+  // The frame leans toward the pointer, the picture inside drifts against it,
+  // and the light and the rim glow follow the cursor. Everything is written as
+  // custom properties, so the reveal animation and the hover never fight over
+  // `transform`. Clamped on purpose: the card lifts inside its own cell.
   if (finePointer && !reducedMotion) {
     document.querySelectorAll(".shot").forEach((card) => {
       if (!card.querySelector(".shot-open")) return;
@@ -241,6 +242,8 @@
       let raf = 0;
       let tiltX = 0;
       let tiltY = 0;
+      let imgX = 0;
+      let imgY = 0;
       let glareX = 50;
       let glareY = 50;
 
@@ -249,14 +252,12 @@
 
       const render = () => {
         raf = 0;
-        card.style.transform =
-          "perspective(1100px) translateY(-5px) rotateX(" +
-          tiltY.toFixed(2) +
-          "deg) rotateY(" +
-          tiltX.toFixed(2) +
-          "deg)";
-        card.style.setProperty("--glare-x", glareX.toFixed(1) + "%");
-        card.style.setProperty("--glare-y", glareY.toFixed(1) + "%");
+        card.style.setProperty("--rx", tiltY.toFixed(2) + "deg");
+        card.style.setProperty("--ry", tiltX.toFixed(2) + "deg");
+        card.style.setProperty("--img-x", imgX.toFixed(1) + "px");
+        card.style.setProperty("--img-y", imgY.toFixed(1) + "px");
+        card.style.setProperty("--mx", glareX.toFixed(1) + "%");
+        card.style.setProperty("--my", glareY.toFixed(1) + "%");
       };
 
       card.addEventListener("pointerenter", () => {
@@ -271,8 +272,11 @@
         const px = (event.clientX - rect.left) / rect.width;
         const py = (event.clientY - rect.top) / rect.height;
         // Face the pointer: the edge under the cursor comes toward the reader.
-        tiltX = (0.5 - px) * 7;
-        tiltY = (py - 0.5) * 6;
+        tiltX = (0.5 - px) * 13;
+        tiltY = (py - 0.5) * 11;
+        // The picture slides the other way, which reads as real depth.
+        imgX = (px - 0.5) * 16;
+        imgY = (py - 0.5) * 12;
         glareX = px * 100;
         glareY = py * 100;
         if (!raf) raf = requestAnimationFrame(render);
@@ -280,9 +284,9 @@
 
       card.addEventListener("pointerleave", () => {
         card.classList.remove("is-peeking");
-        card.style.transform = "";
-        card.style.removeProperty("--glare-x");
-        card.style.removeProperty("--glare-y");
+        ["--rx", "--ry", "--img-x", "--img-y", "--mx", "--my"].forEach((name) =>
+          card.style.removeProperty(name)
+        );
       });
     });
   }
@@ -306,6 +310,8 @@
   let lastFocus = null;
   let group = [];
   let index = 0;
+  let flipAnim = null;
+  let closeToken = 0;
 
   function ensureLightbox() {
     if (lightbox) return;
@@ -398,6 +404,10 @@
 
   function showSlide(next) {
     if (!group.length) return;
+    if (flipAnim) {
+      flipAnim.cancel();
+      flipAnim = null;
+    }
     index = (next + group.length) % group.length;
     const link = group[index];
     const full = link.getAttribute("data-full") || link.getAttribute("href");
@@ -430,8 +440,12 @@
   function openLightbox(link) {
     ensureLightbox();
     lastFocus = document.activeElement;
+    closeToken += 1;
     group = groupFor(link);
     index = Math.max(0, group.indexOf(link));
+    // Remember where the card is, so the viewer can grow out of it.
+    const source = link.querySelector("img");
+    const from = source ? source.getBoundingClientRect() : null;
     lightbox.classList.add("is-open");
     document.body.style.overflow = "hidden";
     lightboxClose.setAttribute("aria-label", lang === "ar" ? "إغلاق" : "Close");
@@ -439,13 +453,60 @@
     lightboxNext.setAttribute("aria-label", lang === "ar" ? "الصورة التالية" : "Next screenshot");
     showSlide(index);
     lightboxClose.focus();
+
+    if (!from || reducedMotion || !from.width) return;
+    const grow = () => {
+      if (!lightbox.classList.contains("is-open")) return;
+      const to = lightboxImg.getBoundingClientRect();
+      if (!to.width || !to.height) return;
+      const scaleX = from.width / to.width;
+      const scaleY = from.height / to.height;
+      const dx = from.left + from.width / 2 - (to.left + to.width / 2);
+      const dy = from.top + from.height / 2 - (to.top + to.height / 2);
+      flipAnim = lightboxImg.animate(
+        [
+          { transform: "translate(" + dx + "px," + dy + "px) scale(" + scaleX + "," + scaleY + ")", opacity: 0.45 },
+          { transform: "translate(0,0) scale(1,1)", opacity: 1 },
+        ],
+        { duration: 460, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+      );
+    };
+    if (lightboxImg.complete && lightboxImg.naturalWidth) {
+      requestAnimationFrame(grow);
+    } else {
+      lightboxImg.addEventListener("load", () => requestAnimationFrame(grow), { once: true });
+    }
   }
 
   function closeLightbox() {
     if (!lightbox) return;
+    if (flipAnim) {
+      flipAnim.cancel();
+      flipAnim = null;
+    }
+    const token = ++closeToken;
     lightbox.classList.remove("is-open");
     document.body.style.overflow = "";
-    lightboxImg.removeAttribute("src");
+    if (lightboxImg.getAttribute("src") && !reducedMotion && lightboxImg.animate) {
+      const shrink = lightboxImg.animate(
+        [
+          { transform: "none", opacity: 1 },
+          { transform: "scale(0.94)", opacity: 0 },
+        ],
+        { duration: 190, easing: "ease-out" }
+      );
+      shrink.onfinish = () => {
+        if (token === closeToken) lightboxImg.removeAttribute("src");
+      };
+      // A cancelled animation must never leave the large image attached.
+      window.setTimeout(() => {
+        if (token === closeToken && !lightbox.classList.contains("is-open")) {
+          lightboxImg.removeAttribute("src");
+        }
+      }, 260);
+    } else {
+      lightboxImg.removeAttribute("src");
+    }
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 

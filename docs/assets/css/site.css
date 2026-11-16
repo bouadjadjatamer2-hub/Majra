@@ -1019,18 +1019,32 @@ body.nav-open .menu-btn span::after {
   background: linear-gradient(180deg, #0d0f17, #090a10);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  /* The peek keeps its perspective on the frame itself, so the tilt is a few
-     degrees on one card and the page never turns into a wall. */
-  perspective: 1100px;
-  transition: border-color 0.25s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.4s ease;
+  /* One owner for `transform`: the reveal, the hover lift and the pointer
+     tilt all feed these custom properties, so nothing overwrites anything. */
+  --rx: 0deg;
+  --ry: 0deg;
+  --lift: 0px;
+  --zoom: 1;
+  --img-x: 0px;
+  --img-y: 0px;
+  --img-zoom: 1;
+  --mx: 50%;
+  --my: 50%;
+  transform: perspective(1150px) translate3d(0, var(--lift), 0) rotateX(var(--rx)) rotateY(var(--ry))
+    scale(var(--zoom));
+  transform-origin: 50% 46%;
+  transition: border-color 0.25s ease, box-shadow 0.5s ease,
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.shot:hover {
+.shot:hover,
+.shot:focus-within {
+  --lift: -7px;
+  --zoom: 1.008;
   border-color: var(--line-strong);
-  transform: translateY(-4px);
+  will-change: transform;
 }
 .shot.is-peeking {
-  transition: border-color 0.25s ease, transform 0.14s ease-out, box-shadow 0.4s ease;
+  transition: border-color 0.25s ease, box-shadow 0.45s ease, transform 0.12s ease-out;
 }
 .shot .shot-open {
   position: relative;
@@ -1047,10 +1061,13 @@ body.nav-open .menu-btn span::after {
   border-radius: 10px;
   object-fit: cover;
   object-position: top center;
-  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translate3d(var(--img-x), var(--img-y), 0) scale(var(--img-zoom));
+  transition: transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  backface-visibility: hidden;
 }
 .shot.is-peeking img {
-  transform: scale(1.035);
+  --img-zoom: 1.075;
+  transition: transform 0.22s ease-out;
 }
 /* A glare that follows the pointer makes the tilt read as a lit surface. */
 .shot .shot-open::after {
@@ -1059,12 +1076,15 @@ body.nav-open .menu-btn span::after {
   inset: 7px;
   border-radius: 10px;
   pointer-events: none;
-  background: radial-gradient(
-    42% 46% at var(--glare-x, 50%) var(--glare-y, 50%),
-    rgba(255, 255, 255, 0.16),
-    rgba(255, 255, 255, 0.05) 46%,
-    transparent 72%
-  );
+  background:
+    radial-gradient(
+      34% 40% at var(--mx, 50%) var(--my, 50%),
+      rgba(255, 247, 235, 0.09),
+      rgba(255, 255, 255, 0.03) 44%,
+      transparent 70%
+    ),
+    radial-gradient(80% 60% at var(--mx, 50%) var(--my, 50%), rgba(242, 180, 109, 0.07), transparent 66%);
+  mix-blend-mode: screen;
   opacity: 0;
   transition: opacity 0.3s ease;
 }
@@ -1087,13 +1107,39 @@ body.nav-open .menu-btn span::after {
     center / 13px no-repeat;
   backdrop-filter: blur(6px);
   opacity: 0;
-  transform: translateY(-4px);
+  transform: translateY(-4px) scale(0.9);
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .shot:hover .shot-open::before {
   opacity: 1;
   transform: none;
 }
+/* A rim light that follows the cursor around the frame edge. */
+.shot::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  padding: 1px;
+  pointer-events: none;
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(242, 180, 109, 0.95),
+    rgba(255, 255, 255, 0.24) 38%,
+    transparent 68%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.shot:hover::before {
+  opacity: 1;
+}
+/* The inset highlight doubles as the light that sweeps across on reveal. */
 .shot::after {
   content: "";
   position: absolute;
@@ -1101,6 +1147,32 @@ body.nav-open .menu-btn span::after {
   pointer-events: none;
   border-radius: inherit;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  background: linear-gradient(
+    104deg,
+    transparent 38%,
+    rgba(255, 255, 255, 0.14) 48%,
+    rgba(242, 180, 109, 0.12) 52%,
+    transparent 62%
+  );
+  background-size: 240% 100%;
+  background-position: 135% 0;
+  opacity: 0;
+}
+html.has-js .shot.is-in::after {
+  animation: shot-sweep 1.25s cubic-bezier(0.33, 0.6, 0.25, 1) 0.1s 1 backwards;
+}
+@keyframes shot-sweep {
+  from {
+    opacity: 0;
+    background-position: 135% 0;
+  }
+  22% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    background-position: -35% 0;
+  }
 }
 .shot figcaption {
   position: static;
@@ -1113,6 +1185,11 @@ body.nav-open .menu-btn span::after {
   color: var(--ink-soft);
   font-size: 0.82rem;
   line-height: 1.35;
+  transition: color 0.3s ease, background 0.3s ease;
+}
+.shot:hover figcaption {
+  color: var(--ink);
+  background: rgba(242, 180, 109, 0.05);
 }
 .shot figcaption::before {
   content: "";
@@ -1122,10 +1199,36 @@ body.nav-open .menu-btn span::after {
   border-radius: 50%;
   background: var(--gold);
   box-shadow: 0 0 10px rgba(242, 180, 109, 0.75);
+  transition: transform 0.35s ease, box-shadow 0.35s ease;
+}
+.shot:hover figcaption::before {
+  transform: scale(1.7);
+  box-shadow: 0 0 16px rgba(242, 180, 109, 0.95);
 }
 [data-page="droidcrate"] .shot figcaption::before {
   background: var(--jade);
   box-shadow: 0 0 10px rgba(84, 179, 156, 0.75);
+}
+/* Touch screens have no pointer to follow, so the peek stays off there. */
+@media (hover: none) {
+  .shot:hover,
+  .shot:focus-within {
+    --lift: 0px;
+    --zoom: 1;
+    border-color: var(--line);
+  }
+  .shot:hover .shot-open::after,
+  .shot:hover::before,
+  .shot:hover .shot-open::before {
+    opacity: 0;
+  }
+  .shot:hover figcaption {
+    color: var(--ink-soft);
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .shot:hover figcaption::before {
+    transform: none;
+  }
 }
 .shot-stack {
   display: grid;
@@ -1139,6 +1242,11 @@ body.nav-open .menu-btn span::after {
 .gallery.duo {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(1rem, 2vw, 1.6rem);
+}
+.gallery.single {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1180px;
+  margin-inline: auto;
 }
 .gallery .shot figcaption {
   font-size: 0.76rem;
@@ -1833,13 +1941,40 @@ html.has-js .reveal.is-in {
   transform: none;
   transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-html.has-js .reveal-scale:not(.is-in) {
+html.has-js .reveal-scale:not(.shot):not(.is-in) {
   opacity: 0;
   transform: scale(0.96);
 }
-html.has-js .reveal-scale.is-in {
+html.has-js .reveal-scale:not(.shot).is-in {
   opacity: 1;
   transform: none;
+}
+
+/* A screenshot unfolds out of depth: it starts smaller, tipped back and
+   blurred, then settles square while a band of light crosses it. */
+html.has-js .shot.reveal-scale:not(.is-in) {
+  opacity: 0;
+  transform: perspective(1150px) translate3d(0, 56px, -130px) rotateX(15deg) scale(0.92);
+  filter: blur(9px) saturate(0.7) brightness(0.82);
+}
+html.has-js .shot.reveal-scale.is-in {
+  animation: shot-unfold 1.05s cubic-bezier(0.16, 1, 0.3, 1) var(--d, 0ms) backwards;
+}
+@keyframes shot-unfold {
+  from {
+    opacity: 0;
+    transform: perspective(1150px) translate3d(0, 56px, -130px) rotateX(15deg) scale(0.92);
+    filter: blur(9px) saturate(0.7) brightness(0.82);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0) saturate(1) brightness(1);
+  }
+  to {
+    opacity: 1;
+    transform: perspective(1150px) translate3d(0, 0, 0) rotateX(0) rotateY(0) scale(1);
+    filter: none;
+  }
 }
 
 /* ---------- Lightbox ---------- */
@@ -2799,9 +2934,8 @@ html.motion-ready .display .line:not(.grad-text) {
 }
 
 /* --- Screenshot presentation --- */
-/* Flat, crisp product frames: the lift and the accent glow carry the depth.
-   Tilting a UI screenshot reads as a mistake, not as 3D, so the deck stays
-   square and every caption sits in its own bar under the image. */
+/* Crisp product frames with a real sense of depth: the frame lifts and leans,
+   the picture inside drifts against it, and the light follows the pointer. */
 .gallery,
 .showcase {
   perspective: none;
@@ -2809,8 +2943,8 @@ html.motion-ready .display .line:not(.grad-text) {
 }
 html.has-js .gallery .shot,
 html.has-js .showcase > .shot {
-  transition: opacity 0.6s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.25s ease, box-shadow 0.5s ease;
+  transition: border-color 0.25s ease, box-shadow 0.5s ease,
+    transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .gallery .shot,
 .showcase > .shot {
@@ -2818,15 +2952,13 @@ html.has-js .showcase > .shot {
 }
 html.has-js .gallery .shot:hover,
 html.has-js .showcase > .shot:hover {
-  transform: translateY(-5px);
   border-color: var(--line-strong);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 90px -40px rgba(0, 0, 0, 0.95);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 46px 96px -38px rgba(0, 0, 0, 0.98);
 }
 /* While the pointer is inside, the tilt has to follow it without lag. */
 html.has-js .gallery .shot.is-peeking,
 html.has-js .showcase > .shot.is-peeking {
-  transition: opacity 0.6s ease, transform 0.13s ease-out, border-color 0.25s ease,
-    box-shadow 0.4s ease;
+  transition: transform 0.12s ease-out, border-color 0.25s ease, box-shadow 0.45s ease;
 }
 html[data-page="majra"] .showcase > .shot {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 40px 110px -58px rgba(242, 180, 109, 0.45);
@@ -2968,14 +3100,22 @@ html.motion-ready .footer-grid > * {
   .depth-card {
     transform: none !important;
   }
+  .shot,
   .shot:hover,
-  .shot:hover img,
-  .shot .shot-open,
-  .shot.is-peeking .shot-open {
+  .shot:focus-within,
+  .shot.is-peeking,
+  .shot img,
+  .shot.is-peeking img,
+  .shot:hover img {
     transform: none !important;
+    animation: none !important;
+    filter: none !important;
   }
-  .shot .shot-open::after {
+  .shot .shot-open::after,
+  .shot::before,
+  .shot::after {
     opacity: 0 !important;
+    animation: none !important;
   }
   .depth-card::after {
     display: none;
