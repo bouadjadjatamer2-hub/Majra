@@ -9,7 +9,7 @@
  *
  * Desktop only, and it stays silent for reduced motion.
  */
-import { THREE, createStage } from "./three-utils.js";
+import { THREE, createStage } from "./three-utils.js?v=8";
 
 const AMBER = 0xf2b46d;
 const JADE = 0x54b39c;
@@ -118,6 +118,112 @@ function buildDust(key) {
       sizeAttenuation: true,
     })
   );
+}
+
+/* ---------- Near dust ---------- */
+// The closest layer: a few hundred specks that sit well in front of the motif,
+// like the grain of a slow cosmic wind. They swim on their own; only the ones
+// around the pointer lean toward it and brighten, and when the hand rests the
+// whole field drifts off again.
+function buildNearDust(key) {
+  const config = DUST[key] || DUST.home;
+  const palette = config.colors.map((c) => new THREE.Color(c));
+  const [w0, w1] = config.weights;
+
+  const count = small ? 180 : 440;
+  const tanHalf = Math.tan((55 * Math.PI) / 360);
+  const aspect = Math.max(0.6, window.innerWidth / Math.max(1, window.innerHeight));
+
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  const sizes = new Float32Array(count);
+  const alphas = new Float32Array(count);
+  const specks = [];
+
+  for (let i = 0; i < count; i += 1) {
+    // Spread across the frame at every depth, so the screen fills evenly and
+    // the near specks still read as one field with the far dust.
+    const z = 1 + Math.random() * 11;
+    const depth = Math.max(4, 23 - z);
+    const halfH = depth * tanHalf;
+    const halfW = halfH * aspect;
+
+    const pick = Math.random();
+    const color = pick < w0 ? palette[0] : pick < w0 + w1 ? palette[1] : palette[2];
+
+    const home = new THREE.Vector3(
+      (Math.random() * 2 - 1) * halfW * 1.14,
+      (Math.random() * 2 - 1) * halfH * 1.14,
+      z
+    );
+
+    specks.push({
+      home,
+      base: home.clone(),
+      pos: home.clone(),
+      vel: new THREE.Vector3(),
+      amp: 0.1 + Math.random() * 0.7,
+      speed: 0.05 + Math.random() * 0.16,
+      phase: Math.random() * Math.PI * 2,
+      size: 0.05 + Math.random() * 0.11,
+      alpha: 0.16 + Math.random() * 0.4,
+      glow: 0,
+    });
+
+    positions[i * 3] = home.x;
+    positions[i * 3 + 1] = home.y;
+    positions[i * 3 + 2] = home.z;
+    colors[i * 3] = color.r;
+    colors[i * 3 + 1] = color.g;
+    colors[i * 3 + 2] = color.b;
+    sizes[i] = specks[i].size;
+    alphas[i] = specks[i].alpha;
+  }
+
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+  geometry.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
+  geometry.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
+  geometry.setAttribute("aAlpha", new THREE.BufferAttribute(alphas, 1));
+  geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 0, 6), 46);
+
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uScale: { value: 800 } },
+    vertexShader: [
+      "attribute vec3 aColor;",
+      "attribute float aSize;",
+      "attribute float aAlpha;",
+      "uniform float uScale;",
+      "varying vec3 vColor;",
+      "varying float vAlpha;",
+      "void main() {",
+      "  vColor = aColor;",
+      "  vAlpha = aAlpha;",
+      "  vec4 mv = modelViewMatrix * vec4(position, 1.0);",
+      "  gl_PointSize = clamp(aSize * uScale / max(1.0, -mv.z), 1.0, 20.0);",
+      "  gl_Position = projectionMatrix * mv;",
+      "}",
+    ].join("\n"),
+    fragmentShader: [
+      "varying vec3 vColor;",
+      "varying float vAlpha;",
+      "void main() {",
+      "  vec2 c = gl_PointCoord - 0.5;",
+      "  float d2 = dot(c, c);",
+      "  if (d2 > 0.25) discard;",
+      "  float edge = smoothstep(0.25, 0.03, d2);",
+      "  gl_FragColor = vec4(vColor, edge * vAlpha);",
+      "}",
+    ].join("\n"),
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  const points = new THREE.Points(geometry, material);
+  points.frustumCulled = false;
+
+  return { points, specks, material, geometry };
 }
 
 /* ---------- Page motifs ---------- */
@@ -375,12 +481,15 @@ function buildMotif(key) {
 if (container) {
   createStage(
     container,
-    ({ scene, camera }) => {
+    ({ scene, camera, renderer, size }) => {
       const root = new THREE.Group();
       scene.add(root);
 
       const dust = buildDust(page);
       root.add(dust);
+
+      const near = buildNearDust(page);
+      root.add(near.points);
 
       const motif = buildMotif(page);
       root.add(motif.group);
@@ -403,8 +512,104 @@ if (container) {
         const portrait = rect.height > rect.width;
         motif.group.scale.setScalar(portrait ? 0.66 : 1);
         dust.scale.setScalar(portrait ? 0.7 : 1);
+        // Speck sizes are written in world units; this turns them into pixels.
+        const buffer = Math.max(1, size.height) * renderer.getPixelRatio();
+        near.material.uniforms.uScale.value = buffer / (2 * Math.tan((55 * Math.PI) / 360));
       };
       fit();
+
+      /* The near dust: it drifts on its own, and only the specks around the
+         pointer lean toward it. One projection per speck keeps the pull exact
+         under the camera move, the scroll and a resize. */
+      const ndc = new THREE.Vector3();
+      const dir = new THREE.Vector3();
+      const forward = new THREE.Vector3();
+      const plane = new THREE.Vector3();
+      const target = new THREE.Vector3();
+      const away = new THREE.Vector3();
+      const positionAttr = near.geometry.attributes.position;
+      const sizeAttr = near.geometry.attributes.aSize;
+      const alphaAttr = near.geometry.attributes.aAlpha;
+      const positions = positionAttr.array;
+      const sizes = sizeAttr.array;
+      const alphas = alphaAttr.array;
+      const specks = near.specks;
+      let idle = 10;
+      let lastTX = 0;
+      let lastTY = 0;
+
+      const stepDust = (t, dt, pointer) => {
+        const w = size.width || 1;
+        const h = size.height || 1;
+        // The hand itself, not the smoothed value: the dust tracks the cursor.
+        const px = (pointer.tx * 0.5 + 0.5) * w;
+        const py = (pointer.ty * 0.5 + 0.5) * h;
+
+        // Read the hand, not the smoothed value: a real move wakes the field,
+        // and a still hand lets it settle back into its own drift.
+        const moved = Math.abs(pointer.tx - lastTX) + Math.abs(pointer.ty - lastTY);
+        lastTX = pointer.tx;
+        lastTY = pointer.ty;
+        idle = moved > 0.0015 ? 0 : idle + dt;
+        const wake = idle < 0.45 ? 1 : Math.max(0, 1 - (idle - 0.45) / 0.75);
+
+        camera.updateMatrixWorld();
+        camera.getWorldDirection(forward);
+        dir.set(pointer.tx, pointer.ty, 0.5).unproject(camera).sub(camera.position).normalize();
+
+        const reach = Math.min(w, h) * 0.42;
+
+        for (let i = 0; i < specks.length; i += 1) {
+          const speck = specks[i];
+          const base = speck.base.set(
+            speck.home.x + Math.sin(t * speck.speed + speck.phase) * speck.amp,
+            speck.home.y + Math.cos(t * speck.speed * 0.83 + speck.phase * 1.7) * speck.amp,
+            speck.home.z + Math.sin(t * speck.speed * 0.61 + speck.phase * 0.9) * speck.amp * 0.5
+          );
+
+          // How near is this speck to the pointer, on screen?
+          ndc.copy(speck.pos).project(camera);
+          const dx = (ndc.x * 0.5 + 0.5) * w - px;
+          const dy = (ndc.y * 0.5 + 0.5) * h - py;
+          const d = Math.hypot(dx, dy);
+          const closeness = d < reach ? 1 - d / reach : 0;
+          const pull = closeness * closeness * (3 - 2 * closeness) * wake;
+          speck.glow += (pull - speck.glow) * Math.min(1, dt * 6);
+
+          // The point under the pointer, on this speck's own depth plane.
+          const along = plane.copy(base).sub(camera.position).dot(forward);
+          target.copy(camera.position).addScaledVector(dir, along);
+
+          speck.vel.x += (base.x - speck.pos.x) * 4.6 * dt;
+          speck.vel.y += (base.y - speck.pos.y) * 4.6 * dt;
+          speck.vel.z += (base.z - speck.pos.z) * 4.6 * dt;
+
+          if (speck.glow > 0.002) {
+            const force = 12 * speck.glow * dt;
+            speck.vel.x += (target.x - speck.pos.x) * force;
+            speck.vel.y += (target.y - speck.pos.y) * force;
+            speck.vel.z += (target.z - speck.pos.z) * force;
+          }
+
+          speck.vel.multiplyScalar(Math.exp(-2.7 * dt));
+          speck.pos.addScaledVector(speck.vel, dt);
+
+          // It leans toward the hand; it never leaves the wind it belongs to.
+          away.subVectors(speck.pos, base);
+          if (away.lengthSq() > 6.76) speck.pos.copy(base).add(away.setLength(2.6));
+
+          const i3 = i * 3;
+          positions[i3] = speck.pos.x;
+          positions[i3 + 1] = speck.pos.y;
+          positions[i3 + 2] = speck.pos.z;
+          sizes[i] = speck.size * (1 + speck.glow * 0.9);
+          alphas[i] = Math.min(1, speck.alpha * (1 + speck.glow * 2.8));
+        }
+
+        positionAttr.needsUpdate = true;
+        sizeAttr.needsUpdate = true;
+        alphaAttr.needsUpdate = true;
+      };
 
       return {
         resize: fit,
@@ -424,6 +629,8 @@ if (container) {
 
           motif.group.position.z = p * 3;
           motif.tickers.forEach((tick) => tick(t, p));
+
+          stepDust(t, dt, pointer);
 
           if (grid) {
             grid.position.z = -16 + p * 9;

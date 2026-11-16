@@ -230,7 +230,11 @@ export function createStage(container, factory, options = {}) {
     });
     document.addEventListener("visibilitychange", onVisibility);
 
-    if ("IntersectionObserver" in window) {
+    // A fixed backdrop is on screen from the first paint, so it never waits for
+    // an observer callback that may not arrive inside an embedded pane.
+    if (container.hasAttribute("data-ambient")) {
+      start();
+    } else if ("IntersectionObserver" in window) {
       const io = new IntersectionObserver(
         (entries) => {
           visible = entries[0].isIntersecting;
