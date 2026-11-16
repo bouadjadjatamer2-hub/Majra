@@ -1003,32 +1003,47 @@ body.nav-open .menu-btn span::after {
   color: var(--ink-soft);
 }
 
-/* ---------- Screenshot showcase ---------- */
+/* ---------- Screenshot frames ---------- */
 .showcase {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.65fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
   gap: clamp(1rem, 2.5vw, 2rem);
-  align-items: stretch;
+  align-items: start;
 }
 .shot {
   position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   background: linear-gradient(180deg, #0d0f17, #090a10);
   box-shadow: var(--shadow-card);
   overflow: hidden;
-  transition: border-color 0.25s ease, transform 0.25s ease;
+  transition: border-color 0.25s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.4s ease;
 }
 .shot:hover {
   border-color: var(--line-strong);
-  transform: translateY(-3px);
+  transform: translateY(-4px);
+}
+.shot .shot-open {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 7px;
 }
 .shot img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  display: block;
+  border-radius: 10px;
   object-fit: cover;
   object-position: top center;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.shot:hover img {
+  transform: scale(1.015);
 }
 .shot::after {
   content: "";
@@ -1039,34 +1054,42 @@ body.nav-open .menu-btn span::after {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 .shot figcaption {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 2.5rem 1.2rem 1rem;
-  background: linear-gradient(transparent, rgba(7, 8, 12, 0.9));
+  position: static;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--ink-soft);
-  font-size: 0.8rem;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.shot figcaption::before {
+  content: "";
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px rgba(242, 180, 109, 0.75);
+}
+[data-page="droidcrate"] .shot figcaption::before {
+  background: var(--jade);
+  box-shadow: 0 0 10px rgba(84, 179, 156, 0.75);
 }
 .shot-stack {
   display: grid;
   gap: clamp(1rem, 2.5vw, 2rem);
-}
-.shot-stack .shot {
-  min-height: 0;
 }
 .gallery {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1rem;
 }
-.gallery .shot {
-  aspect-ratio: 16 / 10;
-}
-.gallery .shot img {
-  object-fit: cover;
-}
 .gallery .shot figcaption {
-  font-size: 0.75rem;
-  padding: 2rem 0.9rem 0.8rem;
+  font-size: 0.76rem;
+  padding: 0.7rem 0.9rem;
 }
 .shot-open {
   cursor: zoom-in;
@@ -2639,6 +2662,17 @@ html[lang="ar"] .cross-card__tagline {
   transform: translateZ(12px);
 }
 
+/* Cards float over the moving backdrop, so they keep a dark floor under their
+   own gradient. Without it the wireframes read through the text. */
+.feature.depth-card,
+.step.depth-card,
+.tab-card.depth-card,
+.callout.depth-card,
+.panel.depth-card,
+.faq details.depth-card {
+  background-color: rgba(9, 10, 15, 0.62);
+}
+
 /* --- 3D headings --- */
 html.motion-ready .h2,
 html.motion-ready .cta-band h2,
@@ -2650,49 +2684,38 @@ html.motion-ready .display .line:not(.grad-text) {
   text-shadow: 0 2px 0 rgba(0, 0, 0, 0.28), 0 20px 46px rgba(0, 0, 0, 0.45);
 }
 
-/* --- Gallery deck --- */
-/* The reveal classes also own `transform`, so the deck keeps its own
-   declaration important and only swaps the custom properties on hover. */
-.gallery {
-  perspective: 1600px;
-  transform-style: preserve-3d;
-}
-html.has-js .gallery .shot {
-  transform: rotateY(var(--ry, 0deg)) rotateX(var(--rx, 0deg)) translateZ(var(--tz, 0px)) !important;
-  transform-style: preserve-3d;
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease,
-    box-shadow 0.25s ease;
-}
-.gallery .shot:nth-child(3n + 1) {
-  --ry: 6deg;
-  --tz: -26px;
-}
-.gallery .shot:nth-child(3n + 2) {
-  --ry: 0deg;
-  --tz: 18px;
-}
-.gallery .shot:nth-child(3n) {
-  --ry: -6deg;
-  --tz: -26px;
-}
-.gallery .shot:hover {
-  --ry: 0deg;
-  --rx: 0deg;
-  --tz: 42px;
-  border-color: var(--line-strong);
-  box-shadow: 0 46px 90px -46px rgba(0, 0, 0, 0.95);
-}
+/* --- Screenshot presentation --- */
+/* Flat, crisp product frames: the lift and the accent glow carry the depth.
+   Tilting a UI screenshot reads as a mistake, not as 3D, so the deck stays
+   square and every caption sits in its own bar under the image. */
+.gallery,
 .showcase {
-  perspective: 1600px;
+  perspective: none;
+  transform-style: flat;
 }
+html.has-js .gallery .shot,
 html.has-js .showcase > .shot {
-  transform: rotateY(var(--ry, 3deg)) translateZ(var(--tz, -18px)) !important;
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease,
-    box-shadow 0.25s ease;
+  transition: opacity 0.6s ease, transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.25s ease, box-shadow 0.5s ease;
 }
-.showcase > .shot:hover {
-  --ry: 0deg;
-  --tz: 26px;
+.gallery .shot,
+.showcase > .shot {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 28px 60px -34px rgba(0, 0, 0, 0.9);
+}
+html.has-js .gallery .shot:hover,
+html.has-js .showcase > .shot:hover {
+  transform: translateY(-5px);
+  border-color: var(--line-strong);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 90px -40px rgba(0, 0, 0, 0.95);
+}
+html[data-page="majra"] .showcase > .shot {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 40px 110px -58px rgba(242, 180, 109, 0.45);
+}
+html.has-js[data-page="majra"] .showcase > .shot:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 44px 100px -44px rgba(242, 180, 109, 0.5);
+}
+html.has-js[data-page="droidcrate"] .gallery .shot:hover {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 40px 90px -42px rgba(84, 179, 156, 0.45);
 }
 
 /* --- Floating app icons behind the closing CTA --- */
@@ -2785,12 +2808,6 @@ html.motion-ready .footer-grid > * {
   .orbit-layer {
     display: none;
   }
-  .gallery .shot,
-  .showcase > .shot {
-    --ry: 0deg;
-    --rx: 0deg;
-    --tz: 0px;
-  }
   .cta-float {
     transform: none;
   }
@@ -2825,14 +2842,12 @@ html.motion-ready .footer-grid > * {
   .cta-orbit {
     display: none;
   }
-  .gallery .shot,
-  .showcase > .shot {
-    --ry: 0deg;
-    --rx: 0deg;
-    --tz: 0px;
-  }
   .depth-card {
     transform: none !important;
+  }
+  .shot:hover,
+  .shot:hover img {
+    transform: none;
   }
   .depth-card::after {
     display: none;
