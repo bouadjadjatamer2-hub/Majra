@@ -296,6 +296,29 @@
     );
   });
 
+  // The scheduler diagram runs itself as the reader scrolls past it: each
+  // interface wakes up in turn, the scheduler fills, and the ordered file
+  // lands. Content is unchanged; the scroll position is the playhead.
+  document.querySelectorAll(".flow").forEach((flow) => {
+    const parts = Array.from(flow.children);
+    if (parts.length < 3) return;
+    const tl = gsap.timeline({
+      scrollTrigger: { trigger: flow, start: "top 88%", end: "bottom 54%", scrub: 0.7 },
+    });
+    parts.forEach((part, i) => {
+      const dot = part.querySelector(".flow-dot, .cube");
+      tl.fromTo(
+        part,
+        { autoAlpha: 0, y: 12 },
+        { autoAlpha: 1, y: 0, duration: 0.9, ease: "power2.out" },
+        i * 0.9
+      );
+      if (dot) {
+        tl.fromTo(dot, { scale: 0.5 }, { scale: 1, duration: 0.7, ease: "back.out(2)" }, i * 0.9);
+      }
+    });
+  });
+
   // Rules draw themselves in as they enter the viewport.
   document.querySelectorAll(".section-rule").forEach((rule) => {
     gsap.fromTo(
