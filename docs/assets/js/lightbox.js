@@ -37,6 +37,11 @@
   let hint = null;
   let live = null;
   let inerted = [];
+  let reflection = null;
+  let progress = null;
+  let brandName = null;
+  let brandKind = null;
+  let zoomBadge = null;
 
   let group = [];
   let index = 0;
@@ -73,7 +78,16 @@
     box.setAttribute("aria-modal", "true");
     box.innerHTML =
       '<div class="lightbox-scrim" aria-hidden="true"></div>' +
-      '<div class="lightbox-stage"><figure class="lightbox-frame"><span class="lightbox-crop"><img alt="" /></span></figure></div>' +
+      '<div class="lightbox-stage">' +
+      '<span class="lightbox-floor" aria-hidden="true"></span>' +
+      '<figure class="lightbox-frame">' +
+      '<div class="lightbox-crop"><img alt="" /></div>' +
+      '<span class="lightbox-glare" aria-hidden="true"></span>' +
+      '<span class="lightbox-reflection" aria-hidden="true"><img alt="" /></span>' +
+      "</figure>" +
+      "</div>" +
+      '<span class="lightbox-brand" aria-hidden="true"><b></b><em></em></span>' +
+      '<span class="lightbox-zoom" aria-hidden="true"></span>' +
       '<button class="lightbox-close" type="button">' +
       ICON('<path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/>') +
       "</button>" +
@@ -83,17 +97,25 @@
       '<button class="lightbox-nav lightbox-next" type="button">' +
       ICON('<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>') +
       "</button>" +
-      '<div class="lightbox-bar"><span class="lightbox-caption"></span>' +
-      '<span class="lightbox-count"></span>' +
+      '<div class="lightbox-dock">' +
+      '<div class="lightbox-bar"><span class="lightbox-count"></span>' +
+      '<span class="lightbox-caption"></span>' +
       '<span class="lightbox-hint"></span></div>' +
+      '<span class="lightbox-progress" aria-hidden="true"><i></i></span>' +
       '<div class="lightbox-strip"></div>' +
+      "</div>" +
       '<span class="lightbox-live" aria-live="polite" aria-atomic="true"></span>';
     doc.body.appendChild(box);
 
     scrim = box.querySelector(".lightbox-scrim");
     stage = box.querySelector(".lightbox-stage");
     frame = box.querySelector(".lightbox-frame");
-    img = box.querySelector("img");
+    img = box.querySelector(".lightbox-crop img");
+    reflection = box.querySelector(".lightbox-reflection img");
+    progress = box.querySelector(".lightbox-progress");
+    brandName = box.querySelector(".lightbox-brand b");
+    brandKind = box.querySelector(".lightbox-brand em");
+    zoomBadge = box.querySelector(".lightbox-zoom");
     btnClose = box.querySelector(".lightbox-close");
     btnPrev = box.querySelector(".lightbox-prev");
     btnNext = box.querySelector(".lightbox-next");
@@ -149,6 +171,7 @@
     img.style.setProperty("--lb-zoom", zoom.toFixed(3));
     img.style.setProperty("--lb-tx", panX.toFixed(1) + "px");
     img.style.setProperty("--lb-ty", panY.toFixed(1) + "px");
+    if (zoomBadge) zoomBadge.textContent = zoom.toFixed(1) + "×";
     box.classList.toggle("is-zoomed", zoom > 1.001);
     paintHint();
   }
@@ -158,12 +181,20 @@
     panX = 0;
     panY = 0;
     drag = null;
+    if (zoomBadge) zoomBadge.textContent = "1.0×";
     if (!img) return;
     img.style.removeProperty("--lb-zoom");
     img.style.removeProperty("--lb-tx");
     img.style.removeProperty("--lb-ty");
     if (box) box.classList.remove("is-zoomed", "is-dragging");
     paintHint();
+  }
+
+  /* One owner for "the viewer has no picture right now": the big frame and
+     the reflection under it always change together. */
+  function clearImage() {
+    img.removeAttribute("src");
+    if (reflection) reflection.removeAttribute("src");
   }
 
   function setZoom(next, cx, cy) {
@@ -189,8 +220,11 @@
     // Tilt and zoom are two different gestures: the picture squares up.
     frame.style.removeProperty("--lb-rx");
     frame.style.removeProperty("--lb-ry");
+    frame.style.removeProperty("--lb-mx");
+    frame.style.removeProperty("--lb-my");
     img.style.removeProperty("--lb-px");
     img.style.removeProperty("--lb-py");
+    stage.style.removeProperty("--lb-floor-x");
 
     clampPan();
     applyZoom();
@@ -389,13 +423,26 @@
     resetZoom();
     img.src = full;
     img.alt = text;
+    if (reflection) reflection.src = full;
     paintCaption(text);
-    count.textContent = group.length > 1 ? index + 1 + " / " + group.length : "";
+    const many = group.length > 1;
+    if (many) {
+      count.innerHTML =
+        "<b>" + (index + 1) + "</b><i>/</i><span>" + group.length + "</span>";
+    } else {
+      count.textContent = "";
+    }
+    if (progress) {
+      progress.hidden = !many;
+      box.style.setProperty(
+        "--lb-progress",
+        ((index + 1) / group.length) * 100 + "%"
+      );
+    }
     if (live) {
-      live.textContent = group.length > 1 ? index + 1 + " / " + group.length + ". " + text : text;
+      live.textContent = many ? index + 1 + " / " + group.length + ". " + text : text;
     }
 
-    const many = group.length > 1;
     btnPrev.hidden = !many;
     btnNext.hidden = !many;
     markStrip();
@@ -458,6 +505,12 @@
     btnPrev.setAttribute("aria-label", label("Previous screenshot", "الصورة السابقة"));
     btnNext.setAttribute("aria-label", label("Next screenshot", "الصورة التالية"));
     strip.setAttribute("aria-label", label("Screenshots in this gallery", "صور هذه المجموعة"));
+    const page = root.dataset.page || "home";
+    if (brandName) {
+      brandName.textContent =
+        page === "droidcrate" ? "DroidCrate" : page === "majra" ? "Majra" : "Asraab";
+    }
+    if (brandKind) brandKind.textContent = label("Screenshots", "لقطات");
 
     buildStrip();
     lockScroll(true);
@@ -524,8 +577,11 @@
     lockScroll(false);
     frame.style.removeProperty("--lb-rx");
     frame.style.removeProperty("--lb-ry");
+    frame.style.removeProperty("--lb-mx");
+    frame.style.removeProperty("--lb-my");
     img.style.removeProperty("--lb-px");
     img.style.removeProperty("--lb-py");
+    stage.style.removeProperty("--lb-floor-x");
 
     const source = current ? current.querySelector("img") : null;
     const target = source ? source.getBoundingClientRect() : null;
@@ -558,7 +614,7 @@
       );
       back.onfinish = () => {
         if (mine !== token) return;
-        img.removeAttribute("src");
+        clearImage();
         back.cancel();
       };
     } else if (img.animate && !reduced()) {
@@ -571,16 +627,16 @@
       );
       fade.onfinish = () => {
         if (mine !== token) return;
-        img.removeAttribute("src");
+        clearImage();
         fade.cancel();
       };
     } else {
-      img.removeAttribute("src");
+      clearImage();
     }
 
     // A cancelled or interrupted flight must never leave the big image behind.
     window.setTimeout(() => {
-      if (mine === token && !box.classList.contains("is-open")) img.removeAttribute("src");
+      if (mine === token && !box.classList.contains("is-open")) clearImage();
     }, 480);
 
     if (lastFocus && lastFocus.focus) lastFocus.focus();
@@ -695,10 +751,15 @@
         if (tiltRaf) return;
         tiltRaf = requestAnimationFrame(() => {
           tiltRaf = 0;
-          frame.style.setProperty("--lb-rx", (-py * 2.2).toFixed(2) + "deg");
-          frame.style.setProperty("--lb-ry", (px * 2.2).toFixed(2) + "deg");
-          img.style.setProperty("--lb-px", (-px * 10).toFixed(1) + "px");
-          img.style.setProperty("--lb-py", (-py * 7).toFixed(1) + "px");
+          // Four degrees is enough to read as an object, small enough that the
+          // screenshot stays square to the eye while it is being studied.
+          frame.style.setProperty("--lb-rx", (-py * 4.2).toFixed(2) + "deg");
+          frame.style.setProperty("--lb-ry", (px * 4.6).toFixed(2) + "deg");
+          frame.style.setProperty("--lb-mx", ((px + 0.5) * 100).toFixed(1) + "%");
+          frame.style.setProperty("--lb-my", ((py + 0.5) * 100).toFixed(1) + "%");
+          img.style.setProperty("--lb-px", (-px * 16).toFixed(1) + "px");
+          img.style.setProperty("--lb-py", (-py * 11).toFixed(1) + "px");
+          stage.style.setProperty("--lb-floor-x", (px * 26).toFixed(1) + "px");
         });
       },
       { passive: true }
@@ -706,8 +767,11 @@
     box.addEventListener("pointerleave", () => {
       frame.style.removeProperty("--lb-rx");
       frame.style.removeProperty("--lb-ry");
+      frame.style.removeProperty("--lb-mx");
+      frame.style.removeProperty("--lb-my");
       img.style.removeProperty("--lb-px");
       img.style.removeProperty("--lb-py");
+      stage.style.removeProperty("--lb-floor-x");
     });
   }
 
