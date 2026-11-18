@@ -2195,14 +2195,52 @@ html.has-js .shot.reveal-scale.is-in {
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   mask-composite: exclude;
 }
+/* The picture sits in a crop that only clips once someone zooms in, so the
+   opening flight is never cut by its own frame. */
+.lightbox-crop {
+  display: block;
+  border-radius: 11px;
+  overflow: visible;
+}
+.lightbox.is-zoomed .lightbox-crop {
+  overflow: hidden;
+}
 .lightbox img {
   display: block;
   max-width: min(100%, 1400px);
   max-height: 62svh;
   border-radius: 11px;
-  transform: translate3d(var(--lb-px, 0px), var(--lb-py, 0px), 0);
+  transform: translate3d(
+      calc(var(--lb-px, 0px) + var(--lb-tx, 0px)),
+      calc(var(--lb-py, 0px) + var(--lb-ty, 0px)),
+      0
+    )
+    scale(var(--lb-zoom, 1));
+  transform-origin: 50% 50%;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+/* Zooming and panning want a tighter follow than the entrance tilt. */
+.lightbox.is-zoomed img {
+  transition: transform 0.18s ease-out;
+}
+.lightbox.is-dragging img {
+  transition: none;
+  cursor: grabbing;
+}
+@media (hover: hover) and (pointer: fine) {
+  .lightbox-frame {
+    cursor: zoom-in;
+  }
+  .lightbox.is-zoomed .lightbox-frame {
+    cursor: grab;
+  }
+  .lightbox.is-dragging .lightbox-frame {
+    cursor: grabbing;
+  }
 }
 .lightbox-bar {
   position: relative;
@@ -2242,6 +2280,23 @@ html.has-js .shot.reveal-scale.is-in {
 }
 .lightbox-count:empty {
   display: none;
+}
+.lightbox-hint {
+  flex: none;
+  padding: 0.16rem 0.52rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.lightbox-hint[hidden] {
+  display: none;
+}
+.lightbox.is-zoomed .lightbox-hint {
+  color: var(--gold-soft, var(--ink-soft));
+  border-color: rgba(242, 180, 109, 0.34);
 }
 .lightbox-strip {
   position: relative;
@@ -3563,10 +3618,13 @@ html.motion-ready .footer-grid > * {
   .depth-card::after {
     display: none;
   }
-  html.motion-ready .page-hero .hero-icon,
-  .lightbox img {
+  html.motion-ready .page-hero .hero-icon {
     transform: none;
     animation: none;
+  }
+  /* Zoom still works without motion: it just snaps instead of easing. */
+  .lightbox img {
+    transition: none;
   }
 }
 

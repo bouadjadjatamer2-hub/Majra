@@ -34,6 +34,7 @@
   let count = null;
   let strip = null;
   let thumbs = [];
+  let hint = null;
 
   let group = [];
   let index = 0;
@@ -42,6 +43,10 @@
   let flight = null;
   let token = 0;
   let tiltRaf = 0;
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  let drag = null;
 
   const reduced = () => reduceQuery.matches;
   const rtl = () => root.dir === "rtl";
@@ -64,7 +69,7 @@
     box.setAttribute("aria-modal", "true");
     box.innerHTML =
       '<div class="lightbox-scrim" aria-hidden="true"></div>' +
-      '<div class="lightbox-stage"><figure class="lightbox-frame"><img alt="" /></figure></div>' +
+      '<div class="lightbox-stage"><figure class="lightbox-frame"><span class="lightbox-crop"><img alt="" /></span></figure></div>' +
       '<button class="lightbox-close" type="button">' +
       ICON('<path d="M6 6l12 12M18 6 6 18" stroke-linecap="round"/>') +
       "</button>" +
@@ -75,7 +80,8 @@
       ICON('<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"/>') +
       "</button>" +
       '<div class="lightbox-bar"><span class="lightbox-caption"></span>' +
-      '<span class="lightbox-count"></span></div>' +
+      '<span class="lightbox-count"></span>' +
+      '<span class="lightbox-hint"></span></div>' +
       '<div class="lightbox-strip"></div>';
     doc.body.appendChild(box);
 
@@ -90,6 +96,7 @@
     caption = box.querySelector(".lightbox-caption");
     count = box.querySelector(".lightbox-count");
     strip = box.querySelector(".lightbox-strip");
+    hint = box.querySelector(".lightbox-hint");
 
     btnClose.addEventListener("click", close);
     btnPrev.addEventListener("click", () => step(rtl() ? 1 : -1));
@@ -102,6 +109,128 @@
     doc.addEventListener("keydown", onKey);
     bindSwipe();
     bindTilt();
+    bindZoom();
+  }
+
+  /* ---------- Zoom: wheel, double-click, drag ---------- */
+  // A screenshot is worth reading, not just seeing. The wheel zooms toward the
+  // pointer, a double-click goes back to fit, and a zoomed picture can be
+  // dragged. The image is clipped to its frame only while zoomed, so the
+  // opening flight is never cut off.
+  function paintHint() {
+    if (!hint) return;
+    hint.hidden = !finePointer;
+    if (!finePointer) return;
+    hint.textContent =
+      zoom > 1.001
+        ? label("Double-click to fit", "نقر مزدوج للاحتواء")
+        : label("Scroll to zoom", "عجلة الماوس للتكبير");
+  }
+
+  function clampPan() {
+    const maxX = Math.max(0, ((zoom - 1) * (img.offsetWidth || 0)) / 2);
+    const maxY = Math.max(0, ((zoom - 1) * (img.offsetHeight || 0)) / 2);
+    panX = Math.min(maxX, Math.max(-maxX, panX));
+    panY = Math.min(maxY, Math.max(-maxY, panY));
+  }
+
+  function applyZoom() {
+    img.style.setProperty("--lb-zoom", zoom.toFixed(3));
+    img.style.setProperty("--lb-tx", panX.toFixed(1) + "px");
+    img.style.setProperty("--lb-ty", panY.toFixed(1) + "px");
+    box.classList.toggle("is-zoomed", zoom > 1.001);
+    paintHint();
+  }
+
+  function resetZoom() {
+    zoom = 1;
+    panX = 0;
+    panY = 0;
+    drag = null;
+    if (!img) return;
+    img.style.removeProperty("--lb-zoom");
+    img.style.removeProperty("--lb-tx");
+    img.style.removeProperty("--lb-ty");
+    if (box) box.classList.remove("is-zoomed", "is-dragging");
+    paintHint();
+  }
+
+  function setZoom(next, cx, cy) {
+    const to = Math.min(4, Math.max(1, next));
+    if (Math.abs(to - zoom) < 0.0005) return;
+
+    const rect = frame.getBoundingClientRect();
+    const midX = rect.left + rect.width / 2;
+    const midY = rect.top + rect.height / 2;
+    const dx = (cx == null ? midX : cx) - midX;
+    const dy = (cy == null ? midY : cy) - midY;
+
+    // Keep the point under the pointer where it is while the scale changes.
+    const ratio = to / zoom;
+    panX = panX + dx * (1 - ratio);
+    panY = panY + dy * (1 - ratio);
+    zoom = to;
+    if (zoom === 1) {
+      panX = 0;
+      panY = 0;
+    }
+
+    // Tilt and zoom are two different gestures: the picture squares up.
+    frame.style.removeProperty("--lb-rx");
+    frame.style.removeProperty("--lb-ry");
+    img.style.removeProperty("--lb-px");
+    img.style.removeProperty("--lb-py");
+
+    clampPan();
+    applyZoom();
+  }
+
+  function bindZoom() {
+    frame.addEventListener(
+      "wheel",
+      (event) => {
+        if (!box.classList.contains("is-open")) return;
+        event.preventDefault();
+        setZoom(zoom * Math.exp(-event.deltaY * 0.0016), event.clientX, event.clientY);
+      },
+      { passive: false }
+    );
+
+    frame.addEventListener("dblclick", (event) => {
+      if (!box.classList.contains("is-open")) return;
+      event.preventDefault();
+      setZoom(zoom > 1.01 ? 1 : 2.2, event.clientX, event.clientY);
+    });
+
+    img.addEventListener("pointerdown", (event) => {
+      if (zoom <= 1.001 || event.button !== 0) return;
+      drag = { x: event.clientX, y: event.clientY, panX: panX, panY: panY };
+      box.classList.add("is-dragging");
+      if (img.setPointerCapture) img.setPointerCapture(event.pointerId);
+    });
+
+    img.addEventListener("pointermove", (event) => {
+      if (!drag) return;
+      panX = drag.panX + (event.clientX - drag.x);
+      panY = drag.panY + (event.clientY - drag.y);
+      clampPan();
+      applyZoom();
+    });
+
+    const end = (event) => {
+      if (!drag) return;
+      if (
+        img.releasePointerCapture &&
+        img.hasPointerCapture &&
+        img.hasPointerCapture(event.pointerId)
+      ) {
+        img.releasePointerCapture(event.pointerId);
+      }
+      drag = null;
+      box.classList.remove("is-dragging");
+    };
+    img.addEventListener("pointerup", end);
+    img.addEventListener("pointercancel", end);
   }
 
   /* ---------- Caption: one word at a time, like it is being written ---------- */
@@ -196,6 +325,7 @@
     const source = current.querySelector("img");
     const text = current.getAttribute("data-caption") || (source ? source.alt : "");
 
+    resetZoom();
     img.src = full;
     img.alt = text;
     paintCaption(text);
@@ -236,6 +366,7 @@
   /* ---------- Open: fly the picture out of its frame ---------- */
   function open(link, event) {
     ensure();
+    resetZoom();
     token += 1;
     lastFocus = doc.activeElement;
     group = groupFor(link);
@@ -244,8 +375,16 @@
 
     const source = link.querySelector("img");
     const from = source ? source.getBoundingClientRect() : null;
-    const x = event && event.clientX ? event.clientX : from ? from.left + from.width / 2 : window.innerWidth / 2;
-    const y = event && event.clientY ? event.clientY : from ? from.top + from.height / 2 : window.innerHeight / 2;
+    // A keyboard visitor has no pointer: the pool of light still has to open
+    // somewhere on screen, even when the frame itself is far below the fold.
+    const clampX = (value) => Math.min(window.innerWidth - 1, Math.max(0, value));
+    const clampY = (value) => Math.min(window.innerHeight - 1, Math.max(0, value));
+    const x = clampX(
+      event && event.clientX ? event.clientX : from ? from.left + from.width / 2 : window.innerWidth / 2
+    );
+    const y = clampY(
+      event && event.clientY ? event.clientY : from ? from.top + from.height / 2 : window.innerHeight / 2
+    );
 
     box.style.setProperty("--lb-x", x.toFixed(0) + "px");
     box.style.setProperty("--lb-y", y.toFixed(0) + "px");
@@ -302,6 +441,7 @@
   /* ---------- Close: send it back to the frame it came from ---------- */
   function close() {
     if (!box || !box.classList.contains("is-open")) return;
+    resetZoom();
     if (flight) {
       flight.cancel();
       flight = null;
@@ -400,6 +540,12 @@
       step(rtl() ? 1 : -1);
       return;
     }
+    if (event.key === "+" || event.key === "=" || event.key === "-" || event.key === "_" || event.key === "0") {
+      event.preventDefault();
+      if (event.key === "0") setZoom(1);
+      else setZoom(zoom * (event.key === "-" || event.key === "_" ? 0.8 : 1.25));
+      return;
+    }
     if (event.key !== "Tab") return;
 
     const stops = [btnClose, btnPrev, btnNext].concat(thumbs).filter((el) => el && !el.hidden);
@@ -447,6 +593,8 @@
       "pointermove",
       (event) => {
         if (!finePointer || reduced() || !box.classList.contains("is-open")) return;
+        // A zoomed picture is being read, not admired: it stays square.
+        if (zoom > 1.001 || drag) return;
         const rect = frame.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
         const px = (event.clientX - rect.left) / rect.width - 0.5;
