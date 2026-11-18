@@ -6,8 +6,10 @@
  * writing and blinks when it pauses. Scrolling back up un-types the line, so
  * the sentence is written again the next time it comes into view.
  *
- * The sentence itself lives in aria-label and the split copy is hidden from
- * assistive tech, so nothing is read or copied twice.
+ * Naming follows the platform rules: a heading can carry the sentence in
+ * aria-label while its split copy is hidden, but a paragraph or a span cannot
+ * (aria-label is prohibited there). Those keep their real text, which reads
+ * correctly because words are never broken apart in running copy.
  */
 (function () {
   "use strict";
@@ -22,6 +24,9 @@
   const smooth = !!(gsap && ScrollTrigger);
   const MAX = 240;
   const HEADINGS = { H1: 1, H2: 1, H3: 1 };
+  // Elements that may carry an author-provided accessible name. Everything
+  // else (p, span) keeps its text in the accessibility tree instead.
+  const NAMABLE = { H1: 1, H2: 1, H3: 1, H4: 1, H5: 1, H6: 1, A: 1, BUTTON: 1 };
 
   const SELECTOR = [
     ".display .line",
@@ -63,7 +68,6 @@
     const byWord = isArabic() || text.length > 48;
     const visual = doc.createElement("span");
     visual.className = "tw-visual " + (byWord ? "tw-visual--words" : "tw-visual--chars");
-    visual.setAttribute("aria-hidden", "true");
     const units = [];
 
     text.split(/(\s+)/).forEach((part) => {
@@ -95,9 +99,14 @@
       caret.setAttribute("aria-hidden", "true");
     }
 
-    // Same contract as GSAP's SplitText: the sentence lives in aria-label and
-    // the split copy is hidden, so nothing is read or copied twice.
-    el.setAttribute("aria-label", text);
+    // A heading may be named by the author; a paragraph or a span may not, so
+    // there the real text stays in the tree and the split copy is what is read.
+    const named = NAMABLE[el.tagName] === 1;
+    if (named) {
+      el.setAttribute("aria-label", text);
+      visual.setAttribute("aria-hidden", "true");
+    }
+    el.dataset.twText = text;
     el.textContent = "";
     el.appendChild(visual);
     if (caret) {

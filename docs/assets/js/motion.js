@@ -80,6 +80,9 @@
   document.addEventListener("click", (event) => {
     const link = event.target && event.target.closest ? event.target.closest('a[href^="#"]') : null;
     if (!link) return;
+    // The skip link is a focus move first and a scroll second: let the browser
+    // do both, with scroll-margin-top keeping the target clear of the header.
+    if (link.classList.contains("skip-link")) return;
     const hash = link.getAttribute("href");
     if (!hash || hash === "#") return;
     let target;

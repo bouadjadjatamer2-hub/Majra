@@ -7,7 +7,9 @@
     <meta name="robots" content="noindex" />
     <meta name="theme-color" content="#07080c" />
     <link rel="icon" href="/Majra/assets/img/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="/Majra/assets/css/site.css?v=12" />
+    <link rel="preload" href="/Majra/assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/Majra/assets/fonts/Manrope-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="/Majra/assets/css/site.css?v=17" />
     <script>
       try {
         if (localStorage.getItem("asraab:lang") === "ar") {
@@ -22,9 +24,9 @@
     <div class="ambient-scene" data-ambient="404" aria-hidden="true"></div>
     <header class="site-header is-stuck">
       <div class="header-inner">
-        <a class="brand" href="/Majra/index.html" aria-label="Asraab — home">
+        <a class="brand" href="/Majra/index.html" aria-label="Asraab apps that fly together — home">
           <img src="/Majra/assets/img/asraab-mark.svg" alt="" width="38" height="38" />
-          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+          <span class="brand-text"><strong>Asraab</strong> <span data-i18n="brand.sub">apps that fly together</span></span>
         </a>
         <div class="header-actions" style="margin-inline-start: auto">
           <button class="lang-btn" id="langToggle" type="button" aria-label="Switch to Arabic">ع</button>
@@ -33,7 +35,7 @@
       </div>
     </header>
 
-    <main class="error-page" id="main">
+    <main class="error-page" id="main" tabindex="-1">
       <div class="wrap">
         <div class="error-code" aria-hidden="true">404</div>
         <h1 data-i18n="404.title">This page flew away.</h1>
@@ -45,16 +47,16 @@
       </div>
     </main>
 
-    <script src="/Majra/assets/js/i18n.js"></script>
-    <script src="/Majra/assets/js/site.js?v=7"></script>
-    <script src="/Majra/assets/js/lightbox.js?v=3"></script>
+    <script src="/Majra/assets/js/i18n.js?v=4"></script>
+    <script src="/Majra/assets/js/site.js?v=9"></script>
+    <script src="/Majra/assets/js/lightbox.js?v=6"></script>
     <script src="/Majra/assets/js/chapters.js?v=1"></script>
     <script src="/Majra/assets/js/cursor.js?v=1"></script>
     <script src="/Majra/assets/vendor/gsap.min.js"></script>
     <script src="/Majra/assets/vendor/ScrollTrigger.min.js"></script>
     <script src="/Majra/assets/vendor/lenis.min.js"></script>
-    <script src="/Majra/assets/js/motion.js?v=8"></script>
-    <script src="/Majra/assets/js/text-reveal.js?v=3"></script>
+    <script src="/Majra/assets/js/motion.js?v=9"></script>
+    <script src="/Majra/assets/js/text-reveal.js?v=4"></script>
     <script type="module" src="/Majra/assets/js/scene-ambient.js?v=8"></script>
   </body>
 </html>

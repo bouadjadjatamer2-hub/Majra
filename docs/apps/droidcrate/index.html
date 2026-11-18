@@ -9,8 +9,12 @@
       content="DroidCrate is a free, open-source Android workbench for Windows: apps, files, screen mirroring, fastboot flashing, adb and logcat in one window, with real device specs and verified Platform Tools."
     />
     <meta name="theme-color" content="#07080c" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="application-name" content="Asraab" />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Asraab" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="ar_AR" />
     <meta property="og:title" content="DroidCrate — know the phone before you touch it" />
     <meta
       property="og:description"
@@ -18,12 +22,20 @@
     />
     <meta property="og:url" content="https://bouadjadjatamer2-hub.github.io/Majra/apps/droidcrate/" />
     <link rel="canonical" href="https://bouadjadjatamer2-hub.github.io/Majra/apps/droidcrate/" />
-    <meta property="og:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og.png" />
+    <meta property="og:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og-droidcrate.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="DroidCrate 0.2.2 — know the phone before you touch it" />
+    <meta name="twitter:title" content="DroidCrate — know the phone before you touch it · Asraab" />
+    <meta name="twitter:description" content="Six Android tools in one window. Real device specs, verified Platform Tools, and checklists before the risky parts." />
+    <meta name="twitter:image" content="https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og-droidcrate.png" />
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="../../assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="../../assets/img/apple-touch-icon.png" />
     <link rel="manifest" href="../../site.webmanifest" />
     <link rel="preload" href="../../assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="../../assets/css/site.css?v=12" />
+    <link rel="preload" href="../../assets/fonts/Manrope-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="../../assets/css/site.css?v=17" />
     <script>
       try {
         if (localStorage.getItem("asraab:lang") === "ar") {
@@ -33,6 +45,34 @@
       } catch (e) {}
         document.documentElement.classList.add("has-js");
     </script>
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "DroidCrate",
+  "softwareVersion": "0.2.2",
+  "applicationCategory": "UtilitiesApplication",
+  "applicationSubCategory": "Android workbench",
+  "operatingSystem": "Windows 10, Windows 11",
+  "description": "A free, open-source Android workbench for Windows: apps, files, screen mirroring, fastboot flashing, adb and logcat in one window, with checklists and lessons.",
+  "url": "https://bouadjadjatamer2-hub.github.io/Majra/apps/droidcrate/",
+  "downloadUrl": "https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.2.2/DroidCrate-0.2.2-Setup.exe",
+  "image": "https://bouadjadjatamer2-hub.github.io/Majra/assets/img/og-droidcrate.png",
+  "screenshot": "https://bouadjadjatamer2-hub.github.io/Majra/assets/img/droidcrate/workbench-overview-en.png",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "license": "https://opensource.org/license/mit",
+  "isAccessibleForFree": true,
+  "publisher": {
+    "@type": "Organization",
+    "name": "Asraab",
+    "url": "https://bouadjadjatamer2-hub.github.io/Majra/"
+  }
+}
+    </script>
   </head>
   <body>
     <div class="ambient-scene" data-ambient="droidcrate" aria-hidden="true"></div>
@@ -40,9 +80,9 @@
 
     <header class="site-header" id="top">
       <div class="header-inner">
-        <a class="brand" href="../../index.html" aria-label="Asraab — home" data-i18n-aria="brand.aria">
+        <a class="brand" href="../../index.html" aria-label="Asraab apps that fly together — home" data-i18n-aria="brand.aria">
           <img src="../../assets/img/asraab-mark.svg" alt="" width="38" height="38" />
-          <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+          <span class="brand-text"><strong>Asraab</strong> <span data-i18n="brand.sub">apps that fly together</span></span>
         </a>
         <nav class="nav" id="nav" aria-label="Primary" data-i18n-aria="nav.aria">
           <a href="../../index.html#apps" data-i18n="nav.apps">Apps</a>
@@ -60,7 +100,7 @@
       </div>
     </header>
 
-    <main id="main">
+    <main id="main" tabindex="-1">
       <!-- ================= HERO ================= -->
       <section class="page-hero">
         <div class="wrap hero-inner">
@@ -239,37 +279,37 @@
           <div class="gallery" data-parallax="0.38">
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-overview-en.png" data-full="../../assets/img/droidcrate/workbench-overview-en.png" data-caption="Overview tab with a connected phone and its real specs">
-                <img src="../../assets/img/droidcrate/workbench-overview-en.png" alt="DroidCrate Overview tab showing a connected phone, Android version, chipset and restart actions" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-overview-en.png" alt="DroidCrate Overview tab showing a connected phone, Android version, chipset and restart actions" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c1">Overview · real device facts</figcaption>
             </figure>
             <figure class="shot reveal-scale" style="margin: 0; --d: 60ms">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-apps-en.png" data-full="../../assets/img/droidcrate/workbench-apps-en.png" data-caption="Apps tab with install, export, freeze, clear data and uninstall">
-                <img src="../../assets/img/droidcrate/workbench-apps-en.png" alt="DroidCrate Apps tab with install, export, freeze, clear data and uninstall actions" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-apps-en.png" alt="DroidCrate Apps tab with install, export, freeze, clear data and uninstall actions" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c2">Apps · install, export, freeze</figcaption>
             </figure>
             <figure class="shot reveal-scale" style="margin: 0; --d: 120ms">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-files-en.png" data-full="../../assets/img/droidcrate/workbench-files-en.png" data-caption="Files tab for sending, receiving and backing up phone folders">
-                <img src="../../assets/img/droidcrate/workbench-files-en.png" alt="DroidCrate Files tab for sending, receiving and backing up phone folders" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-files-en.png" alt="DroidCrate Files tab for sending, receiving and backing up phone folders" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c3">Files · push, pull, backup</figcaption>
             </figure>
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-screen-en.png" data-full="../../assets/img/droidcrate/workbench-screen-en.png" data-caption="Screen tab with screenshot, recording and live view">
-                <img src="../../assets/img/droidcrate/workbench-screen-en.png" alt="DroidCrate Screen tab with screenshot, recording and live view controls" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-screen-en.png" alt="DroidCrate Screen tab with screenshot, recording and live view controls" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c4">Screen · capture and live view</figcaption>
             </figure>
             <figure class="shot reveal-scale" style="margin: 0; --d: 60ms">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-flash-en.png" data-full="../../assets/img/droidcrate/workbench-flash-en.png" data-caption="Flash tab with a local image, partition picker and confirmation">
-                <img src="../../assets/img/droidcrate/workbench-flash-en.png" alt="DroidCrate Flash tab with a local image, partition picker and confirmation" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-flash-en.png" alt="DroidCrate Flash tab with a local image, partition picker and confirmation" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c5">Flash · local image, explicit confirm</figcaption>
             </figure>
             <figure class="shot reveal-scale" style="margin: 0; --d: 120ms">
               <a class="shot-open" href="../../assets/img/droidcrate/workbench-terminal-en.png" data-full="../../assets/img/droidcrate/workbench-terminal-en.png" data-caption="Terminal tab with adb commands and a live logcat filter">
-                <img src="../../assets/img/droidcrate/workbench-terminal-en.png" alt="DroidCrate Terminal tab with adb commands and a live logcat filter" loading="lazy" />
+                <img src="../../assets/img/droidcrate/workbench-terminal-en.png" alt="DroidCrate Terminal tab with adb commands and a live logcat filter" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.gallery.c6">Terminal · adb, fastboot, logcat</figcaption>
             </figure>
@@ -338,14 +378,14 @@
           <div class="showcase" data-parallax="0.38">
             <figure class="shot reveal-scale" style="margin: 0">
               <a class="shot-open" href="../../assets/img/droidcrate/stage-3-checklists.png" data-full="../../assets/img/droidcrate/stage-3-checklists.png" data-caption="Five pre-flight checklists with risk levels">
-                <img src="../../assets/img/droidcrate/stage-3-checklists.png" alt="Five DroidCrate pre-flight checklists with risk levels" loading="lazy" />
+                <img src="../../assets/img/droidcrate/stage-3-checklists.png" alt="Five DroidCrate pre-flight checklists with risk levels" width="1603" height="1028" loading="lazy" decoding="async" />
               </a>
               <figcaption data-i18n="dc.learn.c1">Five checklists · stock firmware, unlock, recovery, root, custom ROM</figcaption>
             </figure>
             <div class="shot-stack">
               <figure class="shot reveal-scale" style="margin: 0; --d: 80ms">
                 <a class="shot-open" href="../../assets/img/droidcrate/stage-5-lessons.png" data-full="../../assets/img/droidcrate/stage-5-lessons.png" data-caption="The learning path with foundation, intermediate and advanced lessons">
-                  <img src="../../assets/img/droidcrate/stage-5-lessons.png" alt="DroidCrate learning path with foundation, intermediate and advanced lessons" loading="lazy" />
+                  <img src="../../assets/img/droidcrate/stage-5-lessons.png" alt="DroidCrate learning path with foundation, intermediate and advanced lessons" width="1603" height="1028" loading="lazy" decoding="async" />
                 </a>
                 <figcaption data-i18n="dc.learn.c2">Nine lessons · a 60% pass mark and an explanation for every answer</figcaption>
               </figure>
@@ -451,7 +491,7 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
               <div class="download-meta">
                 <div><span data-i18n="dc.dl.version">Version</span><span>0.2.2</span></div>
                 <div><span data-i18n="dc.dl.size">Installer size</span><span>118.0 MB</span></div>
-                <div><span data-i18n="dc.dl.sha">SHA-256</span><span>C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</span></div>
+                <div class="hash-row"><span data-i18n="dc.dl.sha">SHA-256</span><span class="sha"><code id="sha-droidcrate-app" dir="ltr">C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code><button class="sha-copy" type="button" data-copy="#sha-droidcrate-app" data-i18n="dc.dl.copy">Copy</button></span></div>
               </div>
             </div>
             <div class="download-side">
@@ -482,7 +522,7 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
             </div>
           </div>
           <div class="cross-card-wrap reveal" data-reveal="3d" style="--d: 90ms">
-            <a class="cross-card" href="../majra/" data-tilt aria-label="Majra — download manager">
+            <a class="cross-card" href="../majra/" data-tilt>
               <span class="cross-card__top">
                 <img class="cross-card__icon" src="../../assets/img/majra-icon.png" alt="" width="72" height="72" />
                 <span class="cross-card__index">01 / M</span>
@@ -505,14 +545,14 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
       <div class="wrap">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a class="brand" href="../../index.html" aria-label="Asraab — home">
+            <a class="brand" href="../../index.html" aria-label="Asraab apps that fly together — home">
               <img src="../../assets/img/asraab-mark.svg" alt="" width="38" height="38" />
-              <span class="brand-text"><strong>Asraab</strong><span data-i18n="brand.sub">apps that fly together</span></span>
+              <span class="brand-text"><strong>Asraab</strong> <span data-i18n="brand.sub">apps that fly together</span></span>
             </a>
             <p data-i18n="footer.tagline">Two Windows tools, built in the open. Free to use, free to read, free to fork.</p>
           </div>
           <div class="footer-col">
-            <h4 data-i18n="footer.appsTitle">Apps</h4>
+            <h3 data-i18n="footer.appsTitle">Apps</h3>
             <ul>
               <li><a href="../majra/">Majra</a></li>
               <li><a href="../droidcrate/">DroidCrate</a></li>
@@ -520,7 +560,7 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
             </ul>
           </div>
           <div class="footer-col">
-            <h4 data-i18n="footer.projectTitle">Project</h4>
+            <h3 data-i18n="footer.projectTitle">Project</h3>
             <ul>
               <li><a href="https://github.com/bouadjadjatamer2-hub/Majra" target="_blank" rel="noopener" data-i18n="footer.repoMajra">Majra on GitHub</a></li>
               <li><a href="https://github.com/bouadjadjatamer2-hub/DroidCrate" target="_blank" rel="noopener" data-i18n="footer.repoDroid">DroidCrate on GitHub</a></li>
@@ -528,7 +568,7 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
             </ul>
           </div>
           <div class="footer-col">
-            <h4 data-i18n="footer.stackTitle">Stack</h4>
+            <h3 data-i18n="footer.stackTitle">Stack</h3>
             <ul>
               <li><span data-i18n="footer.stack1">Windows 10 / 11 · 64-bit</span></li>
               <li><span data-i18n="footer.stack2">MIT license</span></li>
@@ -543,16 +583,22 @@ C6A3E165DCDBB7279A6F2079FE767EF00A61601A3EC92BC16BED227EC8D77F03</code>
       </div>
     </footer>
 
-    <script src="../../assets/js/i18n.js"></script>
-    <script src="../../assets/js/site.js?v=7"></script>
-    <script src="../../assets/js/lightbox.js?v=3"></script>
+    <div class="dock" data-dock>
+      <img src="../../assets/img/droidcrate-icon.png" alt="" width="34" height="34" />
+      <span class="dock-meta"><strong>DroidCrate</strong><small>v0.2.2 · Windows 10/11</small></span>
+      <a class="btn btn-jade btn-sm" href="https://github.com/bouadjadjatamer2-hub/DroidCrate/releases/download/v0.2.2/DroidCrate-0.2.2-Setup.exe" data-i18n="nav.download">Download</a>
+    </div>
+
+    <script src="../../assets/js/i18n.js?v=4"></script>
+    <script src="../../assets/js/site.js?v=9"></script>
+    <script src="../../assets/js/lightbox.js?v=6"></script>
     <script src="../../assets/js/chapters.js?v=1"></script>
     <script src="../../assets/js/cursor.js?v=1"></script>
     <script src="../../assets/vendor/gsap.min.js"></script>
     <script src="../../assets/vendor/ScrollTrigger.min.js"></script>
     <script src="../../assets/vendor/lenis.min.js"></script>
-    <script src="../../assets/js/motion.js?v=8"></script>
-    <script src="../../assets/js/text-reveal.js?v=3"></script>
+    <script src="../../assets/js/motion.js?v=9"></script>
+    <script src="../../assets/js/text-reveal.js?v=4"></script>
     <script src="../../assets/js/shots-cine.js?v=1"></script>
     <script type="module" src="../../assets/js/scene-droidcrate.js"></script>
     <script type="module" src="../../assets/js/scene-ambient.js?v=8"></script>

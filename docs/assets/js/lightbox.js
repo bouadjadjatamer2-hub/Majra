@@ -35,6 +35,8 @@
   let strip = null;
   let thumbs = [];
   let hint = null;
+  let live = null;
+  let inerted = [];
 
   let group = [];
   let index = 0;
@@ -47,6 +49,8 @@
   let panX = 0;
   let panY = 0;
   let drag = null;
+  const touches = new Map();
+  let pinch = null;
 
   const reduced = () => reduceQuery.matches;
   const rtl = () => root.dir === "rtl";
@@ -82,7 +86,8 @@
       '<div class="lightbox-bar"><span class="lightbox-caption"></span>' +
       '<span class="lightbox-count"></span>' +
       '<span class="lightbox-hint"></span></div>' +
-      '<div class="lightbox-strip"></div>';
+      '<div class="lightbox-strip"></div>' +
+      '<span class="lightbox-live" aria-live="polite" aria-atomic="true"></span>';
     doc.body.appendChild(box);
 
     scrim = box.querySelector(".lightbox-scrim");
@@ -97,6 +102,7 @@
     count = box.querySelector(".lightbox-count");
     strip = box.querySelector(".lightbox-strip");
     hint = box.querySelector(".lightbox-hint");
+    live = box.querySelector(".lightbox-live");
 
     btnClose.addEventListener("click", close);
     btnPrev.addEventListener("click", () => step(rtl() ? 1 : -1));
@@ -119,12 +125,17 @@
   // opening flight is never cut off.
   function paintHint() {
     if (!hint) return;
-    hint.hidden = !finePointer;
-    if (!finePointer) return;
-    hint.textContent =
-      zoom > 1.001
-        ? label("Double-click to fit", "نقر مزدوج للاحتواء")
-        : label("Scroll to zoom", "عجلة الماوس للتكبير");
+    hint.hidden = false;
+    const coarse = !finePointer;
+    if (zoom > 1.001) {
+      hint.textContent = coarse
+        ? label("Double-tap to fit", "نقرتان للاحتواء")
+        : label("Double-click to fit", "نقر مزدوج للاحتواء");
+      return;
+    }
+    hint.textContent = coarse
+      ? label("Pinch to zoom", "بإصبعين للتكبير")
+      : label("Scroll to zoom", "عجلة الماوس للتكبير");
   }
 
   function clampPan() {
@@ -231,6 +242,56 @@
     };
     img.addEventListener("pointerup", end);
     img.addEventListener("pointercancel", end);
+
+    // Touch: two fingers scale around their midpoint. The page behind is
+    // locked, and the frame itself carries touch-action: none, so the browser
+    // never steals the gesture.
+    const distance = () => {
+      const points = Array.from(touches.values());
+      return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+    };
+    const midpoint = () => {
+      const points = Array.from(touches.values());
+      return {
+        x: (points[0].x + points[1].x) / 2,
+        y: (points[0].y + points[1].y) / 2,
+      };
+    };
+
+    frame.addEventListener(
+      "pointerdown",
+      (event) => {
+        if (event.pointerType !== "touch" || !box.classList.contains("is-open")) return;
+        touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (touches.size === 2) {
+          drag = null;
+          box.classList.remove("is-dragging");
+          pinch = { dist: distance(), zoom: zoom };
+        }
+      },
+      { passive: true }
+    );
+
+    frame.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!touches.has(event.pointerId)) return;
+        touches.set(event.pointerId, { x: event.clientX, y: event.clientY });
+        if (!pinch || touches.size !== 2) return;
+        event.preventDefault();
+        if (pinch.dist < 8) return;
+        const mid = midpoint();
+        setZoom(pinch.zoom * (distance() / pinch.dist), mid.x, mid.y);
+      },
+      { passive: false }
+    );
+
+    const lift = (event) => {
+      touches.delete(event.pointerId);
+      if (touches.size < 2) pinch = null;
+    };
+    frame.addEventListener("pointerup", lift);
+    frame.addEventListener("pointercancel", lift);
   }
 
   /* ---------- Caption: one word at a time, like it is being written ---------- */
@@ -330,6 +391,9 @@
     img.alt = text;
     paintCaption(text);
     count.textContent = group.length > 1 ? index + 1 + " / " + group.length : "";
+    if (live) {
+      live.textContent = group.length > 1 ? index + 1 + " / " + group.length + ". " + text : text;
+    }
 
     const many = group.length > 1;
     btnPrev.hidden = !many;
@@ -397,10 +461,17 @@
 
     buildStrip();
     lockScroll(true);
+    setInert(true);
     box.classList.add("is-open");
     root.classList.add("lb-open");
     show(index, {});
-    btnClose.focus();
+    // Focus after the first style pass: a visibility:hidden dialog cannot take
+    // focus in the same task that makes it visible.
+    window.setTimeout(() => {
+      if (!box || !box.classList.contains("is-open")) return;
+      if (box.contains(doc.activeElement)) return;
+      btnClose.focus();
+    }, 90);
 
     if (!from || !from.width || reduced() || !img.animate) return;
     const grow = () => {
@@ -449,6 +520,7 @@
     const mine = ++token;
     box.classList.remove("is-open");
     root.classList.remove("lb-open");
+    setInert(false);
     lockScroll(false);
     frame.style.removeProperty("--lb-rx");
     frame.style.removeProperty("--lb-ry");
@@ -514,6 +586,24 @@
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
 
+  /* ---------- The page behind the viewer is not reachable ---------- */
+  // aria-modal alone does not stop a tab from walking into the header, so the
+  // rest of the document is made inert while the viewer is open.
+  function setInert(on) {
+    if (on) {
+      if (inerted.length) return;
+      Array.from(doc.body.children).forEach((el) => {
+        if (el === box || el.tagName === "SCRIPT" || el.hasAttribute("aria-hidden")) return;
+        if (el.hasAttribute("inert")) return;
+        el.setAttribute("inert", "");
+        inerted.push(el);
+      });
+      return;
+    }
+    inerted.forEach((el) => el.removeAttribute("inert"));
+    inerted = [];
+  }
+
   /* ---------- Scroll lock without the page jumping ---------- */
   function lockScroll(on) {
     if (on) {
@@ -568,7 +658,10 @@
     box.addEventListener(
       "touchstart",
       (event) => {
-        if (event.touches.length !== 1) return;
+        if (event.touches.length !== 1) {
+          startX = 0;
+          return;
+        }
         startX = event.touches[0].clientX;
         startY = event.touches[0].clientY;
       },

@@ -8,7 +8,7 @@ window.ASRAAB_I18N = {
   ar: {
     // ---------- Shared ----------
     "a11y.skip": "تجاوز إلى المحتوى",
-    "brand.aria": "أسراب — الصفحة الرئيسية",
+    "brand.aria": "أسراب تطبيقات تطير معاً — الصفحة الرئيسية",
     "brand.sub": "تطبيقات تطير معاً",
     "nav.aria": "التنقل الرئيسي",
     "nav.apps": "التطبيقات",
@@ -254,6 +254,7 @@ window.ASRAAB_I18N = {
     "majra.dl.version": "الإصدار",
     "majra.dl.size": "حجم المثبّت",
     "majra.dl.sha": "SHA-256",
+    "majra.dl.copy": "نسخ",
     "majra.dl.primary": "حمّل مجرى 2.0.4",
     "majra.dl.secondary": "إضافة المتصفح (.zip)",
     "majra.dl.note": "مثبّت غير موقّع. قد يطلب SmartScreen تأكيدك — تحقّق من البصمة أولاً.",
@@ -403,6 +404,7 @@ window.ASRAAB_I18N = {
     "dc.dl.version": "الإصدار",
     "dc.dl.size": "حجم المثبّت",
     "dc.dl.sha": "SHA-256",
+    "dc.dl.copy": "نسخ",
     "dc.dl.primary": "حمّل درويد كريت 0.2.2",
     "dc.dl.secondary": "كل الإصدارات",
     "dc.dl.note":

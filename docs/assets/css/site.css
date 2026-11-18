@@ -268,6 +268,10 @@ button {
 .skip-link:focus-visible {
   translate: -50% 0;
 }
+/* The skip link sends focus to <main>; the ring belongs on real controls. */
+main:focus {
+  outline: none;
+}
 .grad-text {
   background: var(--grad-text);
   -webkit-background-clip: text;
@@ -972,6 +976,11 @@ body.nav-open .menu-btn span::after {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/* Anchor targets land below the fixed header instead of under it. */
+:target {
+  scroll-margin-top: 6rem;
+}
+
 /* ---------- Stats / facts strip ---------- */
 .facts {
   display: grid;
@@ -1323,6 +1332,14 @@ html.has-js .shot.is-in::after {
   gap: clamp(2rem, 5vw, 4rem);
   align-items: center;
 }
+/* Grid children default to min-width: auto, so one wide child (a code block,
+   a long hash) can push a whole column past the viewport on a phone. */
+.split > *,
+.download > *,
+.showcase > *,
+.steps > * {
+  min-width: 0;
+}
 .split.reverse > :first-child {
   order: 2;
 }
@@ -1570,6 +1587,56 @@ html.has-js .shot.is-in::after {
   text-align: right;
   word-break: break-all;
 }
+/* The published hash is long enough that retyping it is a real chore, so it
+   ships with a copy button of its own. The label gets its own line; the hash
+   and the button share the next one. */
+.download-meta .hash-row {
+  display: block;
+}
+.download-meta .hash-row > span:first-child {
+  display: block;
+  margin-bottom: 0.4rem;
+}
+.download-meta .hash-row .sha {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.6rem;
+  width: 100%;
+}
+.download-meta .hash-row .sha code {
+  min-width: 0;
+  font: inherit;
+  color: var(--ink-soft);
+  text-align: start;
+  word-break: break-all;
+  user-select: all;
+}
+.sha-copy {
+  flex: none;
+  margin-top: 0.1rem;
+  padding: 0.2rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  word-break: normal;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+.sha-copy:hover {
+  color: var(--ink);
+  border-color: var(--line-strong);
+  background: rgba(255, 255, 255, 0.07);
+}
+.sha-copy.is-done {
+  color: var(--jade);
+  border-color: rgba(84, 179, 156, 0.5);
+}
 .download-side {
   display: grid;
   gap: 0.8rem;
@@ -1649,6 +1716,27 @@ html.has-js .shot.is-in::after {
 .faq details[open] {
   border-color: var(--line-strong);
   background: rgba(255, 255, 255, 0.04);
+}
+/* Native details snap open. Where the browser can interpolate to auto, the
+   answer unfolds instead; everywhere else it simply appears as before. */
+@supports (interpolate-size: allow-keywords) {
+  :root {
+    interpolate-size: allow-keywords;
+  }
+  .faq details::details-content {
+    block-size: 0;
+    overflow: hidden;
+    transition: block-size 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+      content-visibility 0.34s allow-discrete;
+  }
+  .faq details[open]::details-content {
+    block-size: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .faq details::details-content {
+    transition: none;
+  }
 }
 .faq summary {
   display: flex;
@@ -1745,7 +1833,7 @@ html.has-js .shot.is-in::after {
   font-size: 0.86rem;
   line-height: 1.65;
 }
-.footer-col h4 {
+.footer-col h3 {
   color: var(--muted-dim);
   font-size: 0.68rem;
   font-weight: 700;
@@ -2168,6 +2256,7 @@ html.has-js .shot.reveal-scale.is-in {
     0 40px 120px -30px rgba(0, 0, 0, 0.95);
   transform: rotateX(var(--lb-rx)) rotateY(var(--lb-ry));
   transform-style: preserve-3d;
+  touch-action: none;
   transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease 0.14s,
     box-shadow 0.4s ease;
   opacity: 0;
@@ -2297,6 +2386,17 @@ html.has-js .shot.reveal-scale.is-in {
 .lightbox.is-zoomed .lightbox-hint {
   color: var(--gold-soft, var(--ink-soft));
   border-color: rgba(242, 180, 109, 0.34);
+}
+.lightbox-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 .lightbox-strip {
   position: relative;
@@ -2618,7 +2718,7 @@ html[lang="ar"] .eyebrow,
 html[lang="ar"] .kicker,
 html[lang="ar"] .badge,
 html[lang="ar"] .fact dt,
-html[lang="ar"] .footer-col h4,
+html[lang="ar"] .footer-col h3,
 html[lang="ar"] .scene-tag,
 html[lang="ar"] .scene-badge {
   letter-spacing: 0;
@@ -2859,10 +2959,91 @@ html[dir="rtl"] .scene-badge {
   }
 }
 
+/* ---------- Download dock (phones) ---------- */
+/* The header download button is hidden on narrow screens; this bar appears
+   once the hero has passed, and steps aside for the real download section. */
+.dock {
+  display: none;
+}
+@media (max-width: 900px) {
+  .dock {
+    position: fixed;
+    z-index: 95;
+    inset-inline: 0.7rem;
+    bottom: calc(0.7rem + env(safe-area-inset-bottom, 0px));
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.45rem 0.5rem 0.45rem 0.65rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 15px;
+    background: rgba(9, 10, 16, 0.92);
+    box-shadow: 0 18px 44px -20px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px) saturate(1.1);
+    -webkit-backdrop-filter: blur(16px) saturate(1.1);
+    opacity: 0;
+    transform: translateY(calc(100% + 1.4rem));
+    pointer-events: none;
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+  }
+  .dock.is-on {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+  html.lb-open .dock,
+  html.nav-open .dock {
+    opacity: 0;
+    transform: translateY(calc(100% + 1.4rem));
+    pointer-events: none;
+  }
+  .dock img {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+  }
+  .dock-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    line-height: 1.25;
+  }
+  .dock-meta strong {
+    font-family: var(--font-display);
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .dock-meta small {
+    color: var(--muted);
+    font-size: 0.71rem;
+    white-space: nowrap;
+  }
+  .dock .btn {
+    flex: none;
+    margin-inline-start: auto;
+    min-height: 40px;
+    padding: 0.5rem 0.9rem;
+  }
+}
+
 /* ---------- Reduced motion ---------- */
+@media (prefers-contrast: more) {
+  :root {
+    --muted: #c6c0b5;
+    --muted-dim: #aba499;
+    --line: rgba(246, 242, 234, 0.26);
+    --line-strong: rgba(246, 242, 234, 0.4);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
+  }
+  .dock {
+    transition: none;
   }
   *,
   *::before,

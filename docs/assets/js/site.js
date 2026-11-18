@@ -114,36 +114,93 @@
   onScroll();
   window.addEventListener("scroll", onScroll, { passive: true });
 
-  function closeMenu() {
+  function setMenuInert(on) {
+    document.querySelectorAll("main, .site-footer").forEach((el) => {
+      if (on) el.setAttribute("inert", "");
+      else el.removeAttribute("inert");
+    });
+  }
+
+  function closeMenu(restoreFocus) {
+    if (!document.body.classList.contains("nav-open")) return;
     document.body.classList.remove("nav-open");
+    setMenuInert(false);
     if (menuBtn) {
       menuBtn.setAttribute("aria-expanded", "false");
       menuBtn.setAttribute("aria-label", lang === "ar" ? "فتح القائمة" : "Open menu");
+      if (restoreFocus) menuBtn.focus();
     }
   }
 
   if (menuBtn) {
     menuBtn.addEventListener("click", () => {
-      const open = document.body.classList.toggle("nav-open");
+      const open = !document.body.classList.contains("nav-open");
+      document.body.classList.toggle("nav-open", open);
       menuBtn.setAttribute("aria-expanded", String(open));
       menuBtn.setAttribute("aria-label", open ? (lang === "ar" ? "إغلاق القائمة" : "Close menu") : lang === "ar" ? "فتح القائمة" : "Open menu");
+      setMenuInert(open);
+      if (open) {
+        const first = nav && nav.querySelector("a");
+        // Wait for the panel to be visible: focus() on a hidden link is lost.
+        if (first) {
+          window.setTimeout(() => {
+            if (document.body.classList.contains("nav-open") && document.activeElement === menuBtn) first.focus();
+          }, 220);
+        }
+      }
     });
   }
   if (nav) {
     nav.addEventListener("click", (event) => {
-      if (event.target.closest("a")) closeMenu();
+      if (event.target.closest("a")) closeMenu(false);
     });
   }
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape") closeMenu();
+    if (event.key === "Escape") closeMenu(true);
   });
+  document.addEventListener(
+    "pointerdown",
+    (event) => {
+      if (!document.body.classList.contains("nav-open")) return;
+      if (event.target.closest(".site-header")) return;
+      closeMenu(false);
+    },
+    { passive: true }
+  );
   window.addEventListener("resize", () => {
-    if (window.innerWidth > 900) closeMenu();
+    if (window.innerWidth > 900) closeMenu(false);
   });
 
   /* ---------- Year ---------- */
   const year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
+
+  /* ---------- Phone-sized download dock ---------- */
+  // The header CTA is hidden under 900px, so a small bar takes over once the
+  // hero is behind: it stays out of the way near the real download section
+  // and near the footer.
+  const dock = document.querySelector("[data-dock]");
+  if (dock) {
+    const download = document.getElementById("download");
+    let dockOn = false;
+    const updateDock = () => {
+      const y = window.scrollY || window.pageYOffset || 0;
+      const height = window.innerHeight;
+      let nearDownload = false;
+      if (download) {
+        const rect = download.getBoundingClientRect();
+        nearDownload = rect.top < height * 0.9 && rect.bottom > height * 0.35;
+      }
+      const nearEnd = document.documentElement.scrollHeight - (y + height) < 260;
+      const on = y > 560 && !nearDownload && !nearEnd;
+      if (on === dockOn) return;
+      dockOn = on;
+      dock.classList.toggle("is-on", on);
+    };
+    window.addEventListener("scroll", updateDock, { passive: true });
+    window.addEventListener("resize", updateDock);
+    updateDock();
+  }
 
   /* ---------- Reveal ---------- */
   const revealNodes = Array.from(document.querySelectorAll(".reveal, .reveal-scale"));
