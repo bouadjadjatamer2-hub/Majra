@@ -9,7 +9,7 @@
     <link rel="icon" href="/Majra/assets/img/favicon.svg" type="image/svg+xml" />
     <link rel="preload" href="/Majra/assets/fonts/SpaceGrotesk-Variable.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/Majra/assets/fonts/Manrope-Variable.woff2" as="font" type="font/woff2" crossorigin />
-    <link rel="stylesheet" href="/Majra/assets/css/site.css?v=22" />
+    <link rel="stylesheet" href="/Majra/assets/css/site.css?v=24" />
     <script>
       try {
         if (localStorage.getItem("asraab:lang") === "ar") {
@@ -18,6 +18,10 @@
         }
       } catch (e) {}
         document.documentElement.classList.add("has-js");
+      window.setTimeout(function () {
+        var d = document.documentElement;
+        if (!d.classList.contains("reveal-ready")) d.classList.add("reveal-fallback");
+      }, 2200);
     </script>
   </head>
   <body>
@@ -48,7 +52,7 @@
     </main>
 
     <script src="/Majra/assets/js/i18n.js?v=4"></script>
-    <script src="/Majra/assets/js/site.js?v=9"></script>
+    <script src="/Majra/assets/js/site.js?v=10"></script>
     <script src="/Majra/assets/js/lightbox.js?v=9"></script>
     <script src="/Majra/assets/js/chapters.js?v=1"></script>
     <script src="/Majra/assets/js/cursor.js?v=1"></script>

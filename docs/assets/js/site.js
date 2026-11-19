@@ -171,6 +171,160 @@
     if (window.innerWidth > 900) closeMenu(false);
   });
 
+  /* ---------- Section previews on hover ---------- */
+  // The row of section names is a table of contents. Pointing at one shows a
+  // short, honest summary of what waits below; clicking still scrolls there.
+  const NAV_PREVIEW = {
+    apps: {
+      accent: "gold",
+      en: {
+        kicker: "The catalog",
+        title: "Two tools, one standard.",
+        body: "Majra for downloads, DroidCrate for Android. Free, open source, built for Windows.",
+        chips: ["Majra", "DroidCrate", "MIT"],
+      },
+      ar: {
+        kicker: "الكتالوج",
+        title: "أداتان. معيار واحد.",
+        body: "مجرى للتنزيل، ودرويد كريت لأندرويد. مجانيان، مفتوحا المصدر، لويندوز.",
+        chips: ["مجرى", "درويد كريت", "MIT"],
+      },
+    },
+    standards: {
+      accent: "jade",
+      en: {
+        kicker: "What stays true",
+        title: "Quiet software. Loud craft.",
+        body: "No accounts, no telemetry, no cloud. Four rules kept on every release.",
+        chips: ["Local-first", "SHA-256", "MIT"],
+      },
+      ar: {
+        kicker: "ما يبقى ثابتاً",
+        title: "برمجيات هادئة. حرفة عالية.",
+        body: "بلا حسابات، بلا تتبّع، بلا سحابة. أربع قواعد نلتزم بها في كل إصدار.",
+        chips: ["محلي أولاً", "SHA-256", "MIT"],
+      },
+    },
+    how: {
+      accent: "gold",
+      en: {
+        kicker: "From link to app",
+        title: "Three steps. No detours.",
+        body: "Pick a tool, read the page, check the hash, then run it.",
+        chips: ["Pick", "Read", "Verify"],
+      },
+      ar: {
+        kicker: "من الرابط إلى التطبيق",
+        title: "ثلاث خطوات. بلا التفاف.",
+        body: "اختر أداة، اقرأ الصفحة، تحقّق من البصمة، ثم شغّلها.",
+        chips: ["اختر", "اقرأ", "تحقّق"],
+      },
+    },
+    about: {
+      accent: "jade",
+      en: {
+        kicker: "About Asraab",
+        title: "Built by people who use the tools.",
+        body: "A small independent studio making focused Windows software.",
+        chips: ["Independent", "Windows 10 / 11"],
+      },
+      ar: {
+        kicker: "عن أسراب",
+        title: "مبني بواسطة أشخاص يستخدمون الأدوات.",
+        body: "أسراب استوديو صغير مستقل يصنع برمجيات ويندوز مركّزة.",
+        chips: ["مستقل", "ويندوز 10 / 11"],
+      },
+    },
+  };
+
+  let navPreview = null;
+  let previewLink = null;
+  let previewTimer = 0;
+
+  function ensurePreview() {
+    if (navPreview) return navPreview;
+    navPreview = document.createElement("div");
+    navPreview.className = "nav-preview";
+    navPreview.setAttribute("aria-hidden", "true");
+    navPreview.innerHTML =
+      '<span class="nav-preview__kicker"></span>' +
+      '<p class="nav-preview__title"></p>' +
+      '<p class="nav-preview__body"></p>' +
+      '<div class="nav-preview__chips"></div>';
+    document.body.appendChild(navPreview);
+    return navPreview;
+  }
+
+  function placePreview(link) {
+    const p = ensurePreview();
+    const rect = link.getBoundingClientRect();
+    const head = header ? header.getBoundingClientRect() : null;
+    const width = p.getBoundingClientRect().width || 332;
+    const margin = 12;
+    let left = rect.left + rect.width / 2 - width / 2;
+    left = Math.max(margin, Math.min(window.innerWidth - width - margin, left));
+    const top = Math.max(rect.bottom + 10, head ? head.bottom + 8 : 0);
+    p.style.left = Math.round(left) + "px";
+    p.style.top = Math.round(top) + "px";
+    p.style.setProperty("--np-caret", Math.round(rect.left + rect.width / 2 - left) + "px");
+  }
+
+  function showPreview(link) {
+    if (!finePointer || window.innerWidth < 900) return;
+    if (document.body.classList.contains("nav-open")) return;
+    const key = (link.hash || "").replace("#", "");
+    const item = NAV_PREVIEW[key];
+    if (!item) return;
+    const data = item[lang] || item.en;
+    const p = ensurePreview();
+    window.clearTimeout(previewTimer);
+    p.dataset.accent = item.accent;
+    p.querySelector(".nav-preview__kicker").textContent = data.kicker;
+    p.querySelector(".nav-preview__title").textContent = data.title;
+    p.querySelector(".nav-preview__body").textContent = data.body;
+    const chips = p.querySelector(".nav-preview__chips");
+    chips.textContent = "";
+    data.chips.forEach((chip) => {
+      const span = document.createElement("span");
+      span.textContent = chip;
+      chips.appendChild(span);
+    });
+    p.classList.add("is-on");
+    previewLink = link;
+    placePreview(link);
+  }
+
+  function hidePreview(immediate) {
+    if (!navPreview) return;
+    window.clearTimeout(previewTimer);
+    const apply = () => {
+      navPreview.classList.remove("is-on");
+      previewLink = null;
+    };
+    if (immediate) apply();
+    else previewTimer = window.setTimeout(apply, 90);
+  }
+
+  if (nav && finePointer) {
+    nav.querySelectorAll("a").forEach((link) => {
+      link.addEventListener("pointerenter", () => showPreview(link));
+      link.addEventListener("focus", () => showPreview(link));
+    });
+    nav.addEventListener("pointerleave", () => hidePreview(false));
+    nav.addEventListener("focusout", (event) => {
+      if (!nav.contains(event.relatedTarget)) hidePreview(false);
+    });
+    nav.addEventListener("pointerdown", () => hidePreview(true));
+    window.addEventListener("scroll", () => hidePreview(true), { passive: true });
+    window.addEventListener("resize", () => hidePreview(true));
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") hidePreview(true);
+    });
+    document.addEventListener("asraab:lang", () => {
+      if (previewLink) showPreview(previewLink);
+    });
+  }
+
   /* ---------- Year ---------- */
   const year = document.getElementById("year");
   if (year) year.textContent = String(new Date().getFullYear());
@@ -206,6 +360,7 @@
   const revealNodes = Array.from(document.querySelectorAll(".reveal, .reveal-scale"));
   if (reducedMotion || !("IntersectionObserver" in window)) {
     revealNodes.forEach((el) => el.classList.add("is-in"));
+    root.classList.add("reveal-ready");
   } else {
     const pending = new Set(revealNodes);
     const reveal = (el) => {
@@ -223,6 +378,7 @@
       { rootMargin: "0px 0px -8% 0px", threshold: 0.08 }
     );
     revealNodes.forEach((el) => io.observe(el));
+    root.classList.add("reveal-ready");
 
     // Fast scrolling can outrun the observer. A cheap geometry check on scroll
     // keeps every section visible even when frames are busy with WebGL.
